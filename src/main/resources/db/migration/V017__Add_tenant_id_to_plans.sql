@@ -1,0 +1,3 @@
+ALTER TABLE plans ADD COLUMN tenant_id UUID NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000';
+
+CREATE INDEX idx_plans_tenant_id ON plans(tenant_id) WHERE is_deleted = FALSE;

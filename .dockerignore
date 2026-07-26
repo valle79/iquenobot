@@ -1,0 +1,13 @@
+target/
+*.jar
+*.war
+.env
+node_modules/
+frontendiquenobot/node_modules/
+frontendiquenobot/dist/
+logs/
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws

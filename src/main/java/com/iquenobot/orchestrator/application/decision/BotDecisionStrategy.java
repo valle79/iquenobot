@@ -1,0 +1,85 @@
+package com.iquenobot.orchestrator.application.decision;
+
+import com.iquenobot.chatbot.application.ChatbotService;
+import com.iquenobot.chatbot.domain.dto.ChatbotResponseDto;
+import com.iquenobot.orchestrator.domain.model.ActionType;
+import com.iquenobot.orchestrator.domain.model.Decision;
+import com.iquenobot.orchestrator.domain.model.ProcessingContext;
+import com.iquenobot.orchestrator.domain.service.DecisionStrategy;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.util.Map;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class BotDecisionStrategy implements DecisionStrategy {
+
+    private final ChatbotService chatbotService;
+
+    @Override
+    public int getPriority() { return 10; }
+
+    @Override
+    public boolean canHandle(ProcessingContext context) {
+        if (context.getConversation().isBotConversation()) {
+            return true;
+        }
+        if (context.getConversation().getAssignedUser() == null) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Decision decide(ProcessingContext context) {
+        var msg = context.getIncomingMessage();
+
+        try {
+            ChatbotResponseDto botResponse = chatbotService.processMessage(
+                    msg.getContent(),
+                    Map.of(
+                            "conversationId", context.getConversation().getId().toString(),
+                            "tenantId", context.getTenantId().toString(),
+                            "contactId", context.getContact().getId().toString(),
+                            "channel", msg.getChannel().name()
+                    )
+            );
+
+            if (botResponse.isRequiresHumanAgent()) {
+                return Decision.builder()
+                        .actionType(ActionType.TRANSFER_CONVERSATION)
+                        .reason("Bot requested human agent handoff")
+                        .requiresAgent(true)
+                        .parameters(Map.of(
+                                "response", botResponse.getMessage(),
+                                "intent", botResponse.getIntentDetected() != null
+                                        ? botResponse.getIntentDetected() : "unknown"
+                        ))
+                        .build();
+            }
+
+            return Decision.builder()
+                    .actionType(ActionType.SEND_TEXT)
+                    .reason("Bot responded to message")
+                    .parameters(Map.of(
+                            "response", botResponse.getMessage(),
+                            "intent", botResponse.getIntentDetected() != null
+                                    ? botResponse.getIntentDetected() : "unknown",
+                            "flowExecuted", botResponse.getFlowExecuted() != null
+                                    ? botResponse.getFlowExecuted() : ""
+                    ))
+                    .build();
+
+        } catch (Exception e) {
+            log.warn("Chatbot processing failed, transferring to human: {}", e.getMessage());
+            return Decision.builder()
+                    .actionType(ActionType.TRANSFER_CONVERSATION)
+                    .reason("Bot error: " + e.getMessage())
+                    .requiresAgent(true)
+                    .build();
+        }
+    }
+}

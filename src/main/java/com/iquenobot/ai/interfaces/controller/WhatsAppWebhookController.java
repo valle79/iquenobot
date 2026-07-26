@@ -1,0 +1,46 @@
+package com.iquenobot.ai.interfaces.controller;
+
+import com.iquenobot.ai.domain.dto.WhatsAppWebhookDto;
+import com.iquenobot.orchestrator.application.WhatsAppWebhookAdapter;
+import com.iquenobot.orchestrator.domain.model.ProcessingResult;
+import com.iquenobot.shared.domain.dto.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/v1/whatsapp/webhook")
+@RequiredArgsConstructor
+@Slf4j
+@Tag(name = "WhatsApp Webhook", description = "Webhook endpoints for receiving WhatsApp messages from Evolution API")
+public class WhatsAppWebhookController {
+
+    private final WhatsAppWebhookAdapter webhookAdapter;
+
+    @PostMapping("/{instanceId}")
+    @Operation(summary = "Recibir webhook de WhatsApp",
+            description = "Endpoint público para recibir mensajes entrantes desde Evolution API. " +
+                    "El Conversation Orchestrator decide automáticamente la acción a tomar.")
+    public ResponseEntity<ApiResponse<Void>> receiveWebhook(
+            @PathVariable String instanceId,
+            @Valid @RequestBody WhatsAppWebhookDto payload) {
+        log.info("WhatsApp webhook received for instance: {} event: {}", instanceId, payload.getEvent());
+
+        ProcessingResult result = webhookAdapter.processWebhook(instanceId, payload);
+
+        if (result.isSuccess()) {
+            return ResponseEntity.ok(ApiResponse.success(null, "Webhook procesado exitosamente"));
+        }
+
+        log.warn("Webhook processing returned error: {}", result.getMessage());
+        return ResponseEntity.ok(ApiResponse.success(null, "Webhook procesado con advertencias"));
+    }
+}

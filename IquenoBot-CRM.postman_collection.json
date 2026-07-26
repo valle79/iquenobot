@@ -1,0 +1,1568 @@
+{
+  "info": {
+    "name": "IquenoBot CRM",
+    "description": "Colección completa para probar todos los endpoints del CRM Omnicanal con IA",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "opencode"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "1. Crear Tenant (registro empresa)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) {",
+                  "  pm.collectionVariables.set('tenant_id', jsonData.data.id);",
+                  "  pm.collectionVariables.set('access_token', jsonData.data.accessToken);",
+                  "  pm.collectionVariables.set('refresh_token', jsonData.data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Mi Empresa Demo\",\n  \"subdomain\": \"midemo\",\n  \"contactEmail\": \"contacto@miempresa.com\",\n  \"contactPhone\": \"+51999000111\",\n  \"websiteUrl\": \"https://miempresa.com\",\n  \"timezone\": \"America/Lima\",\n  \"currency\": \"PEN\",\n  \"adminEmail\": \"admin@miempresa.com\",\n  \"adminPassword\": \"Admin@123\",\n  \"adminFirstName\": \"Admin\",\n  \"adminLastName\": \"Principal\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/tenants",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "tenants"]
+            }
+          }
+        },
+        {
+          "name": "2. Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) {",
+                  "  pm.collectionVariables.set('access_token', jsonData.data.accessToken);",
+                  "  pm.collectionVariables.set('refresh_token', jsonData.data.refreshToken);",
+                  "  pm.collectionVariables.set('user_id', jsonData.data.userId);",
+                  "  pm.collectionVariables.set('tenant_id', jsonData.data.tenantId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@miempresa.com\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "3. Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "{{refresh_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "refresh"]
+            }
+          }
+        },
+        {
+          "name": "4. Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "X-Refresh-Token", "value": "{{refresh_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "logout"]
+            }
+          }
+        },
+        {
+          "name": "5. Crear Usuario (subordinado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"agente@miempresa.com\",\n  \"password\": \"Agente@123\",\n  \"firstName\": \"Agente\",\n  \"lastName\": \"Prueba\",\n  \"role\": \"AGENT\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "users"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Contacts",
+      "item": [
+        {
+          "name": "Listar contactos",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/contacts?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "contacts"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear contacto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) { pm.collectionVariables.set('contact_id', jsonData.data.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Carlos\",\n  \"lastName\": \"López\",\n  \"email\": \"carlos@example.com\",\n  \"phone\": \"+51999111222\",\n  \"whatsappPhone\": \"+51999111222\",\n  \"company\": \"Tech Solutions\",\n  \"jobTitle\": \"CEO\",\n  \"language\": \"es\",\n  \"timezone\": \"America/Lima\",\n  \"notes\": \"Cliente potencial\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/contacts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "contacts"]
+            }
+          }
+        },
+        {
+          "name": "Obtener contacto por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/contacts/{{contact_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "contacts", "{{contact_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Buscar contactos",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/contacts/search?query=Carlos&page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "contacts", "search"],
+              "query": [
+                { "key": "query", "value": "Carlos" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filtrar por estado",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/contacts/status/ACTIVE?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "contacts", "status", "ACTIVE"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar contacto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Carlos\",\n  \"lastName\": \"López Actualizado\",\n  \"email\": \"carlos@example.com\",\n  \"phone\": \"+51999111222\",\n  \"company\": \"Tech Solutions SAC\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/contacts/{{contact_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "contacts", "{{contact_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Bloquear contacto",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/contacts/{{contact_id}}/block?reason=Spam",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "contacts", "{{contact_id}}", "block"],
+              "query": [{ "key": "reason", "value": "Spam" }]
+            }
+          }
+        },
+        {
+          "name": "Desbloquear contacto",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/contacts/{{contact_id}}/unblock",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "contacts", "{{contact_id}}", "unblock"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar contacto (soft delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/contacts/{{contact_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "contacts", "{{contact_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Conversations",
+      "item": [
+        {
+          "name": "Listar conversaciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "conversations"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear conversación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) { pm.collectionVariables.set('conversation_id', jsonData.data.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contactId\": \"{{contact_id}}\",\n  \"channel\": \"WHATSAPP\",\n  \"subject\": \"Consulta sobre productos\",\n  \"priority\": \"MEDIUM\",\n  \"initialMessage\": \"Hola, quiero información sobre sus productos\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "conversations"]
+            }
+          }
+        },
+        {
+          "name": "Obtener conversación por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations/{{conversation_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "conversations", "{{conversation_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Conversaciones activas",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations/active?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "conversations", "active"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Conversaciones sin asignar",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations/unassigned?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "conversations", "unassigned"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mis conversaciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations/my-conversations?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "conversations", "my-conversations"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filtrar por estado",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations/status/OPEN?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "conversations", "status", "OPEN"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Enviar mensaje",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) { pm.collectionVariables.set('message_id', jsonData.data.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversationId\": \"{{conversation_id}}\",\n  \"type\": \"TEXT\",\n  \"content\": \"Gracias por contactarnos. ¿En qué podemos ayudarle?\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations/messages",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "conversations", "messages"]
+            }
+          }
+        },
+        {
+          "name": "Obtener mensajes de conversación",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations/{{conversation_id}}/messages?page=0&size=50",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "conversations", "{{conversation_id}}", "messages"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Asignar conversación",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations/{{conversation_id}}/assign/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "conversations", "{{conversation_id}}", "assign", "{{user_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Desasignar conversación",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations/{{conversation_id}}/unassign",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "conversations", "{{conversation_id}}", "unassign"]
+            }
+          }
+        },
+        {
+          "name": "Resolver conversación",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations/{{conversation_id}}/resolve",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "conversations", "{{conversation_id}}", "resolve"]
+            }
+          }
+        },
+        {
+          "name": "Cerrar conversación",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations/{{conversation_id}}/close",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "conversations", "{{conversation_id}}", "close"]
+            }
+          }
+        },
+        {
+          "name": "Reabrir conversación",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations/{{conversation_id}}/reopen",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "conversations", "{{conversation_id}}", "reopen"]
+            }
+          }
+        },
+        {
+          "name": "Marcar como leído",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations/{{conversation_id}}/mark-as-read",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "conversations", "{{conversation_id}}", "mark-as-read"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Listar categorías",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categories"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear categoría",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) { pm.collectionVariables.set('category_id', jsonData.data.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Electrónicos\",\n  \"description\": \"Productos electrónicos y gadgets\",\n  \"displayOrder\": 1,\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Obtener categoría por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories/{{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categories", "{{category_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Categorías activas",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories/active",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categories", "active"]
+            }
+          }
+        },
+        {
+          "name": "Buscar categorías",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories/search?query=Electr&page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categories", "search"],
+              "query": [
+                { "key": "query", "value": "Electr" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar categoría",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Electrónicos y Tecnología\",\n  \"description\": \"Todo en tecnología\",\n  \"displayOrder\": 1,\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories/{{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categories", "{{category_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar categoría",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories/{{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categories", "{{category_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Listar productos",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/products?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "products"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) { pm.collectionVariables.set('product_id', jsonData.data.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Laptop Pro X\",\n  \"sku\": \"LPT-PRO-X-001\",\n  \"description\": \"Laptop de última generación con 32GB RAM\",\n  \"shortDescription\": \"Laptop profesional\",\n  \"price\": 4999.99,\n  \"categoryId\": \"{{category_id}}\",\n  \"stockQuantity\": 10,\n  \"lowStockThreshold\": 3,\n  \"status\": \"ACTIVE\",\n  \"featured\": true,\n  \"tags\": \"laptop,tecnología,profesional\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/products",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "products"]
+            }
+          }
+        },
+        {
+          "name": "Obtener producto por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/products/{{product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "products", "{{product_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Buscar productos",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/products/search?query=Laptop&page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "products", "search"],
+              "query": [
+                { "key": "query", "value": "Laptop" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Productos destacados",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/products/featured",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "products", "featured"]
+            }
+          }
+        },
+        {
+          "name": "Productos con stock bajo",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/products/low-stock",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "products", "low-stock"]
+            }
+          }
+        },
+        {
+          "name": "Productos por estado",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/products/status/ACTIVE?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "products", "status", "ACTIVE"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Productos por categoría",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/products/category/{{category_id}}?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "products", "category", "{{category_id}}"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar producto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Laptop Pro X 2024\",\n  \"sku\": \"LPT-PRO-X-002\",\n  \"description\": \"Versión actualizada\",\n  \"price\": 5499.99,\n  \"stockQuantity\": 15,\n  \"lowStockThreshold\": 5,\n  \"status\": \"ACTIVE\",\n  \"featured\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/products/{{product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "products", "{{product_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Aumentar stock",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/products/{{product_id}}/stock/increase?quantity=5",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "products", "{{product_id}}", "stock", "increase"],
+              "query": [{ "key": "quantity", "value": "5" }]
+            }
+          }
+        },
+        {
+          "name": "Disminuir stock",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/products/{{product_id}}/stock/decrease?quantity=2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "products", "{{product_id}}", "stock", "decrease"],
+              "query": [{ "key": "quantity", "value": "2" }]
+            }
+          }
+        },
+        {
+          "name": "Eliminar producto",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/products/{{product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "products", "{{product_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Leads",
+      "item": [
+        {
+          "name": "Listar leads",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear lead",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) { pm.collectionVariables.set('lead_id', jsonData.data.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contactId\": \"{{contact_id}}\",\n  \"title\": \"Interesado en laptops\",\n  \"description\": \"Cliente potencial interesado en laptops profesionales\",\n  \"status\": \"NEW\",\n  \"source\": \"WHATSAPP\",\n  \"estimatedValue\": 5000.00,\n  \"probability\": 70.0,\n  \"tags\": \"laptop,interesado-caliente\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads"]
+            }
+          }
+        },
+        {
+          "name": "Obtener lead por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads/{{lead_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads", "{{lead_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Leads por estado",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads/status/NEW?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads", "status", "NEW"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Leads por fuente",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads/source/WHATSAPP?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads", "source", "WHATSAPP"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Leads asignados a usuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads/assigned/{{user_id}}?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads", "assigned", "{{user_id}}"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Leads sin asignar",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads/unassigned?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads", "unassigned"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Leads con alto score",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads/high-score?minScore=50",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads", "high-score"],
+              "query": [{ "key": "minScore", "value": "50" }]
+            }
+          }
+        },
+        {
+          "name": "Leads sin actividad (stale)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads/stale?days=3",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads", "stale"],
+              "query": [{ "key": "days", "value": "3" }]
+            }
+          }
+        },
+        {
+          "name": "Buscar leads",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads/search?query=laptop&page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads", "search"],
+              "query": [
+                { "key": "query", "value": "laptop" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar lead",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contactId\": \"{{contact_id}}\",\n  \"title\": \"Interesado en laptops - presupuesto alto\",\n  \"description\": \"Cliente con alto presupuesto\",\n  \"status\": \"CONTACTED\",\n  \"source\": \"WHATSAPP\",\n  \"estimatedValue\": 8000.00,\n  \"probability\": 80.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads/{{lead_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads", "{{lead_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Asignar lead a usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads/{{lead_id}}/assign/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads", "{{lead_id}}", "assign", "{{user_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Marcar como contactado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads/{{lead_id}}/contacted",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads", "{{lead_id}}", "contacted"]
+            }
+          }
+        },
+        {
+          "name": "Marcar como calificado (con score)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads/{{lead_id}}/qualified?score=85",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads", "{{lead_id}}", "qualified"],
+              "query": [{ "key": "score", "value": "85" }]
+            }
+          }
+        },
+        {
+          "name": "Marcar como convertido",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads/{{lead_id}}/converted?contactId={{contact_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads", "{{lead_id}}", "converted"],
+              "query": [{ "key": "contactId", "value": "{{contact_id}}" }]
+            }
+          }
+        },
+        {
+          "name": "Marcar como perdido",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads/{{lead_id}}/lost?reason=No%20interesado",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads", "{{lead_id}}", "lost"],
+              "query": [{ "key": "reason", "value": "No interesado" }]
+            }
+          }
+        },
+        {
+          "name": "Marcar como descalificado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads/{{lead_id}}/disqualified?reason=Presupuesto%20insuficiente",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads", "{{lead_id}}", "disqualified"],
+              "query": [{ "key": "reason", "value": "Presupuesto insuficiente" }]
+            }
+          }
+        },
+        {
+          "name": "Eliminar lead",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/leads/{{lead_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "leads", "{{lead_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Crear notificación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data) { pm.collectionVariables.set('notification_id', jsonData.data.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{user_id}}\",\n  \"type\": \"NEW_MESSAGE\",\n  \"channel\": \"IN_APP\",\n  \"priority\": \"NORMAL\",\n  \"title\": \"Nuevo mensaje\",\n  \"message\": \"Tienes un nuevo mensaje en la conversación\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "notifications"]
+            }
+          }
+        },
+        {
+          "name": "Obtener notificación por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/{{notification_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "notifications", "{{notification_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Notificaciones por usuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/user/{{user_id}}?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "notifications", "user", "{{user_id}}"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Notificaciones no leídas",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/user/{{user_id}}/unread?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "notifications", "user", "{{user_id}}", "unread"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Notificaciones por tipo",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/user/{{user_id}}/type/NEW_MESSAGE?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "notifications", "user", "{{user_id}}", "type", "NEW_MESSAGE"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Contador no leídas",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/user/{{user_id}}/unread/count",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "notifications", "user", "{{user_id}}", "unread", "count"]
+            }
+          }
+        },
+        {
+          "name": "Contador no leídas por prioridad",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/user/{{user_id}}/unread/count/priority/HIGH",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "notifications", "user", "{{user_id}}", "unread", "count", "priority", "HIGH"]
+            }
+          }
+        },
+        {
+          "name": "Marcar como leída",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/{{notification_id}}/read",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "notifications", "{{notification_id}}", "read"]
+            }
+          }
+        },
+        {
+          "name": "Marcar como no leída",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/{{notification_id}}/unread",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "notifications", "{{notification_id}}", "unread"]
+            }
+          }
+        },
+        {
+          "name": "Marcar todas como leídas",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/user/{{user_id}}/read-all",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "notifications", "user", "{{user_id}}", "read-all"]
+            }
+          }
+        },
+        {
+          "name": "Enviar notificación",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/{{notification_id}}/send",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "notifications", "{{notification_id}}", "send"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar notificación",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/{{notification_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "notifications", "{{notification_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Limpiar notificaciones antiguas",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/user/{{user_id}}/cleanup?daysOld=15",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "notifications", "user", "{{user_id}}", "cleanup"],
+              "query": [{ "key": "daysOld", "value": "15" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Resumen general",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dashboard/overview",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dashboard", "overview"]
+            }
+          }
+        },
+        {
+          "name": "Estadísticas de conversaciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dashboard/conversations/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dashboard", "conversations", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Estadísticas de leads",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dashboard/leads/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dashboard", "leads", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Estadísticas de contactos",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dashboard/contacts/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dashboard", "contacts", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Estadísticas de productos",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dashboard/products/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dashboard", "products", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Actividad de usuarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dashboard/users/activity",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dashboard", "users", "activity"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Chatbot",
+      "item": [
+        {
+          "name": "Procesar mensaje chatbot",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Hola, quiero información sobre laptops\",\n  \"context\": {\n    \"conversationId\": \"{{conversation_id}}\",\n    \"channel\": \"WEBCHAT\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/chatbot/message",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "chatbot", "message"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: iquenobot
+    env: docker
+    dockerfilePath: Dockerfile.prod
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: docker
+      - key: DATASOURCE_URL
+        value: jdbc:postgresql://postgres:5432/iquenobot
+      - key: DATASOURCE_USERNAME
+        value: postgres
+      - key: DATASOURCE_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CRYPTO_SECRET
+        generateValue: true
+      - key: PORT
+        value: 80

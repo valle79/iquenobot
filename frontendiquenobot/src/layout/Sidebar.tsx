@@ -51,7 +51,7 @@ const tenantNavItems: NavItem[] = [
   { label: 'Mi Perfil', path: '/profile', icon: User },
   { label: 'Permisos', path: '/permissions', icon: Shield, roles: ['TENANT_ADMIN'] },
   { label: 'Mi Empresa', path: '/company', icon: Building2, roles: ['TENANT_ADMIN'] },
-  { label: 'WhatsApp', path: '/whatsapp', icon: MessageCircle },
+  { label: 'Canales', path: '/channels', icon: MessageSquare },
   { label: 'navigation.settings', path: '/settings', icon: Settings },
 ]
 
@@ -72,7 +72,7 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { t } = useTranslation()
-  const { user } = useAuthStore()
+  const { user, tenant } = useAuthStore()
 
   const isSuperAdmin = user?.role === 'SUPER_ADMIN'
   const navItems = isSuperAdmin ? adminNavItems : tenantNavItems
@@ -104,7 +104,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               ) : (
                 <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                   <Building2 size={12} />
-                  {user?.tenantId?.slice(0, 8) ?? ''}
+                  {tenant?.companyName ?? ''}
                 </span>
               )}
             </motion.div>

@@ -48,17 +48,18 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
+        set({
+          user: null,
+          tenant: null,
+          accessToken: null,
+          refreshToken: null,
+          isAuthenticated: false,
+          isLoading: false,
+        })
         try {
           await authService.logout()
-        } finally {
-          set({
-            user: null,
-            tenant: null,
-            accessToken: null,
-            refreshToken: null,
-            isAuthenticated: false,
-            isLoading: false,
-          })
+        } catch {
+          // Logout request may fail (e.g. token already expired) — that's fine
         }
       },
 

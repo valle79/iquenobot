@@ -12,22 +12,38 @@ import com.iquenobot.orchestrator.interfaces.event.ActionExecutedEvent;
 import com.iquenobot.orchestrator.interfaces.event.MessageReceivedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ConversationOrchestrator {
 
+    private static final String CORRELATION_ID = "correlationId";
+    private static final String TENANT_ID = "tenantId";
+    private static final String CONVERSATION_ID = "conversationId";
+    private static final String CONTACT_ID = "contactId";
+    private static final String CHANNEL = "channel";
+    private static final String MESSAGE_ID = "messageId";
+
     private final MessagePipeline pipeline;
     private final DecisionEngine decisionEngine;
     private final ActionDispatcher actionDispatcher;
     private final EventPublisher eventPublisher;
 
-    @Transactional
     public ProcessingResult processMessage(IncomingMessage message) {
         long startTime = System.currentTimeMillis();
+        String correlationId = message.getChannelMessageId() != null
+                ? message.getChannelMessageId()
+                : UUID.randomUUID().toString();
+
+        MDC.put(CORRELATION_ID, correlationId);
+        MDC.put(CHANNEL, message.getChannel() != null ? message.getChannel().name() : "UNKNOWN");
+        MDC.put(MESSAGE_ID, correlationId);
+
         log.info("Orchestrator processing message from channel={} source={}",
                 message.getChannel(), message.getSourceIdentifier());
 
@@ -36,6 +52,10 @@ public class ConversationOrchestrator {
             context.setIncomingMessage(message);
 
             context = pipeline.execute(context);
+
+            if (context.getTenantId() != null) MDC.put(TENANT_ID, context.getTenantId().toString());
+            if (context.getConversation() != null) MDC.put(CONVERSATION_ID, context.getConversation().getId().toString());
+            if (context.getContact() != null) MDC.put(CONTACT_ID, context.getContact().getId().toString());
 
             eventPublisher.publish(new MessageReceivedEvent(
                     context.getTenantId() != null ? context.getTenantId().toString() : null,
@@ -56,11 +76,8 @@ public class ConversationOrchestrator {
             ));
 
             long elapsed = System.currentTimeMillis() - startTime;
-            log.info("Message processed successfully in {}ms. tenantId={} conversationId={} decision={}",
-                    elapsed,
-                    context.getTenantId(),
-                    context.getConversation() != null ? context.getConversation().getId() : null,
-                    decision.getActionType());
+            log.info("Message processed successfully in {}ms. decision={}",
+                    elapsed, decision.getActionType());
 
             return ProcessingResult.success(decision, "Message processed successfully", elapsed);
 
@@ -69,6 +86,8 @@ public class ConversationOrchestrator {
             log.error("Message processing failed after {}ms: {}",
                     elapsed, e.getMessage(), e);
             return ProcessingResult.failure("PROCESSING_ERROR", e.getMessage(), elapsed);
+        } finally {
+            MDC.clear();
         }
     }
 }

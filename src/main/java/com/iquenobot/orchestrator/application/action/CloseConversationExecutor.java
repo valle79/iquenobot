@@ -10,6 +10,7 @@ import com.iquenobot.orchestrator.domain.service.EventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class CloseConversationExecutor implements ActionExecutor {
     public ActionType supportedActionType() { return ActionType.CLOSE_CONVERSATION; }
 
     @Override
+    @Transactional
     public void execute(Decision decision, ProcessingContext context) {
         var conv = context.getConversation();
         conv.markClosed();

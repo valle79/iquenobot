@@ -10,8 +10,8 @@ import com.iquenobot.shared.enums.ChannelType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,6 +26,7 @@ public class ContactResolutionStep implements PipelineStep, MessagePipeline.Prio
     public int getOrder() { return 20; }
 
     @Override
+    @Transactional
     public ProcessingContext execute(ProcessingContext context) {
         var message = context.getIncomingMessage();
         UUID tenantId = context.getTenantId();
@@ -41,50 +42,65 @@ public class ContactResolutionStep implements PipelineStep, MessagePipeline.Prio
         context.setContact(contact);
         TenantContextHolder.setUserId(contact.getId().toString());
 
-        log.debug("Contact resolved: id={} name={} phone={}",
-                contact.getId(), contact.getFullName(), contact.getPhone());
+        log.debug("Contact resolved: id={} name={}",
+                contact.getId(), contact.getDisplayName());
         return context;
     }
 
     private Optional<Contact> findExistingContact(UUID tenantId, IncomingMessage message) {
         String source = message.getSourceIdentifier();
+        ChannelType channel = message.getChannel();
 
-        if (message.getChannel() == ChannelType.WHATSAPP || message.getChannel() == ChannelType.SMS) {
-            Optional<Contact> byPhone = contactRepository
-                    .findByPhoneAndTenantIdAndDeletedFalse(source, tenantId);
-            if (byPhone.isPresent()) return byPhone;
+        return switch (channel) {
+            case WHATSAPP, SMS -> {
+                Optional<Contact> byPhone = contactRepository
+                        .findByPhoneAndTenantIdAndDeletedFalse(source, tenantId);
+                if (byPhone.isPresent()) yield byPhone;
 
-            Optional<Contact> byWhatsApp = contactRepository
-                    .findByWhatsappPhoneAndTenantIdAndDeletedFalse(source, tenantId);
-            if (byWhatsApp.isPresent()) return byWhatsApp;
-        }
-
-        if (message.getChannel() == ChannelType.EMAIL) {
-            Optional<Contact> byEmail = contactRepository
+                yield contactRepository
+                        .findByWhatsappPhoneAndTenantIdAndDeletedFalse(source, tenantId);
+            }
+            case EMAIL -> contactRepository
                     .findByEmailAndTenantIdAndDeletedFalse(source, tenantId);
-            if (byEmail.isPresent()) return byEmail;
-        }
+            default -> {
+                Optional<Contact> byPhone = contactRepository
+                        .findByPhoneAndTenantIdAndDeletedFalse(source, tenantId);
+                if (byPhone.isPresent()) yield byPhone;
 
-        return contactRepository
-                .findByPhoneAndTenantIdAndDeletedFalse(source, tenantId);
+                yield Optional.empty();
+            }
+        };
     }
 
     private Contact createContact(UUID tenantId, IncomingMessage message) {
-        Contact contact = Contact.builder()
-                .id(UUID.randomUUID())
+        ChannelType channel = message.getChannel();
+        String sourceId = message.getSourceIdentifier();
+        String sourceName = message.getSourceName();
+
+        Contact.ContactBuilder<?, ?> builder = Contact.builder()
                 .tenantId(tenantId)
-                .phone(message.getChannel() == ChannelType.WHATSAPP ? message.getSourceIdentifier() : null)
-                .whatsappPhone(message.getChannel() == ChannelType.WHATSAPP ? message.getSourceIdentifier() : null)
-                .fullName(message.getSourceName() != null ? message.getSourceName() : message.getSourceIdentifier())
+                .fullName(sourceName != null && !sourceName.isBlank() ? sourceName : sourceId)
                 .status(ContactStatus.ACTIVE)
                 .conversationCount(0)
                 .messageCount(0)
-                .subscribed(true)
-                .build();
+                .subscribed(true);
 
-        contact = contactRepository.save(contact);
-        log.info("New contact created: id={} phone={} via channel={}",
-                contact.getId(), contact.getPhone(), message.getChannel());
+        switch (channel) {
+            case WHATSAPP -> {
+                builder.phone(sourceId);
+                builder.whatsappPhone(sourceId);
+            }
+            case SMS -> builder.phone(sourceId);
+            case EMAIL -> builder.email(sourceId);
+            default -> {
+                // Social media channels: store identifier in phone field as fallback
+                // since Contact has no dedicated social media columns
+            }
+        }
+
+        Contact contact = contactRepository.save(builder.build());
+        log.info("New contact created: id={} channel={} sourceId={}",
+                contact.getId(), channel, sourceId);
         return contact;
     }
 

@@ -3,7 +3,12 @@ import { API_BASE_URL } from '@/config/constants'
 import { useAuthStore } from '@/core/auth/auth.store'
 import type { ApiResponse } from '@/types/api'
 
+function generateCorrelationId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+}
+
 let isRefreshing = false
+let isLoggingOut = false
 let failedQueue: Array<{
   resolve: (value: unknown) => void
   reject: (reason: unknown) => void
@@ -31,6 +36,9 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  if (config.headers) {
+    config.headers['X-Correlation-Id'] = generateCorrelationId()
+  }
   return config
 })
 
@@ -40,6 +48,11 @@ api.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isLoggingOut || originalRequest.url?.includes('/auth/logout')) {
+        isLoggingOut = false
+        return Promise.reject(error)
+      }
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })
@@ -71,6 +84,7 @@ api.interceptors.response.use(
         return api(originalRequest)
       } catch (refreshError) {
         processQueue(refreshError)
+        isLoggingOut = true
         useAuthStore.getState().logout()
         return Promise.reject(refreshError)
       } finally {

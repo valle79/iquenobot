@@ -11,6 +11,7 @@ import com.iquenobot.shared.enums.MessageStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -27,6 +28,7 @@ public class MessagePersistenceStep implements PipelineStep, MessagePipeline.Pri
     public int getOrder() { return 40; }
 
     @Override
+    @Transactional
     public ProcessingContext execute(ProcessingContext context) {
         var message = context.getIncomingMessage();
         Conversation conversation = context.getConversation();

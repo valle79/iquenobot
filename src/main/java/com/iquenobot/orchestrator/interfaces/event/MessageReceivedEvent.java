@@ -1,6 +1,7 @@
 package com.iquenobot.orchestrator.interfaces.event;
 
 import com.iquenobot.orchestrator.domain.model.IncomingMessage;
+import com.iquenobot.shared.enums.ChannelType;
 
 public class MessageReceivedEvent extends OrchestratorEvent {
 
@@ -12,6 +13,9 @@ public class MessageReceivedEvent extends OrchestratorEvent {
     }
 
     public IncomingMessage getMessage() { return message; }
+    public ChannelType getChannelType() { return message != null ? message.getChannel() : null; }
+    public String getChannel() { return message != null ? message.getChannel().name() : "UNKNOWN"; }
+    public String getMessageId() { return message != null ? message.getChannelMessageId() : null; }
 
     @Override
     public String getEventType() { return "MESSAGE_RECEIVED"; }

@@ -337,6 +337,20 @@ public class ConversationService {
                  markedCount, conversationId, tenantId);
     }
 
+    @Transactional
+    public void updateMetadata(UUID conversationId, String metadata) {
+        UUID tenantId = getTenantId();
+
+        Conversation conversation = conversationRepository
+                .findByIdAndTenantIdAndDeletedFalse(conversationId, tenantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Conversación no encontrada"));
+
+        conversation.setMetadata(metadata);
+        conversationRepository.save(conversation);
+
+        log.info("Metadata updated for conversation {} in tenant {}", conversationId, tenantId);
+    }
+
     public Conversation findOrCreateByChannelId(String channelConversationId, UUID contactId, ChannelType channel) {
         UUID tenantId = getTenantId();
         

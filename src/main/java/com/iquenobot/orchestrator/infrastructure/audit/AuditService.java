@@ -38,11 +38,10 @@ public class AuditService {
     public void logMessageReceived(IncomingMessage message, UUID tenantId) {
         try {
             AuditLog auditLog = AuditLog.builder()
-                    .id(UUID.randomUUID())
                     .tenantId(tenantId)
-                    .messageId(message.getMessageId())
-                    .conversationId(message.getConversationId())
-                    .contactId(message.getFrom())
+                    .messageId(message.getChannelMessageId())
+                    .conversationId(null)
+                    .contactId(message.getSourceIdentifier())
                     .channel(message.getChannel().name())
                     .eventType("MESSAGE_RECEIVED")
                     .processingTimeMs(0L)
@@ -51,7 +50,7 @@ public class AuditService {
                     .build();
 
             auditLogRepository.save(auditLog);
-            log.debug("Audit log created for message received: messageId={}", message.getMessageId());
+            log.debug("Audit log created for message received: messageId={}", message.getChannelMessageId());
 
         } catch (Exception e) {
             log.error("Error creating audit log for message received", e);
@@ -73,10 +72,9 @@ public class AuditService {
             }
 
             AuditLog auditLog = AuditLog.builder()
-                    .id(UUID.randomUUID())
                     .tenantId(context.getTenantId())
                     .messageId(context.getIncomingMessage() != null ? 
-                              context.getIncomingMessage().getMessageId() : null)
+                              context.getIncomingMessage().getChannelMessageId() : null)
                     .conversationId(context.getConversation() != null ? 
                                    context.getConversation().getId().toString() : null)
                     .contactId(context.getContact() != null ? 
@@ -108,10 +106,9 @@ public class AuditService {
                                   ProcessingResult result, long processingTimeMs) {
         try {
             AuditLog auditLog = AuditLog.builder()
-                    .id(UUID.randomUUID())
                     .tenantId(context.getTenantId())
                     .messageId(context.getIncomingMessage() != null ? 
-                              context.getIncomingMessage().getMessageId() : null)
+                              context.getIncomingMessage().getChannelMessageId() : null)
                     .conversationId(context.getConversation() != null ? 
                                    context.getConversation().getId().toString() : null)
                     .contactId(context.getContact() != null ? 
@@ -144,11 +141,10 @@ public class AuditService {
                                    Exception error, long processingTimeMs) {
         try {
             AuditLog auditLog = AuditLog.builder()
-                    .id(UUID.randomUUID())
                     .tenantId(tenantId)
-                    .messageId(message.getMessageId())
-                    .conversationId(message.getConversationId())
-                    .contactId(message.getFrom())
+                    .messageId(message.getChannelMessageId())
+                    .conversationId(null)
+                    .contactId(message.getSourceIdentifier())
                     .channel(message.getChannel().name())
                     .eventType("PROCESSING_ERROR")
                     .processingTimeMs(processingTimeMs)
@@ -159,7 +155,7 @@ public class AuditService {
                     .build();
 
             auditLogRepository.save(auditLog);
-            log.debug("Audit log created for processing error: messageId={}", message.getMessageId());
+            log.debug("Audit log created for processing error: messageId={}", message.getChannelMessageId());
 
         } catch (Exception e) {
             log.error("Error creating audit log for processing error", e);

@@ -60,6 +60,12 @@ class ConversationService extends BaseService<ConversationDto, CreateConversatio
   async markAsRead(conversationId: string): Promise<void> {
     await this.action(`${conversationId}/mark-as-read`)
   }
+
+  async updateMetadata(conversationId: string, metadata: string): Promise<void> {
+    await api.put(`${this.endpoint}/${conversationId}/metadata`, metadata, {
+      headers: { 'Content-Type': 'text/plain' },
+    })
+  }
 }
 
 export const conversationService = new ConversationService()

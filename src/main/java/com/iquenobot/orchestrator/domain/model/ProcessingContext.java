@@ -16,6 +16,9 @@ public class ProcessingContext {
     private Conversation conversation;
     private ConversationMessage persistedMessage;
     private String channelConversationId;
+    private BotConfiguration botConfiguration;
+    private WorkingHours workingHours;
+    private ConversationContext conversationContext;
 
     public IncomingMessage getIncomingMessage() { return incomingMessage; }
     public void setIncomingMessage(IncomingMessage incomingMessage) { this.incomingMessage = incomingMessage; }
@@ -37,4 +40,13 @@ public class ProcessingContext {
 
     public String getChannelConversationId() { return channelConversationId; }
     public void setChannelConversationId(String channelConversationId) { this.channelConversationId = channelConversationId; }
+
+    public BotConfiguration getBotConfiguration() { return botConfiguration; }
+    public void setBotConfiguration(BotConfiguration botConfiguration) { this.botConfiguration = botConfiguration; }
+
+    public WorkingHours getWorkingHours() { return workingHours; }
+    public void setWorkingHours(WorkingHours workingHours) { this.workingHours = workingHours; }
+
+    public ConversationContext getConversationContext() { return conversationContext; }
+    public void setConversationContext(ConversationContext conversationContext) { this.conversationContext = conversationContext; }
 }

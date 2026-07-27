@@ -30,6 +30,7 @@ export interface ConversationDto {
   satisfactionRating: number
   satisfactionFeedback: string
   tags: string
+  metadata: string
   botConversation: boolean
   botHandoffAt: string
   createdAt: string

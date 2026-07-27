@@ -1,7 +1,20 @@
 import { useState, useMemo, memo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Search, MessageCircle, Filter, Inbox, UserCheck, Users } from 'lucide-react'
+import {
+  Search,
+  MessageCircle,
+  Filter,
+  Inbox,
+  UserCheck,
+  Users,
+  MessageSquare,
+  Mail,
+  Globe,
+  Send,
+  Instagram,
+  Smartphone,
+} from 'lucide-react'
 import { useConversations } from '@/modules/chat/hooks/useConversations'
 import { useChatStore } from '@/modules/chat/stores/chat.store'
 import { Avatar } from '@/shared/atoms/Avatar/Avatar'
@@ -9,6 +22,31 @@ import { Badge } from '@/shared/atoms/Badge/Badge'
 import { cn } from '@/shared/utils'
 import { dayjs } from '@/config/dayjs'
 import type { ConversationDto } from '@/types/chat'
+import type { ChannelType } from '@/types/enums'
+
+const CHANNEL_ICONS: Record<ChannelType, typeof MessageCircle> = {
+  WHATSAPP: MessageCircle,
+  MESSENGER: MessageSquare,
+  INSTAGRAM: Instagram,
+  EMAIL: Mail,
+  WEBCHAT: Globe,
+  SMS: Send,
+  TELEGRAM: Send,
+  TWITTER: MessageSquare,
+  API: Globe,
+}
+
+const CHANNEL_COLORS: Record<ChannelType, string> = {
+  WHATSAPP: 'text-green-600',
+  MESSENGER: 'text-blue-500',
+  INSTAGRAM: 'text-pink-500',
+  EMAIL: 'text-blue-600',
+  WEBCHAT: 'text-indigo-500',
+  SMS: 'text-amber-500',
+  TELEGRAM: 'text-sky-600',
+  TWITTER: 'text-sky-500',
+  API: 'text-gray-500',
+}
 
 type FilterTab = 'all' | 'mine' | 'unassigned'
 
@@ -66,6 +104,13 @@ const ConversationItem = memo(function ConversationItem({ conversation, isActive
              conversation.status === 'PENDING' ? 'Pendiente' :
              conversation.status === 'SPAM' ? 'Spam' : 'Abierto'}
           </Badge>
+          {(() => {
+            const ChannelIcon = CHANNEL_ICONS[conversation.channel]
+            const channelColor = CHANNEL_COLORS[conversation.channel]
+            return ChannelIcon ? (
+              <ChannelIcon size={12} className={channelColor} title={conversation.channel} />
+            ) : null
+          })()}
           {conversation.priority === 'HIGH' && (
             <Badge variant="warning" size="sm" dot>Alta</Badge>
           )}

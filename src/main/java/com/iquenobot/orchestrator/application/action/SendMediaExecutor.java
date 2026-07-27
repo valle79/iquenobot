@@ -1,7 +1,5 @@
 package com.iquenobot.orchestrator.application.action;
 
-import com.iquenobot.ai.domain.dto.WhatsAppMessageDto;
-import com.iquenobot.ai.domain.service.IWhatsAppProvider;
 import com.iquenobot.conversation.domain.entity.ConversationMessage;
 import com.iquenobot.conversation.domain.repository.ConversationMessageRepository;
 import com.iquenobot.conversation.domain.repository.ConversationRepository;
@@ -9,14 +7,19 @@ import com.iquenobot.orchestrator.domain.model.ActionType;
 import com.iquenobot.orchestrator.domain.model.Decision;
 import com.iquenobot.orchestrator.domain.model.ProcessingContext;
 import com.iquenobot.orchestrator.domain.service.ActionExecutor;
+import com.iquenobot.orchestrator.domain.service.ChannelMessageSender;
+import com.iquenobot.shared.enums.ChannelType;
 import com.iquenobot.shared.enums.MessageDirection;
 import com.iquenobot.shared.enums.MessageStatus;
 import com.iquenobot.shared.enums.MessageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -26,12 +29,13 @@ public class SendMediaExecutor implements ActionExecutor {
 
     private final ConversationMessageRepository messageRepository;
     private final ConversationRepository conversationRepository;
-    private final IWhatsAppProvider whatsAppProvider;
+    private final List<ChannelMessageSender> channelSenders;
 
     @Override
     public ActionType supportedActionType() { return ActionType.SEND_MEDIA; }
 
     @Override
+    @Transactional
     public void execute(Decision decision, ProcessingContext context) {
         var params = decision.getParameters();
         if (params == null) {
@@ -46,18 +50,22 @@ public class SendMediaExecutor implements ActionExecutor {
                 ? MessageType.valueOf((String) params.get("mediaType"))
                 : MessageType.IMAGE;
 
-        WhatsAppMessageDto mediaMessage = WhatsAppMessageDto.builder()
-                .to(context.getContact().getPhone())
-                .type(mediaType)
-                .mediaUrl(mediaUrl)
-                .caption(caption)
-                .filename(filename)
-                .build();
+        ChannelType channel = context.getIncomingMessage().getChannel();
+        ChannelMessageSender sender = channelSenders.stream()
+                .filter(s -> s.supportedChannel() == channel)
+                .findFirst()
+                .orElse(null);
 
+        if (sender == null) {
+            log.warn("No channel sender available for channel={}", channel);
+            return;
+        }
+
+        String recipient = resolveRecipient(context, channel);
         String instanceId = context.getIncomingMessage().getInstanceId();
 
         try {
-            String messageId = whatsAppProvider.sendMediaMessage(instanceId, mediaMessage);
+            String messageId = sender.sendMediaMessage(instanceId, recipient, mediaUrl, caption, filename, mediaType);
 
             ConversationMessage botMessage = ConversationMessage.builder()
                     .id(UUID.randomUUID())
@@ -78,11 +86,18 @@ public class SendMediaExecutor implements ActionExecutor {
             conv.incrementMessageCount();
             conversationRepository.save(conv);
 
-            log.info("Media sent: type={} conversation={} mediaUrl={}",
-                    mediaType, conv.getId(), mediaUrl);
+            log.info("Media sent: type={} channel={} conversation={}", mediaType, channel, conv.getId());
 
         } catch (Exception e) {
-            log.error("Failed to send media: {}", e.getMessage(), e);
+            log.error("Failed to send media via {}: {}", channel, e.getMessage(), e);
         }
     }
+
+    private String resolveRecipient(ProcessingContext context, ChannelType channel) {
+        return switch (channel) {
+            case WHATSAPP, SMS -> context.getContact().getPhone();
+            default -> context.getIncomingMessage().getSourceIdentifier();
+        };
+    }
 }
+

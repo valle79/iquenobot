@@ -14,6 +14,7 @@ import com.iquenobot.shared.enums.ConversationStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -31,6 +32,7 @@ public class ConversationResolutionStep implements PipelineStep, MessagePipeline
     public int getOrder() { return 30; }
 
     @Override
+    @Transactional
     public ProcessingContext execute(ProcessingContext context) {
         var message = context.getIncomingMessage();
         UUID tenantId = context.getTenantId();

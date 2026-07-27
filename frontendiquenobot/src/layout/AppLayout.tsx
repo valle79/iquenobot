@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
 import { useBreakpoint } from '@/hooks/useMediaQuery'
+import { useRealtimeEvents } from '@/modules/chat/hooks/useRealtimeEvents'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
 
@@ -10,6 +11,8 @@ export function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const { isLg } = useBreakpoint()
+
+  useRealtimeEvents()
 
   useEffect(() => {
     if (isLg) setMobileOpen(false)

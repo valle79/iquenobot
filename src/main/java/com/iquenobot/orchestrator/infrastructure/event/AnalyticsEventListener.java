@@ -26,7 +26,7 @@ public class AnalyticsEventListener {
                 event.getTenantId(), event.getConversationId(), event.getChannel());
 
         // Track webhook received
-        metricsService.recordWebhookReceived(event.getChannel());
+        metricsService.recordWebhookReceived(event.getChannelType());
 
         // Track tenant activity
         if (event.getTenantId() != null) {

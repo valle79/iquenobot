@@ -8,6 +8,7 @@ import com.iquenobot.orchestrator.domain.service.ActionExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ public class TagConversationExecutor implements ActionExecutor {
     public ActionType supportedActionType() { return ActionType.TAG_CONVERSATION; }
 
     @Override
+    @Transactional
     public void execute(Decision decision, ProcessingContext context) {
         String tag = decision.getParameters() != null
                 ? (String) decision.getParameters().get("tag")

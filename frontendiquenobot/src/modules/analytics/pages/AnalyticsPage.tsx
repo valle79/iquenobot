@@ -107,11 +107,13 @@ export default function AnalyticsPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <ConversationTrendsChart stats={conversationStats} />
         <ChannelDistributionChart
-          stats={{
-            whatsappConversations: conversationStats.activeConversations,
-            webConversations: Math.round(conversationStats.activeConversations * 0.4),
-            emailConversations: Math.round(conversationStats.activeConversations * 0.15),
-          }}
+          data={[
+            { channel: 'WHATSAPP', count: Math.round(conversationStats.activeConversations * 0.6) },
+            { channel: 'WEBCHAT', count: Math.round(conversationStats.activeConversations * 0.2) },
+            { channel: 'EMAIL', count: Math.round(conversationStats.activeConversations * 0.1) },
+            { channel: 'MESSENGER', count: Math.round(conversationStats.activeConversations * 0.05) },
+            { channel: 'SMS', count: Math.round(conversationStats.activeConversations * 0.05) },
+          ].filter(d => d.count > 0)}
         />
       </div>
 

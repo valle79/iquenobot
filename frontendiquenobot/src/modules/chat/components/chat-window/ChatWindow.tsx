@@ -2,10 +2,11 @@ import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, ChevronDown } from 'lucide-react'
-import { useMessages } from '@/modules/chat/hooks/useConversations'
+import { useMessages, useConversation } from '@/modules/chat/hooks/useConversations'
 import { useChatSocket } from '@/modules/chat/hooks/useChatSocket'
 import { useChatStore } from '@/modules/chat/stores/chat.store'
 import { MessageBubble } from '@/modules/chat/components/message-bubble/MessageBubble'
+import { ConversationContextPanel } from '@/modules/chat/components/chat-window/ConversationContextPanel'
 import { useAuthStore } from '@/core/auth/auth.store'
 import { Skeleton } from '@/shared/atoms/Skeleton/Skeleton'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -49,11 +50,13 @@ export function ChatWindow() {
   const { emitTyping, emitStopTyping } = useChatSocket()
   const { markAsRead } = useUpdateConversation()
   const [autoScroll, setAutoScroll] = useState(true)
+  const [showContext, setShowContext] = useState(false)
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
 
   const { fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useMessages(conversationId)
+  const { data: conversation } = useConversation(conversationId)
 
   const messages = useChatStore((state) => {
     if (!conversationId) return null
@@ -115,6 +118,14 @@ export function ChatWindow() {
 
   return (
     <div className="relative flex flex-1 flex-col">
+      {conversation?.botConversation && conversationId && (
+        <ConversationContextPanel
+          conversationId={conversationId}
+          open={showContext}
+          onToggle={() => setShowContext(!showContext)}
+        />
+      )}
+
       <div
         ref={scrollRef}
         onScroll={handleScroll}

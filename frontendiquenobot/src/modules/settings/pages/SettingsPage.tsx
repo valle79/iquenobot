@@ -10,6 +10,8 @@ import {
   User,
   Shield,
   Globe,
+  Bot,
+  Clock,
   Save,
   Eye,
   EyeOff,
@@ -20,17 +22,23 @@ import { Tabs } from '@/shared/molecules/Tabs'
 import { Button } from '@/shared/atoms/Button/Button'
 import { Input } from '@/shared/atoms/Input/Input'
 import { Select } from '@/shared/atoms/Select/Select'
+import { Toggle } from '@/shared/atoms/Toggle/Toggle'
+import { WorkingHoursEditor } from '@/modules/settings/components/WorkingHoursEditor'
 import { useAuthStore } from '@/core/auth/auth.store'
 import { api } from '@/core/api/client'
 import { settingService } from '@/services/setting.service'
 import { useSettingsByCategory, useUpdateSettings } from '@/modules/settings/hooks/useSettings'
+import { DEFAULT_WORKING_HOURS, DAY_ORDER } from '@/types/orchestrator'
 import type { ApiResponse } from '@/types/api'
 import type { UserDto } from '@/types/auth'
+import type { WorkingHoursSchedule } from '@/types/orchestrator'
 
 const settingsTabs = [
   { id: 'profile', label: 'Perfil', icon: <User size={16} /> },
   { id: 'company', label: 'Empresa', icon: <Building2 size={16} /> },
+  { id: 'bot', label: 'Bot', icon: <Bot size={16} /> },
   { id: 'ai', label: 'Inteligencia Artificial', icon: <Cpu size={16} /> },
+  { id: 'working_hours', label: 'Horario', icon: <Clock size={16} /> },
   { id: 'notifications', label: 'Notificaciones', icon: <Bell size={16} /> },
   { id: 'security', label: 'Seguridad', icon: <Shield size={16} /> },
   { id: 'general', label: 'General', icon: <Globe size={16} /> },
@@ -175,60 +183,316 @@ function CompanySettings() {
   )
 }
 
-function AISettings() {
-  const { data: settings, isLoading } = useSettingsByCategory('ai')
+const botSchema = z.object({
+  humanHandoffEnabled: z.boolean(),
+  fallbackMessage: z.string().min(1, 'El mensaje de respaldo es obligatorio'),
+})
+
+type BotForm = z.infer<typeof botSchema>
+
+function BotSettings() {
+  const { data: botSettings } = useSettingsByCategory('bot')
+  const { data: aiSettings } = useSettingsByCategory('ai')
   const updateSettings = useUpdateSettings()
-  const [values, setValues] = useState<Record<string, string>>({})
 
-  useEffect(() => {
-    if (settings) {
-      const v: Record<string, string> = {}
-      settings.forEach((s) => { v[s.key] = s.value ?? '' })
-      setValues(v)
-    }
-  }, [settings])
+  const getBotVal = (key: string, fallback = '') =>
+    botSettings?.find((s) => s.key === key)?.value ?? fallback
+  const getAiVal = (key: string, fallback = '') =>
+    aiSettings?.find((s) => s.key === key)?.value ?? fallback
 
-  const handleSave = () => {
-    updateSettings.mutate({
-      category: 'ai',
-      settings: Object.entries(values).map(([key, value]) => ({ key, value })),
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<BotForm>({
+    resolver: zodResolver(botSchema),
+    values: {
+      humanHandoffEnabled: getBotVal('human_handoff', 'true') === 'true',
+      fallbackMessage: getBotVal('fallback_message', 'Lo siento, voy a conectarte con un agente humano.'),
+    },
+  })
+
+  const humanHandoff = watch('humanHandoffEnabled')
+  const aiEnabled = getAiVal('enabled', 'false') === 'true'
+  const autoReply = getAiVal('auto_reply', 'false') === 'true'
+
+  const handleSave = async (data: BotForm) => {
+    await settingService.update({
+      category: 'bot',
+      settings: [
+        { key: 'human_handoff', value: String(data.humanHandoffEnabled), type: 'boolean' },
+        { key: 'fallback_message', value: data.fallbackMessage, type: 'text' },
+      ],
     })
   }
 
-  if (isLoading) return <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-950"><p className="text-gray-500">Cargando...</p></div>
+  return (
+    <form onSubmit={handleSubmit(handleSave)} className="space-y-6">
+      <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-950">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Configuración del Bot</h3>
+        <p className="mt-1 text-sm text-gray-500">Controla el comportamiento general del chatbot</p>
+
+        <div className="mt-6 space-y-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Bot habilitado</p>
+              <p className="text-xs text-gray-500">Activa o desactiva el chatbot para responder mensajes</p>
+            </div>
+            <Toggle checked={aiEnabled} onChange={() => {}} disabled />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Auto-respuesta</p>
+              <p className="text-xs text-gray-500">El bot responde automáticamente a los mensajes entrantes</p>
+            </div>
+            <Toggle checked={autoReply} onChange={() => {}} disabled />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Transferencia a agente humano</p>
+              <p className="text-xs text-gray-500">Permitir que el bot transfiera conversaciones a un agente humano</p>
+            </div>
+            <Toggle
+              checked={humanHandoff}
+              onChange={(checked) => setValue('humanHandoffEnabled', checked)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Mensaje de respaldo
+            </label>
+            <p className="text-xs text-gray-500">Mensaje que se envía cuando el bot no puede responder</p>
+            <textarea
+              className="h-20 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
+              {...register('fallbackMessage')}
+            />
+            {errors.fallbackMessage && (
+              <p className="text-xs text-red-500">{errors.fallbackMessage.message}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <Button type="submit" loading={updateSettings.isPending}>
+          <Save size={16} className="mr-2" />
+          Guardar cambios
+        </Button>
+      </div>
+    </form>
+  )
+}
+
+function AISettings() {
+  const { data: settings, isLoading } = useSettingsByCategory('ai')
+  const updateSettings = useUpdateSettings()
+
+  const getVal = (key: string, fallback = '') =>
+    settings?.find((s) => s.key === key)?.value ?? fallback
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(z.object({
+      provider: z.string().min(1, 'Selecciona un proveedor'),
+      systemPrompt: z.string().min(1, 'El prompt del sistema es obligatorio'),
+      temperature: z.coerce.number().min(0).max(2),
+      enabled: z.boolean(),
+    })),
+    values: {
+      provider: getVal('provider', 'NONE'),
+      systemPrompt: getVal('system_prompt', 'Eres un asistente virtual de atención al cliente amable y profesional.'),
+      temperature: parseFloat(getVal('temperature', '0.7')),
+      enabled: getVal('enabled', 'false') === 'true',
+    },
+  })
+
+  const temperature = watch('temperature')
+
+  const handleSave = async (data: { provider: string; systemPrompt: string; temperature: number; enabled: boolean }) => {
+    await updateSettings.mutateAsync({
+      category: 'ai',
+      settings: [
+        { key: 'provider', value: data.provider, type: 'text' },
+        { key: 'system_prompt', value: data.systemPrompt, type: 'text' },
+        { key: 'temperature', value: String(data.temperature), type: 'text' },
+        { key: 'enabled', value: String(data.enabled), type: 'boolean' },
+      ],
+    })
+  }
+
+  if (isLoading) {
+    return (
+      <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-950">
+        <p className="text-gray-500">Cargando...</p>
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit(handleSave)} className="space-y-6">
+      <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-950">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Inteligencia Artificial</h3>
+        <p className="mt-1 text-sm text-gray-500">Configura el proveedor de IA y el comportamiento del modelo</p>
+
+        <div className="mt-6 space-y-5">
+          <Select
+            label="Proveedor de IA"
+            options={[
+              { value: 'NONE', label: 'Sin proveedor (deshabilitado)' },
+              { value: 'OPENAI', label: 'OpenAI' },
+              { value: 'GROQ', label: 'Groq' },
+              { value: 'GEMINI', label: 'Google Gemini' },
+              { value: 'CLAUDE', label: 'Anthropic Claude' },
+            ]}
+            error={errors.provider?.message}
+            {...register('provider')}
+          />
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Prompt del sistema
+            </label>
+            <p className="text-xs text-gray-500">Instrucciones para el comportamiento del asistente de IA</p>
+            <textarea
+              className="h-32 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
+              {...register('systemPrompt')}
+            />
+            {errors.systemPrompt && (
+              <p className="text-xs text-red-500">{errors.systemPrompt.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Temperatura
+              </label>
+              <span className="text-sm text-gray-500">{temperature}</span>
+            </div>
+            <p className="text-xs text-gray-500">Controla la creatividad de las respuestas (0 = preciso, 2 = creativo)</p>
+            <input
+              type="range"
+              min="0"
+              max="2"
+              step="0.1"
+              className="w-full accent-brand-600"
+              {...register('temperature')}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <Button type="submit" loading={updateSettings.isPending}>
+          <Save size={16} className="mr-2" />
+          Guardar cambios
+        </Button>
+      </div>
+    </form>
+  )
+}
+
+function WorkingHoursSettings() {
+  const { data: generalSettings } = useSettingsByCategory('general')
+  const { data: botSettings } = useSettingsByCategory('bot')
+  const updateSettings = useUpdateSettings()
+
+  const getGeneralVal = (key: string, fallback = '') =>
+    generalSettings?.find((s) => s.key === key)?.value ?? fallback
+  const getBotVal = (key: string, fallback = '') =>
+    botSettings?.find((s) => s.key === key)?.value ?? fallback
+
+  const [enabled, setEnabled] = useState(() => getGeneralVal('business_hours_enabled', 'true') === 'true')
+  const [schedule, setSchedule] = useState<WorkingHoursSchedule>(() => {
+    try {
+      const raw = getGeneralVal('business_hours')
+      return raw ? JSON.parse(raw) : DEFAULT_WORKING_HOURS
+    } catch {
+      return DEFAULT_WORKING_HOURS
+    }
+  })
+  const [closedMessage, setClosedMessage] = useState(() =>
+    getBotVal('after_hours_message', 'Estamos fuera de horario laboral. Te atenderemos en nuestro horario de atención.')
+  )
+  const [timezone, setTimezone] = useState(() => getGeneralVal('timezone', 'America/Guayaquil'))
+
+  const handleSave = async () => {
+    await settingService.update({
+      category: 'general',
+      settings: [
+        { key: 'business_hours_enabled', value: String(enabled), type: 'boolean' },
+        { key: 'business_hours', value: JSON.stringify(schedule), type: 'json' },
+        { key: 'timezone', value: timezone, type: 'text' },
+      ],
+    })
+    await settingService.update({
+      category: 'bot',
+      settings: [
+        { key: 'after_hours_message', value: closedMessage, type: 'text' },
+      ],
+    })
+  }
 
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-950">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Inteligencia Artificial</h3>
-        <p className="mt-1 text-sm text-gray-500">Configura los proveedores de IA y el modelo</p>
-        <div className="mt-6 space-y-4">
-          {settings?.map((s) => (
-            <div key={s.key} className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{s.description || s.key}</label>
-              {s.type === 'boolean' || s.type === 'select' ? (
-                <select
-                  className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
-                  value={values[s.key] ?? ''}
-                  onChange={(e) => setValues((prev) => ({ ...prev, [s.key]: e.target.value }))}
-                >
-                  <option value="true">Activado</option>
-                  <option value="false">Desactivado</option>
-                </select>
-              ) : (
-                <input
-                  className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
-                  value={values[s.key] ?? ''}
-                  onChange={(e) => setValues((prev) => ({ ...prev, [s.key]: e.target.value }))}
-                />
-              )}
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Horario Laboral</h3>
+        <p className="mt-1 text-sm text-gray-500">Define el horario en el que el bot está disponible</p>
+
+        <div className="mt-6 space-y-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Horario habilitado</p>
+              <p className="text-xs text-gray-500">Activa la restricción de horario laboral</p>
             </div>
-          ))}
-          {(!settings || settings.length === 0) && (
-            <p className="text-sm text-gray-500">No hay configuraciones disponibles</p>
+            <Toggle checked={enabled} onChange={setEnabled} />
+          </div>
+
+          {enabled && (
+            <>
+              <Select
+                label="Zona horaria"
+                options={[
+                  { value: 'America/Guayaquil', label: 'Guayaquil (GMT-5)' },
+                  { value: 'America/Bogota', label: 'Bogotá (GMT-5)' },
+                  { value: 'America/Mexico_City', label: 'Ciudad de México (GMT-6)' },
+                  { value: 'America/Lima', label: 'Lima (GMT-5)' },
+                  { value: 'America/Santiago', label: 'Santiago (GMT-4)' },
+                  { value: 'America/Buenos_Aires', label: 'Buenos Aires (GMT-3)' },
+                  { value: 'Europe/Madrid', label: 'Madrid (GMT+1)' },
+                  { value: 'UTC', label: 'UTC (GMT+0)' },
+                ]}
+                value={timezone}
+                onChange={(e) => setTimezone(e.target.value)}
+              />
+
+              <WorkingHoursEditor schedule={schedule} onChange={setSchedule} />
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Mensaje fuera de horario
+                </label>
+                <p className="text-xs text-gray-500">Mensaje que se envía cuando el cliente escribe fuera del horario laboral</p>
+                <textarea
+                  className="h-20 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
+                  value={closedMessage}
+                  onChange={(e) => setClosedMessage(e.target.value)}
+                />
+              </div>
+            </>
           )}
         </div>
       </div>
+
       <div className="flex justify-end">
         <Button onClick={handleSave} loading={updateSettings.isPending}>
           <Save size={16} className="mr-2" />
@@ -452,7 +716,9 @@ function GeneralSettings() {
 const tabComponents: Record<string, React.FC> = {
   profile: ProfileSettings,
   company: CompanySettings,
+  bot: BotSettings,
   ai: AISettings,
+  working_hours: WorkingHoursSettings,
   notifications: NotificationSettings,
   security: SecuritySettings,
   general: GeneralSettings,

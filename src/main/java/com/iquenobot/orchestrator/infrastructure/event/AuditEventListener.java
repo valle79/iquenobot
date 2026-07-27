@@ -24,7 +24,8 @@ public class AuditEventListener {
     @Async
     @EventListener
     public void handleMessageReceived(MessageReceivedEvent event) {
-        log.debug("Persisting audit log for message received: messageId={}", event.getMessageId());
+        log.debug("Persisting audit log for message received: messageId={}", 
+                event.getMessage().getChannelMessageId());
         
         // The initial audit log is created by AuditStep in the pipeline
         // This listener can be used for additional audit processing if needed

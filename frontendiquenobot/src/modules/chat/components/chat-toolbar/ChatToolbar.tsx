@@ -11,6 +11,8 @@ import {
   Tag,
   FileText,
   UserCircle,
+  AlertTriangle,
+  Clock,
 } from 'lucide-react'
 import { useConversation, useUpdateConversation } from '@/modules/chat/hooks/useConversations'
 import { useAuthStore } from '@/core/auth/auth.store'
@@ -22,6 +24,7 @@ import { Skeleton } from '@/shared/atoms/Skeleton/Skeleton'
 import { AssignAgentModal } from '@/modules/chat/components/AssignAgentModal'
 import { TagsManager } from '@/modules/chat/components/TagsManager'
 import { InternalNotes } from '@/modules/chat/components/InternalNotes'
+import { dayjs } from '@/config/dayjs'
 
 interface ChatToolbarProps {
   onToggleInfo: () => void
@@ -179,6 +182,23 @@ export function ChatToolbar({ onToggleInfo, showInfo }: ChatToolbarProps) {
           currentUserId={currentUserId ?? null}
           onClose={() => setShowAssign(false)}
         />
+      )}
+
+      {conversation?.botConversation && conversation?.botHandoffAt && (
+        <div className="flex items-center gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2.5 dark:border-amber-800 dark:bg-amber-900/10">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
+            <AlertTriangle size={14} className="text-amber-600 dark:text-amber-400" />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs font-medium text-amber-800 dark:text-amber-300">
+              Conversación transferida del bot a un agente humano
+            </p>
+            <p className="flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400">
+              <Clock size={10} />
+              Transferida {dayjs(conversation.botHandoffAt).fromNow()}
+            </p>
+          </div>
+        </div>
       )}
     </>
   )

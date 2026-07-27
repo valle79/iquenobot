@@ -50,6 +50,7 @@ public class ConversationDto {
     private Integer satisfactionRating;
     private String satisfactionFeedback;
     private String tags;
+    private String metadata;
     private boolean botConversation;
     
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")

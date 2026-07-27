@@ -170,4 +170,14 @@ public class ConversationController {
         conversationService.markAsRead(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Mensajes marcados como leídos"));
     }
+
+    @PutMapping("/{id}/metadata")
+    @Operation(summary = "Actualizar metadata", description = "Actualiza la metadata de una conversación (notas internas)")
+    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'SUPERVISOR', 'AGENT')")
+    public ResponseEntity<ApiResponse<Void>> updateMetadata(
+            @PathVariable UUID id,
+            @RequestBody String metadata) {
+        conversationService.updateMetadata(id, metadata);
+        return ResponseEntity.ok(ApiResponse.success(null, "Metadata actualizada"));
+    }
 }

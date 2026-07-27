@@ -149,9 +149,9 @@ export default function LeadsPage() {
               </Button>
             }
             items={[
-              { label: 'Ver detalle', icon: Search, onClick: () => navigate(`/contacts/${lead.contact?.id}`) },
+              { label: 'Ver detalle', icon: Search, onClick: () => navigate(`/leads/${lead.id}`) },
               { label: 'Editar', icon: Pencil, onClick: () => { setFormTarget(lead); setFormOpen(true) } },
-              { label: 'Asignar', icon: UserPlus, onClick: () => {} },
+              { label: 'Asignar', icon: UserPlus, onClick: () => navigate(`/leads/${lead.id}`) },
               { type: 'separator' },
               ...(lead.status === 'NEW'
                 ? [{ label: 'Contactado', icon: Target, onClick: () => updateStatus.mutate({ id: lead.id, action: 'contacted' }) }]

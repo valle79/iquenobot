@@ -5,13 +5,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.FilterDef;
-import org.hibernate.annotations.ParamDef;
+
 
 /**
  * Audit log entity for tracking Orchestrator operations.
@@ -19,11 +18,10 @@ import org.hibernate.annotations.ParamDef;
  */
 @Entity
 @Table(name = "orchestrator_audit_logs")
-@FilterDef(name = "tenantFilter", parameters = @ParamDef(name = "tenantId", type = String.class))
 @Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuditLog extends BaseEntity {

@@ -1,9 +1,13 @@
-import { useState } from 'react'
-import { FileText, Send } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { FileText, Send, Trash2 } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/shared/atoms/Button/Button'
 import { Avatar } from '@/shared/atoms/Avatar/Avatar'
 import { useAuthStore } from '@/core/auth/auth.store'
+import { conversationService } from '@/services/conversation.service'
+import { useConversation } from '@/modules/chat/hooks/useConversations'
 import { dayjs } from '@/config/dayjs'
+import { toast } from 'sonner'
 
 interface InternalNotesProps {
   conversationId: string
@@ -12,34 +16,64 @@ interface InternalNotesProps {
 interface Note {
   id: string
   content: string
+  authorId: string
   author: string
   authorAvatar?: string
   createdAt: string
 }
 
+function parseNotes(metadata: string | null | undefined): Note[] {
+  if (!metadata) return []
+  try {
+    const parsed = JSON.parse(metadata)
+    return Array.isArray(parsed.notes) ? parsed.notes : []
+  } catch {
+    return []
+  }
+}
+
+function buildMetadata(notes: Note[]): string {
+  return JSON.stringify({ notes })
+}
+
 export function InternalNotes({ conversationId }: InternalNotesProps) {
-  const [notes, setNotes] = useState<Note[]>([
-    {
-      id: '1',
-      content: 'Cliente solicita información sobre planes empresariales.',
-      author: 'Carlos Pérez',
-      createdAt: new Date().toISOString(),
-    },
-  ])
   const [newNote, setNewNote] = useState('')
   const user = useAuthStore((s) => s.user)
+  const queryClient = useQueryClient()
+
+  const { data: conversation } = useConversation(conversationId)
+  const notes = parseNotes(conversation?.metadata)
+
+  const updateMetadataMutation = useMutation({
+    mutationFn: (updatedNotes: Note[]) =>
+      conversationService.updateMetadata(conversationId, buildMetadata(updatedNotes)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversation', conversationId] })
+    },
+  })
 
   const handleAddNote = () => {
     if (!newNote.trim() || !user) return
     const note: Note = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       content: newNote.trim(),
+      authorId: user.id,
       author: user.fullName,
       authorAvatar: user.avatarUrl,
       createdAt: new Date().toISOString(),
     }
-    setNotes((prev) => [note, ...prev])
-    setNewNote('')
+    const updated = [note, ...notes]
+    updateMetadataMutation.mutate(updated, {
+      onSuccess: () => setNewNote(''),
+      onError: () => toast.error('Error al guardar nota'),
+    })
+  }
+
+  const handleDeleteNote = (noteId: string) => {
+    const updated = notes.filter((n) => n.id !== noteId)
+    updateMetadataMutation.mutate(updated, {
+      onError: () => toast.error('Error al eliminar nota'),
+    })
   }
 
   return (
@@ -54,11 +88,21 @@ export function InternalNotes({ conversationId }: InternalNotesProps) {
           <p className="py-4 text-center text-sm text-gray-400">Sin notas internas</p>
         )}
         {notes.map((note) => (
-          <div key={note.id} className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800/50">
-            <div className="mb-1 flex items-center gap-2">
-              <Avatar name={note.author} src={note.authorAvatar} size="xs" />
-              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{note.author}</span>
-              <span className="text-xs text-gray-400">{dayjs(note.createdAt).fromNow()}</span>
+          <div key={note.id} className="group rounded-lg bg-gray-50 p-3 dark:bg-gray-800/50">
+            <div className="mb-1 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Avatar name={note.author} src={note.authorAvatar} size="xs" />
+                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{note.author}</span>
+                <span className="text-xs text-gray-400">{dayjs(note.createdAt).fromNow()}</span>
+              </div>
+              {note.authorId === user?.id && (
+                <button
+                  onClick={() => handleDeleteNote(note.id)}
+                  className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"
+                >
+                  <Trash2 size={12} />
+                </button>
+              )}
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">{note.content}</p>
           </div>
@@ -73,7 +117,14 @@ export function InternalNotes({ conversationId }: InternalNotesProps) {
           onChange={(e) => setNewNote(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAddNote() } }}
         />
-        <Button variant="ghost" size="sm" icon onClick={handleAddNote} disabled={!newNote.trim()}>
+        <Button
+          variant="ghost"
+          size="sm"
+          icon
+          onClick={handleAddNote}
+          disabled={!newNote.trim()}
+          loading={updateMetadataMutation.isPending}
+        >
           <Send size={16} />
         </Button>
       </div>

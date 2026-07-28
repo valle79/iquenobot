@@ -9,11 +9,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -23,6 +23,12 @@ public class WhatsAppConnectionService {
 
     private final SettingRepository settingRepository;
     private final IWhatsAppProvider whatsAppProvider;
+
+    @Value("${app.base-url:http://localhost:8085}")
+    private String backendBaseUrl;
+
+    @Value("${EVOLUTION_WEBHOOK_BASE_URL:}")
+    private String evolutionWebhookBaseUrl;
 
     private static final String CATEGORY = "whatsapp";
 
@@ -43,6 +49,14 @@ public class WhatsAppConnectionService {
         private boolean success;
         private boolean connected;
         private String message;
+    }
+
+    @Data
+    @Builder
+    public static class QRCodeResponse {
+        private String base64;
+        private boolean hasQR;
+        private String error;
     }
 
     @Transactional(readOnly = true)
@@ -105,6 +119,8 @@ public class WhatsAppConnectionService {
         }
 
         try {
+            whatsAppProvider.setWebhook(instanceId, getWebhookUrl(instanceId));
+
             boolean connected = whatsAppProvider.isConnected(instanceId);
             updateConnectedSetting(tenantId, connected);
 
@@ -124,6 +140,62 @@ public class WhatsAppConnectionService {
                     .connected(false)
                     .message("Error al conectar: " + e.getMessage())
                     .build();
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public QRCodeResponse getQRCode() {
+        UUID tenantId = getTenantId();
+        List<Setting> settings = settingRepository.findByTenantIdAndCategoryAndDeletedFalse(tenantId, CATEGORY);
+
+        String instanceId = getSettingValue(settings, "instance_id");
+
+        if (instanceId == null || instanceId.isBlank()) {
+            return QRCodeResponse.builder()
+                    .hasQR(false)
+                    .error("No se ha configurado el ID de instancia")
+                    .build();
+        }
+
+        try {
+            whatsAppProvider.setWebhook(instanceId, getWebhookUrl(instanceId));
+
+            String qrBase64 = whatsAppProvider.getQRCode(instanceId);
+            if (qrBase64 != null) {
+                String fullBase64 = qrBase64.startsWith("data:") ? qrBase64 : "data:image/png;base64," + qrBase64;
+                return QRCodeResponse.builder()
+                        .base64(fullBase64)
+                        .hasQR(true)
+                        .build();
+            }
+            return QRCodeResponse.builder()
+                    .hasQR(false)
+                    .error("No se pudo generar el código QR")
+                    .build();
+        } catch (Exception e) {
+            log.warn("Error getting QR code: {}", e.getMessage());
+            return QRCodeResponse.builder()
+                    .hasQR(false)
+                    .error("Error al obtener código QR: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    @Transactional
+    public void disconnect() {
+        UUID tenantId = getTenantId();
+        List<Setting> settings = settingRepository.findByTenantIdAndCategoryAndDeletedFalse(tenantId, CATEGORY);
+        String instanceId = getSettingValue(settings, "instance_id");
+
+        if (instanceId != null && !instanceId.isBlank()) {
+            try {
+                whatsAppProvider.disconnect(instanceId);
+                updateConnectedSetting(tenantId, false);
+                log.info("WhatsApp disconnected for tenant: {}", tenantId);
+            } catch (Exception e) {
+                log.error("Error disconnecting WhatsApp: {}", e.getMessage());
+                throw new BusinessException("Error al desconectar WhatsApp: " + e.getMessage());
+            }
         }
     }
 
@@ -147,6 +219,13 @@ public class WhatsAppConnectionService {
                     .build();
             settingRepository.save(setting);
         }
+    }
+
+    private String getWebhookUrl(String instanceId) {
+        String base = evolutionWebhookBaseUrl != null && !evolutionWebhookBaseUrl.isBlank()
+                ? evolutionWebhookBaseUrl
+                : backendBaseUrl;
+        return base + "/api/v1/whatsapp/webhook/" + instanceId;
     }
 
     private String getSettingValue(List<Setting> settings, String key) {

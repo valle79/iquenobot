@@ -30,7 +30,7 @@ public class FileUploadService {
     @Value("${app.upload.path:uploads}")
     private String uploadPath;
 
-    @Value("${app.base-url:http://localhost:8080}")
+    @Value("${app.base-url:http://localhost:8085}")
     private String baseUrl;
 
     private Path uploadDir;

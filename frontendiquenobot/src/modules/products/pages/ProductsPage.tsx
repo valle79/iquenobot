@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { Plus, MoreHorizontal, Package, Trash2, Eye, Pencil, Minus, Plus as PlusIcon } from 'lucide-react'
+import { Plus, MoreHorizontal, Package, Trash2, Eye, Pencil, Minus, Plus as PlusIcon, Upload } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useProducts, useDeleteProduct, useAdjustStock } from '../hooks/useProducts'
 import { ProductFormModal } from '../components/ProductFormModal'
+import { ImportProductsModal } from '../components/ImportProductsModal'
 import { DataTable } from '@/shared/organisms/DataTable/DataTable'
 import { Button } from '@/shared/atoms/Button/Button'
 import { Badge } from '@/shared/atoms/Badge/Badge'
@@ -24,6 +26,7 @@ const statusColors: Record<string, 'success' | 'warning' | 'error' | 'neutral'> 
 export default function ProductsPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const {
     products, totalElements, totalPages, page, setPage,
     search, setSearch, statusFilter, setStatusFilter,
@@ -34,6 +37,7 @@ export default function ProductsPage() {
   const [deleteTarget, setDeleteTarget] = useState<ProductDto | null>(null)
   const [formTarget, setFormTarget] = useState<ProductDto | null>(null)
   const [formOpen, setFormOpen] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
 
   const columns: ColumnDef<ProductDto>[] = [
     {
@@ -171,10 +175,16 @@ export default function ProductsPage() {
             Gestiona tu catálogo de productos ({totalElements} total)
           </p>
         </div>
-        <Button onClick={() => { setFormTarget(null); setFormOpen(true) }}>
-          <Plus size={18} />
-          Nuevo producto
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportOpen(true)}>
+            <Upload size={18} />
+            Importar
+          </Button>
+          <Button onClick={() => { setFormTarget(null); setFormOpen(true) }}>
+            <Plus size={18} />
+            Nuevo producto
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center gap-3">
@@ -222,6 +232,7 @@ export default function ProductsPage() {
       />
 
       <ProductFormModal open={formOpen} product={formTarget} onClose={() => { setFormOpen(false); setFormTarget(null) }} />
+      <ImportProductsModal open={importOpen} onClose={() => { setImportOpen(false); queryClient.invalidateQueries({ queryKey: ['products'] }) }} />
     </div>
   )
 }

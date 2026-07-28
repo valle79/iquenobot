@@ -3,6 +3,7 @@ package com.iquenobot.orchestrator.application.decision;
 import com.iquenobot.chatbot.application.ChatbotService;
 import com.iquenobot.chatbot.domain.dto.ChatbotResponseDto;
 import com.iquenobot.orchestrator.domain.model.ActionType;
+import com.iquenobot.orchestrator.domain.model.BotConfiguration;
 import com.iquenobot.orchestrator.domain.model.Decision;
 import com.iquenobot.orchestrator.domain.model.ProcessingContext;
 import com.iquenobot.orchestrator.domain.service.DecisionStrategy;
@@ -24,6 +25,18 @@ public class BotDecisionStrategy implements DecisionStrategy {
 
     @Override
     public boolean canHandle(ProcessingContext context) {
+        if (context.getIncomingMessage().isOutbound()) {
+            return false;
+        }
+
+        BotConfiguration botConfig = context.getBotConfiguration();
+        if (botConfig == null || !botConfig.isAiAvailable()) {
+            log.debug("Bot not available (enabled={} provider={})",
+                    botConfig != null ? botConfig.isEnabled() : "N/A",
+                    botConfig != null ? botConfig.getAiProvider() : "N/A");
+            return false;
+        }
+
         if (context.getConversation().isBotConversation()) {
             return true;
         }
@@ -36,6 +49,7 @@ public class BotDecisionStrategy implements DecisionStrategy {
     @Override
     public Decision decide(ProcessingContext context) {
         var msg = context.getIncomingMessage();
+        var botConfig = context.getBotConfiguration();
 
         try {
             ChatbotResponseDto botResponse = chatbotService.processMessage(
@@ -44,7 +58,9 @@ public class BotDecisionStrategy implements DecisionStrategy {
                             "conversationId", context.getConversation().getId().toString(),
                             "tenantId", context.getTenantId().toString(),
                             "contactId", context.getContact().getId().toString(),
-                            "channel", msg.getChannel().name()
+                            "channel", msg.getChannel().name(),
+                            "systemPrompt", botConfig != null ? botConfig.getSystemPrompt() : "",
+                            "temperature", String.valueOf(botConfig != null ? botConfig.getTemperature() : 0.7)
                     )
             );
 

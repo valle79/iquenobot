@@ -1,11 +1,16 @@
 server:
-  port: ${PORT:8080}
+  port: ${PORT:8085}
 
 spring:
   config:
     import: optional:file:.env[.properties]
   application:
     name: iquenobot
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/iquenobot}
@@ -91,7 +96,7 @@ app:
     secret: ${CRYPTO_SECRET:}
   cors:
     allowed-origins: ${CORS_ORIGINS:*}
-  base-url: ${BASE_URL:http://localhost:8080}
+  base-url: ${BASE_URL:http://localhost:8085}
   upload:
     path: ${UPLOAD_PATH:uploads}
     max-file-size: 10MB

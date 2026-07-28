@@ -2,6 +2,8 @@ package com.iquenobot.contact.application;
 
 import com.iquenobot.contact.domain.dto.ContactDto;
 import com.iquenobot.contact.domain.dto.CreateContactRequestDto;
+import com.iquenobot.contact.domain.dto.ImportContactsRequestDto;
+import com.iquenobot.contact.domain.dto.ImportContactsResultDto;
 import com.iquenobot.contact.domain.entity.Contact;
 import com.iquenobot.contact.domain.repository.ContactRepository;
 import com.iquenobot.contact.interfaces.mapper.ContactMapper;
@@ -17,6 +19,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -146,6 +153,107 @@ public class ContactService {
         log.info("Contact updated: {} for tenant: {}", id, tenantId);
         
         return contactMapper.toDto(contact);
+    }
+
+    @Transactional
+    public ImportContactsResultDto importContacts(ImportContactsRequestDto request) {
+        UUID tenantId = getTenantId();
+        int created = 0, skipped = 0, errors = 0;
+        List<String> messages = new ArrayList<>();
+        List<Contact> contactsToSave = new ArrayList<>();
+
+        List<String> rawPhones = request.getContacts().stream()
+                .map(r -> sanitizePhone(r.getOrDefault("phone", "")))
+                .filter(p -> !p.isBlank())
+                .toList();
+        List<String> rawEmails = request.getContacts().stream()
+                .map(r -> r.getOrDefault("email", "").trim().toLowerCase())
+                .filter(e -> !e.isBlank())
+                .toList();
+
+        Set<String> existingPhones = new HashSet<>(contactRepository.findExistingPhones(tenantId, rawPhones));
+        Set<String> existingEmails = new HashSet<>(contactRepository.findExistingEmails(tenantId, rawEmails));
+
+        for (Map<String, String> row : request.getContacts()) {
+            String rawPhone = sanitizePhone(row.getOrDefault("phone", ""));
+            String rawWhatsapp = sanitizePhone(row.getOrDefault("whatsappPhone", ""));
+            String email = row.getOrDefault("email", "").trim().toLowerCase();
+
+            try {
+                if (!email.isBlank() && existingEmails.contains(email)) {
+                    skipped++;
+                    messages.add("Email ya existe: " + email);
+                    continue;
+                }
+                if (!rawPhone.isBlank() && existingPhones.contains(rawPhone)) {
+                    skipped++;
+                    messages.add("Tel\u00e9fono ya existe: " + rawPhone);
+                    continue;
+                }
+
+                existingPhones.add(rawPhone);
+                existingEmails.add(email);
+
+                String firstName = truncate(row.getOrDefault("firstName", ""), 100);
+                String lastName = truncate(row.getOrDefault("lastName", ""), 100);
+                String fullName = truncate(row.getOrDefault("fullName", ""), 200);
+
+                Contact contact = Contact.builder()
+                        .id(UUID.randomUUID())
+                        .tenantId(tenantId)
+                        .firstName(firstName)
+                        .lastName(lastName)
+                        .fullName(fullName)
+                        .email(truncate(email, 255))
+                        .phone(rawPhone)
+                        .whatsappPhone(!rawWhatsapp.isBlank() ? rawWhatsapp : (!rawPhone.isBlank() ? rawPhone : null))
+                        .company(truncate(row.getOrDefault("company", ""), 200))
+                        .jobTitle(truncate(row.getOrDefault("jobTitle", ""), 100))
+                        .status(ContactStatus.ACTIVE)
+                        .conversationCount(0)
+                        .messageCount(0)
+                        .subscribed(true)
+                        .notes(truncate(row.getOrDefault("notes", ""), 2000))
+                        .build();
+                contact.updateFullName();
+
+                contactsToSave.add(contact);
+                created++;
+            } catch (Exception e) {
+                errors++;
+                messages.add("Error en fila: " + e.getMessage());
+            }
+        }
+
+        if (!contactsToSave.isEmpty()) {
+            contactRepository.saveAll(contactsToSave);
+        }
+
+        log.info("Contacts imported: {} created, {} skipped, {} errors for tenant: {}",
+                created, skipped, errors, tenantId);
+
+        return ImportContactsResultDto.builder()
+                .total(request.getContacts().size())
+                .created(created)
+                .skipped(skipped)
+                .errors(errors)
+                .messages(messages)
+                .build();
+    }
+
+    private String sanitizePhone(String value) {
+        if (value == null) return "";
+        String cleaned = value.trim();
+        int idx = cleaned.indexOf(":::");
+        if (idx > 0) cleaned = cleaned.substring(0, idx).trim();
+        cleaned = cleaned.replaceAll("[^+\\d]", "");
+        if (cleaned.length() > 20) cleaned = cleaned.substring(0, 20);
+        return cleaned;
+    }
+
+    private String truncate(String value, int max) {
+        if (value == null) return "";
+        return value.length() <= max ? value : value.substring(0, max);
     }
 
     @Transactional

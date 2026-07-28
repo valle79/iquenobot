@@ -35,6 +35,13 @@ public class ProcessingResult {
                 .build();
     }
 
+    public static ProcessingResult empty() {
+        return new Builder()
+                .success(true)
+                .message("skipped")
+                .build();
+    }
+
     public static ProcessingResult failure(String errorCode, String message, long processingTimeMs) {
         return new Builder()
                 .success(false)

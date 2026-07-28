@@ -33,4 +33,19 @@ public class WhatsAppConnectionController {
     public ResponseEntity<ApiResponse<WhatsAppConnectionService.TestConnectionResponse>> testConnection() {
         return ResponseEntity.ok(ApiResponse.success(connectionService.testConnection()));
     }
+
+    @GetMapping("/qr-code")
+    @Operation(summary = "Obtener código QR", description = "Obtiene el código QR para conectar WhatsApp escaneando con el teléfono")
+    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'SUPERVISOR')")
+    public ResponseEntity<ApiResponse<WhatsAppConnectionService.QRCodeResponse>> getQRCode() {
+        return ResponseEntity.ok(ApiResponse.success(connectionService.getQRCode()));
+    }
+
+    @PostMapping("/disconnect")
+    @Operation(summary = "Desconectar WhatsApp", description = "Desconecta la instancia de WhatsApp")
+    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'SUPERVISOR')")
+    public ResponseEntity<ApiResponse<Void>> disconnect() {
+        connectionService.disconnect();
+        return ResponseEntity.ok(ApiResponse.success(null, "WhatsApp desconectado exitosamente"));
+    }
 }

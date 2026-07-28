@@ -33,18 +33,21 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
 
     private final RestTemplate restTemplate;
 
-    @Value("${app.whatsapp.evolution.base-url:http://localhost:8080}")
-    private String baseUrl;
+    @Value("${evolution.api.url:http://localhost:8080}")
+    private String evolutionApiUrl;
 
-    @Value("${app.whatsapp.evolution.api-key:}")
+    @Value("${evolution.api.key:}")
     private String apiKey;
+
+    @Value("${app.base-url:http://localhost:8085}")
+    private String backendBaseUrl;
 
     @Override
     public String sendMessage(String instanceId, WhatsAppMessageDto message) {
         log.info("Sending text message via Evolution API to: {}", message.getTo());
 
         try {
-            String url = String.format("%s/message/sendText/%s", baseUrl, instanceId);
+            String url = String.format("%s/message/sendText/%s", evolutionApiUrl, instanceId);
             
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("number", message.getTo());
@@ -85,7 +88,7 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
 
         try {
             String endpoint = getMediaEndpoint(message.getType());
-            String url = String.format("%s/message/%s/%s", baseUrl, endpoint, instanceId);
+            String url = String.format("%s/message/%s/%s", evolutionApiUrl, endpoint, instanceId);
             
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("number", message.getTo());
@@ -133,7 +136,7 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
         log.info("Marking message as read via Evolution API: {}", messageId);
 
         try {
-            String url = String.format("%s/chat/markMessageAsRead/%s", baseUrl, instanceId);
+            String url = String.format("%s/chat/markMessageAsRead/%s", evolutionApiUrl, instanceId);
             
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("readMessages", new String[]{messageId});
@@ -154,7 +157,7 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
     @Override
     public boolean isConnected(String instanceId) {
         try {
-            String url = String.format("%s/instance/connectionState/%s", baseUrl, instanceId);
+            String url = String.format("%s/instance/connectionState/%s", evolutionApiUrl, instanceId);
             HttpHeaders headers = createHeaders();
             HttpEntity<Void> request = new HttpEntity<>(headers);
 
@@ -162,8 +165,11 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
                     url, HttpMethod.GET, request, Map.class);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                String state = (String) response.getBody().get("state");
-                return "open".equalsIgnoreCase(state);
+                Map<String, Object> instance = (Map<String, Object>) response.getBody().get("instance");
+                if (instance != null) {
+                    String state = (String) instance.get("state");
+                    return "open".equalsIgnoreCase(state);
+                }
             }
 
             return false;
@@ -177,7 +183,7 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
     @Override
     public String getQRCode(String instanceId) {
         try {
-            String url = String.format("%s/instance/connect/%s", baseUrl, instanceId);
+            String url = String.format("%s/instance/connect/%s", evolutionApiUrl, instanceId);
             HttpHeaders headers = createHeaders();
             HttpEntity<Void> request = new HttpEntity<>(headers);
 
@@ -185,10 +191,7 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
                     url, HttpMethod.GET, request, Map.class);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                Map<String, Object> qrcode = (Map<String, Object>) response.getBody().get("qrcode");
-                if (qrcode != null) {
-                    return (String) qrcode.get("base64");
-                }
+                return (String) response.getBody().get("base64");
             }
 
             return null;
@@ -202,7 +205,7 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
     @Override
     public void disconnect(String instanceId) {
         try {
-            String url = String.format("%s/instance/logout/%s", baseUrl, instanceId);
+            String url = String.format("%s/instance/logout/%s", evolutionApiUrl, instanceId);
             HttpHeaders headers = createHeaders();
             HttpEntity<Void> request = new HttpEntity<>(headers);
 
@@ -223,9 +226,46 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
 
     @Override
     public boolean validateWebhookSignature(String payload, String signature) {
-        // Evolution API doesn't use webhook signatures by default
-        // Can be implemented if needed for security
         return true;
+    }
+
+    @Override
+    public void setWebhook(String instanceId, String webhookUrl) {
+        log.info("=== CONFIGURANDO WEBHOOK Evolution API ===");
+        log.info("Instance: {} -> URL: {}", instanceId, webhookUrl);
+
+        try {
+            String url = String.format("%s/webhook/set/%s", evolutionApiUrl, instanceId);
+
+            Map<String, Object> webhookConfig = new HashMap<>();
+            webhookConfig.put("enabled", true);
+            webhookConfig.put("url", webhookUrl);
+            webhookConfig.put("webhookByEvents", false);
+            webhookConfig.put("webhookBase64", false);
+            webhookConfig.put("base64", false);
+            webhookConfig.put("events", java.util.List.of("MESSAGES_UPSERT", "MESSAGES_SET", "MESSAGES_DELETE"));
+
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("webhook", webhookConfig);
+
+            log.debug("Webhook request payload: {}", requestBody);
+
+            HttpHeaders headers = createHeaders();
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url, HttpMethod.POST, request, Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("=== WEBHOOK CONFIGURADO EXITOSAMENTE para instancia: {} ===", instanceId);
+                log.debug("Evolution API response: {}", response.getBody());
+            } else {
+                log.warn("Error configurando webhook. Status: {} Response: {}", response.getStatusCode(), response.getBody());
+            }
+
+        } catch (Exception e) {
+            log.error("Error configurando webhook para instancia {}: {}", instanceId, e.getMessage());
+        }
     }
 
     private HttpHeaders createHeaders() {

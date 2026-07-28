@@ -13,6 +13,7 @@ import com.iquenobot.orchestrator.interfaces.event.BotAnsweredEvent;
 import com.iquenobot.shared.enums.MessageDirection;
 import com.iquenobot.shared.enums.MessageStatus;
 import com.iquenobot.shared.enums.MessageType;
+import com.iquenobot.shared.enums.SenderType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -77,6 +78,7 @@ public class SendTextExecutor implements ActionExecutor {
                 .tenantId(context.getTenantId())
                 .conversation(context.getConversation())
                 .direction(MessageDirection.OUTBOUND)
+                .senderType(SenderType.BOT)
                 .type(MessageType.TEXT)
                 .status(channelMessageId != null ? MessageStatus.SENT : MessageStatus.FAILED)
                 .content(responseText)
@@ -89,9 +91,8 @@ public class SendTextExecutor implements ActionExecutor {
         messageRepository.save(botMessage);
 
         var conv = context.getConversation();
-        conv.incrementMessageCount();
-        conv.setLastMessageAt(LocalDateTime.now());
-        conversationRepository.save(conv);
+        conversationRepository.incrementIncomingMessageMetrics(
+                conv.getId(), context.getTenantId(), LocalDateTime.now());
 
         eventPublisher.publish(new BotAnsweredEvent(
                 context.getTenantId().toString(),

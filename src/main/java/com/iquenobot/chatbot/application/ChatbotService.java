@@ -8,6 +8,7 @@ import com.iquenobot.chatbot.domain.entity.ChatbotFlow;
 import com.iquenobot.chatbot.domain.entity.ChatbotIntent;
 import com.iquenobot.chatbot.domain.repository.ChatbotFlowRepository;
 import com.iquenobot.chatbot.domain.repository.ChatbotIntentRepository;
+import com.iquenobot.knowledge.application.KnowledgeBaseService;
 import com.iquenobot.shared.domain.util.TenantContext;
 import com.iquenobot.shared.enums.ChatbotFlowTrigger;
 import com.iquenobot.shared.exception.BusinessException;
@@ -30,6 +31,7 @@ public class ChatbotService {
     private final ChatbotFlowRepository flowRepository;
     private final ChatbotIntentRepository intentRepository;
     private final IAIProvider aiProvider;
+    private final KnowledgeBaseService knowledgeBaseService;
 
     @Transactional
     public ChatbotResponseDto processMessage(String message, Map<String, Object> context) {
@@ -139,6 +141,12 @@ public class ChatbotService {
         log.info("Generating AI response");
         
         try {
+            String systemPrompt = (String) context.get("systemPrompt");
+            String kbContext = knowledgeBaseService.buildContextForQuery(message);
+            if (!kbContext.isEmpty()) {
+                systemPrompt = (systemPrompt != null ? systemPrompt : "") + kbContext;
+            }
+            
             AIMessageDto aiMessage = AIMessageDto.builder()
                     .role("user")
                     .content(message)
@@ -147,7 +155,8 @@ public class ChatbotService {
             List<AIMessageDto> history = (List<AIMessageDto>) context.getOrDefault("history", new ArrayList<>());
             history.add(aiMessage);
             
-            AIResponseDto aiResponse = aiProvider.chatCompletion(history, null, null, null);
+            Double temperature = context.get("temperature") instanceof String t ? Double.parseDouble(t) : null;
+            AIResponseDto aiResponse = aiProvider.chatCompletion(history, systemPrompt, temperature, null);
             
             return ChatbotResponseDto.builder()
                     .message(aiResponse.getContent())

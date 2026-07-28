@@ -5,6 +5,7 @@ import com.iquenobot.shared.enums.ContactStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -53,4 +54,14 @@ public interface ContactRepository extends JpaRepository<Contact, UUID> {
     boolean existsByPhoneAndTenantIdAndDeletedFalse(String phone, UUID tenantId);
 
     boolean existsByEmailAndTenantIdAndDeletedFalse(String email, UUID tenantId);
+
+    @Query("SELECT c.phone FROM Contact c WHERE c.tenantId = :tenantId AND c.deleted = false AND c.phone IN :phones")
+    List<String> findExistingPhones(@Param("tenantId") UUID tenantId, @Param("phones") List<String> phones);
+
+    @Query("SELECT c.email FROM Contact c WHERE c.tenantId = :tenantId AND c.deleted = false AND c.email IN :emails")
+    List<String> findExistingEmails(@Param("tenantId") UUID tenantId, @Param("emails") List<String> emails);
+
+    @Modifying
+    @Query("UPDATE Contact c SET c.messageCount = c.messageCount + 1 WHERE c.id = :id")
+    int incrementMessageCount(@Param("id") UUID id);
 }

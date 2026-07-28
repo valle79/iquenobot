@@ -35,13 +35,13 @@ public class OpenAIProvider implements IAIProvider {
 
     private final RestTemplate restTemplate;
 
-    @Value("${app.ai.openai.api-key:}")
+    @Value("${openai.api.key:}")
     private String apiKey;
 
-    @Value("${app.ai.openai.model:gpt-4o-mini}")
+    @Value("${openai.api.model:gpt-4}")
     private String model;
 
-    @Value("${app.ai.openai.base-url:https://api.openai.com/v1}")
+    @Value("${openai.api.base-url:https://api.openai.com/v1}")
     private String baseUrl;
 
     @Override

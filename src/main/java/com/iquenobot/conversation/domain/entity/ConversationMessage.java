@@ -5,6 +5,7 @@ import com.iquenobot.shared.common.BaseEntity;
 import com.iquenobot.shared.enums.MessageDirection;
 import com.iquenobot.shared.enums.MessageType;
 import com.iquenobot.shared.enums.MessageStatus;
+import com.iquenobot.shared.enums.SenderType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -96,6 +97,10 @@ public class ConversationMessage extends BaseEntity {
 
     @Column(name = "failure_reason", length = 500)
     private String failureReason;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sender_type", nullable = false, length = 10)
+    private SenderType senderType;
 
     @Column(name = "metadata", columnDefinition = "TEXT")
     private String metadata; // JSON metadata for channel-specific data

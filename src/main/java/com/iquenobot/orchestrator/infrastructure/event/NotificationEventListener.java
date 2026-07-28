@@ -7,6 +7,7 @@ import com.iquenobot.conversation.domain.repository.ConversationRepository;
 import com.iquenobot.notification.application.NotificationService;
 import com.iquenobot.notification.domain.dto.CreateNotificationRequestDto;
 import com.iquenobot.orchestrator.interfaces.event.*;
+import com.iquenobot.shared.domain.util.TenantContext;
 import com.iquenobot.shared.enums.NotificationChannel;
 import com.iquenobot.shared.enums.NotificationPriority;
 import com.iquenobot.shared.enums.NotificationType;
@@ -137,6 +138,8 @@ public class NotificationEventListener {
                         )
                 ));
 
+                TenantContext.setTenantId(event.getTenantId());
+
                 CreateNotificationRequestDto notification = CreateNotificationRequestDto.builder()
                         .userId(agentId)
                         .type(NotificationType.CONVERSATION_ASSIGNED)
@@ -219,6 +222,32 @@ public class NotificationEventListener {
             ));
         } catch (Exception e) {
             log.error("Error pushing conversation:closed via WebSocket", e);
+        }
+    }
+
+    @Async
+    @EventListener
+    public void handleMessageSent(MessageSentEvent event) {
+        try {
+            UUID tenantId = UUID.fromString(event.getTenantId());
+
+            Map<String, Object> payload = new LinkedHashMap<>();
+            payload.put("id", event.getMessageId());
+            payload.put("conversationId", event.getConversationId());
+            payload.put("content", event.getContent());
+            payload.put("sentAt", java.time.LocalDateTime.now().toString());
+            payload.put("direction", event.getDirection());
+            payload.put("type", event.getType());
+            payload.put("status", "SENT");
+            payload.put("fromBot", false);
+            payload.put("senderName", event.getSenderName());
+
+            webSocketHandler.sendToTenant(tenantId, Map.of("type", "message:new", "payload", payload));
+
+            updateConversationLastMessage(UUID.fromString(event.getConversationId()), payload);
+
+        } catch (Exception e) {
+            log.error("Error pushing message:sent via WebSocket", e);
         }
     }
 

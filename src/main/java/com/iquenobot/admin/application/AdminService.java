@@ -17,6 +17,7 @@ import com.iquenobot.plan.domain.repository.PlanRepository;
 import com.iquenobot.role.domain.entity.Role;
 import com.iquenobot.role.domain.repository.RoleRepository;
 import com.iquenobot.shared.domain.dto.PagedResponse;
+import com.iquenobot.ai.application.WhatsAppConnectionService;
 import com.iquenobot.shared.enums.RoleType;
 import com.iquenobot.shared.enums.TenantStatus;
 import com.iquenobot.shared.enums.UserStatus;
@@ -59,6 +60,7 @@ public class AdminService {
     private final ObjectMapper objectMapper;
     private final TenantProvisioningService provisioningService;
     private final DataSource dataSource;
+    private final WhatsAppConnectionService whatsAppConnectionService;
 
     // ========== TENANT CRUD ==========
 
@@ -309,11 +311,26 @@ public class AdminService {
                         .maxConnections(maxConnections)
                         .diskUsageMb(0)
                         .build())
-                .evolutionApi(SystemStatsDto.IntegrationStatusDto.builder()
-                        .status("disconnected")
-                        .lastCheck(LocalDateTime.now().toString())
-                        .build())
+                .evolutionApi(getEvolutionApiStatus())
                 .build();
+    }
+
+    private SystemStatsDto.IntegrationStatusDto getEvolutionApiStatus() {
+        try {
+            var status = whatsAppConnectionService.getStatus();
+            return SystemStatsDto.IntegrationStatusDto.builder()
+                    .status(status.isConnected() ? "connected" : "disconnected")
+                    .lastCheck(LocalDateTime.now().toString())
+                    .errorMessage(status.getError())
+                    .build();
+        } catch (Exception e) {
+            log.warn("Could not check Evolution API status: {}", e.getMessage());
+            return SystemStatsDto.IntegrationStatusDto.builder()
+                    .status("disconnected")
+                    .lastCheck(LocalDateTime.now().toString())
+                    .errorMessage("No se pudo verificar: " + e.getMessage())
+                    .build();
+        }
     }
 
     // ========== MAPPERS ==========

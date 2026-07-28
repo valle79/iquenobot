@@ -59,6 +59,7 @@ export function MessageInput() {
 
   const handleSend = useCallback(() => {
     if (!conversationId) return
+    if (sendMutation.isPending) return
     const trimmed = message.trim()
     if (!trimmed && attachments.length === 0) return
 
@@ -94,7 +95,7 @@ export function MessageInput() {
         handleSend()
       }
     },
-    [handleSend],
+    [handleSend, sendMutation.isPending],
   )
 
   const adjustTextarea = useCallback(() => {
@@ -233,7 +234,7 @@ export function MessageInput() {
           size="md"
           icon
           onClick={handleSend}
-          disabled={!message.trim() && attachments.length === 0}
+          disabled={sendMutation.isPending || (!message.trim() && attachments.length === 0)}
           loading={sendMutation.isPending}
           className="shrink-0"
         >

@@ -98,7 +98,7 @@ public class Product extends SoftDeletableEntity {
     }
 
     public boolean isLowStock() {
-        return stockQuantity <= lowStockThreshold;
+        return lowStockThreshold != null && stockQuantity <= lowStockThreshold;
     }
 
     public boolean hasDiscount() {

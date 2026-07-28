@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
@@ -17,6 +17,10 @@ import {
   Save,
   ExternalLink,
   Plug,
+  QrCode,
+  LogOut,
+  RefreshCw,
+  AlertCircle,
 } from 'lucide-react'
 import { Tabs } from '@/shared/molecules/Tabs'
 import { Button } from '@/shared/atoms/Button/Button'
@@ -150,7 +154,7 @@ function ChannelConfigForm({ channel, whatsappStatus, statusLoading, onTestConne
   const getVal = (key: string) => settings?.find((s) => s.key === key)?.value ?? ''
   const connected = isWhatsApp ? (whatsappStatus?.connected ?? false) : getVal('connected') === 'true'
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, getValues, formState: { errors } } = useForm({
     resolver: zodResolver(z.object(
       Object.fromEntries(channel.fields.map((f) => [f.key, z.string()]))
     )),
@@ -250,7 +254,14 @@ function ChannelConfigForm({ channel, whatsappStatus, statusLoading, onTestConne
               type="button"
               variant="outline"
               loading={testingConnection}
-              onClick={onTestConnection}
+              onClick={async () => {
+                const data = getValues()
+                await settingService.update({
+                  category: channel.category,
+                  settings: Object.entries(data).map(([key, value]) => ({ key, value, type: 'text' })),
+                })
+                onTestConnection?.()
+              }}
             >
               <Plug size={16} className="mr-2" />
               Probar conexión
@@ -262,6 +273,94 @@ function ChannelConfigForm({ channel, whatsappStatus, statusLoading, onTestConne
           </Button>
         </div>
       </form>
+    </div>
+  )
+}
+
+function WhatsAppQRCode() {
+  const [qrError, setQrError] = useState(false)
+
+  const { data: qrCode, isLoading: qrLoading, refetch: refetchQR } = useQuery({
+    queryKey: ['channels-whatsapp-qr'],
+    queryFn: () => whatsappService.getQRCode(),
+    refetchInterval: 30000,
+  })
+
+  useEffect(() => {
+    setQrError(false)
+  }, [qrCode?.base64])
+
+  const handleRefreshQR = async () => {
+    setQrError(false)
+    await refetchQR()
+    toast.success('Código QR actualizado')
+  }
+
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-950">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <QrCode size={16} className="text-gray-400" />
+          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Escanear código QR</span>
+        </div>
+        <Button type="button" variant="ghost" size="sm" onClick={handleRefreshQR}>
+          <RefreshCw size={14} className="mr-1" />
+          Actualizar QR
+        </Button>
+      </div>
+      <p className="mt-1 text-xs text-gray-500">
+        Escanea este código QR con WhatsApp en tu teléfono para conectar la instancia.
+      </p>
+      <div className="mt-4 flex flex-col items-center gap-4">
+        {qrLoading && !qrCode?.base64 ? (
+          <div className="flex h-64 w-64 items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-600 border-t-transparent" />
+          </div>
+        ) : qrCode?.hasQR && qrCode?.base64 ? (
+          <div className="relative">
+            <img
+              src={qrCode.base64}
+              alt="QR Code"
+              className="h-64 w-64 rounded-lg border border-gray-200 object-contain dark:border-gray-700"
+              onError={() => setQrError(true)}
+            />
+            {qrError && (
+              <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-white/80 dark:bg-gray-950/80">
+                <p className="text-sm text-red-500">Error al cargar QR</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex h-48 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
+            <AlertCircle size={24} className="text-gray-400" />
+            <p className="text-sm text-gray-500">
+              {qrCode?.error || 'No se pudo generar el código QR'}
+            </p>
+            <Button type="button" variant="outline" size="sm" onClick={handleRefreshQR}>
+              <RefreshCw size={14} className="mr-1" />
+              Reintentar
+            </Button>
+          </div>
+        )}
+        <ol className="space-y-1.5 text-xs text-gray-500">
+          <li className="flex items-start gap-2">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[10px] font-bold text-brand-700 dark:bg-brand-900/30 dark:text-brand-400">1</span>
+            Abre WhatsApp en tu teléfono
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[10px] font-bold text-brand-700 dark:bg-brand-900/30 dark:text-brand-400">2</span>
+            Ve a <span className="font-medium text-gray-700 dark:text-gray-300">Menú &gt; Dispositivos vinculados</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[10px] font-bold text-brand-700 dark:bg-brand-900/30 dark:text-brand-400">3</span>
+            Toca <span className="font-medium text-gray-700 dark:text-gray-300">Vincular un dispositivo</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[10px] font-bold text-brand-700 dark:bg-brand-900/30 dark:text-brand-400">4</span>
+            Escanea el código QR con tu teléfono
+          </li>
+        </ol>
+      </div>
     </div>
   )
 }
@@ -327,38 +426,73 @@ export default function ChannelsPage() {
       />
 
       {activeChannel === 'whatsapp' && (
-        <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-950">
-          <div className="flex items-center gap-2">
-            <MessageCircle size={16} className="text-gray-400" />
-            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Estado de conexión</span>
+        <>
+          {whatsappStatus?.configured && !connected && (
+            <WhatsAppQRCode />
+          )}
+
+          {connected && (
+            <div className="rounded-xl border border-green-200 bg-white p-6 dark:border-green-800 dark:bg-gray-950">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Wifi size={16} className="text-green-500" />
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">WhatsApp conectado</span>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="text-red-500 hover:text-red-600"
+                  onClick={async () => {
+                    try {
+                      await whatsappService.disconnect()
+                      queryClient.invalidateQueries({ queryKey: ['whatsapp-status'] })
+                      toast.success('WhatsApp desconectado exitosamente')
+                    } catch {
+                      toast.error('Error al desconectar WhatsApp')
+                    }
+                  }}
+                >
+                  <LogOut size={14} className="mr-1.5" />
+                  Desconectar
+                </Button>
+              </div>
+            </div>
+          )}
+
+          <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-950">
+            <div className="flex items-center gap-2">
+              <MessageCircle size={16} className="text-gray-400" />
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Estado de conexión</span>
+            </div>
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500">Proveedor:</span>
+                <span className="font-medium text-gray-900 dark:text-gray-100">{whatsappStatus?.provider ?? '—'}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500">Instance ID:</span>
+                <span className="font-mono text-xs text-gray-900 dark:text-gray-100">{whatsappStatus?.instanceId ?? '—'}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500">Estado:</span>
+                <Badge variant={connected ? 'success' : 'error'} size="sm">
+                  {connected ? 'Conectado' : 'Desconectado'}
+                </Badge>
+              </div>
+              {whatsappStatus?.error && (
+                <p className="mt-2 text-xs text-red-500">{whatsappStatus.error}</p>
+              )}
+            </div>
+            <p className="mt-3 text-xs text-gray-500">
+              Las conversaciones de WhatsApp aparecen en la sección de Conversaciones, filtradas por canal WhatsApp.
+            </p>
+            <Button variant="outline" size="sm" className="mt-3" onClick={() => navigate('/conversations')}>
+              <ExternalLink size={14} className="mr-1.5" />
+              Ir a conversaciones
+            </Button>
           </div>
-          <div className="mt-3 space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">Proveedor:</span>
-              <span className="font-medium text-gray-900 dark:text-gray-100">{whatsappStatus?.provider ?? '—'}</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">Instance ID:</span>
-              <span className="font-mono text-xs text-gray-900 dark:text-gray-100">{whatsappStatus?.instanceId ?? '—'}</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">Estado:</span>
-              <Badge variant={connected ? 'success' : 'error'} size="sm">
-                {connected ? 'Conectado' : 'Desconectado'}
-              </Badge>
-            </div>
-            {whatsappStatus?.error && (
-              <p className="mt-2 text-xs text-red-500">{whatsappStatus.error}</p>
-            )}
-          </div>
-          <p className="mt-3 text-xs text-gray-500">
-            Las conversaciones de WhatsApp aparecen en la sección de Conversaciones, filtradas por canal WhatsApp.
-          </p>
-          <Button variant="outline" size="sm" className="mt-3" onClick={() => navigate('/conversations')}>
-            <ExternalLink size={14} className="mr-1.5" />
-            Ir a conversaciones
-          </Button>
-        </div>
+        </>
       )}
     </div>
   )

@@ -81,7 +81,7 @@ export const MessageBubble = memo(function MessageBubble({ message, isOwn, showA
       <div className={cn('max-w-[70%]', isOwn ? 'items-end' : 'items-start')}>
         {showAvatar && (
           <p className={cn('mb-1 text-xs text-gray-500', isOwn && 'text-right')}>
-            {message.userName}
+            {message.senderName || message.userName}
           </p>
         )}
 
@@ -94,7 +94,7 @@ export const MessageBubble = memo(function MessageBubble({ message, isOwn, showA
             message.status === 'FAILED' && 'opacity-70',
           )}
         >
-          {isImage && message.attachments[0] && (
+          {isImage && message.attachments?.[0] && (
             <img
               src={message.attachments[0].fileUrl}
               alt={message.attachments[0].caption ?? ''}

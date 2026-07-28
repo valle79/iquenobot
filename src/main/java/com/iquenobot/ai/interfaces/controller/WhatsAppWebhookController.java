@@ -32,15 +32,28 @@ public class WhatsAppWebhookController {
     public ResponseEntity<ApiResponse<Void>> receiveWebhook(
             @PathVariable String instanceId,
             @Valid @RequestBody WhatsAppWebhookDto payload) {
-        log.info("WhatsApp webhook received for instance: {} event: {}", instanceId, payload.getEvent());
+        log.info("=== WEBHOOK WHATSAPP RECIBIDO ===");
+        log.info("Instance: {} Event: {}", instanceId, payload.getEvent());
+        log.info("Payload - event: {}, instanceId: {}, from: {}, messageId: {}, type: {}, text: {}",
+                payload.getEvent(), payload.getInstanceId(), payload.getFrom(),
+                payload.getMessageId(), payload.getType(), payload.getText());
+        log.info("Payload - data present: {}, data keys: {}",
+                payload.getData() != null ? "SI" : "NO",
+                payload.getData() != null ? payload.getData().keySet() : "N/A");
 
-        ProcessingResult result = webhookAdapter.processWebhook(instanceId, payload);
+        try {
+            ProcessingResult result = webhookAdapter.processWebhook(instanceId, payload);
 
-        if (result.isSuccess()) {
-            return ResponseEntity.ok(ApiResponse.success(null, "Webhook procesado exitosamente"));
+            if (result.isSuccess()) {
+                log.info("=== WEBHOOK PROCESADO EXITOSAMENTE ===");
+            } else {
+                log.warn("Webhook processing returned error: code={} message={}",
+                        result.getErrorCode(), result.getMessage());
+            }
+        } catch (Exception e) {
+            log.error("Error processing webhook: {}", e.getMessage(), e);
         }
 
-        log.warn("Webhook processing returned error: {}", result.getMessage());
-        return ResponseEntity.ok(ApiResponse.success(null, "Webhook procesado con advertencias"));
+        return ResponseEntity.ok(ApiResponse.success(null, "Webhook recibido"));
     }
 }

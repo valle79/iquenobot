@@ -65,7 +65,7 @@ export function ChatToolbar({ onToggleInfo, showInfo }: ChatToolbarProps) {
       <div className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 dark:border-gray-700 dark:bg-gray-950">
         <div className="flex items-center gap-3">
           <Avatar
-            name={contact?.displayName || contact?.fullName || ''}
+            name={conversation?.subject || contact?.displayName || contact?.fullName || ''}
             src={contact?.avatarUrl}
             size="md"
             status={
@@ -74,7 +74,7 @@ export function ChatToolbar({ onToggleInfo, showInfo }: ChatToolbarProps) {
           />
           <div>
             <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              {contact?.displayName || contact?.fullName || 'Sin nombre'}
+              {conversation?.subject || contact?.displayName || contact?.fullName || 'Sin nombre'}
             </h2>
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500">

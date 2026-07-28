@@ -19,6 +19,8 @@ import java.util.UUID;
 @Repository
 public interface ConversationMessageRepository extends JpaRepository<ConversationMessage, UUID> {
 
+    boolean existsByChannelMessageId(String channelMessageId);
+
     Optional<ConversationMessage> findByIdAndTenantId(UUID id, UUID tenantId);
 
     Optional<ConversationMessage> findByChannelMessageIdAndTenantId(String channelMessageId, UUID tenantId);

@@ -13,6 +13,14 @@ import com.iquenobot.shared.enums.WhatsAppProvider;
 public interface IWhatsAppProvider {
 
     /**
+     * Configure webhook URL for the instance.
+     * Evolution API will send incoming message events to this URL.
+     * @param instanceId WhatsApp instance/phone identifier
+     * @param webhookUrl URL to receive webhook events
+     */
+    void setWebhook(String instanceId, String webhookUrl);
+
+    /**
      * Send a text message
      * @param instanceId WhatsApp instance/phone identifier
      * @param message Message details

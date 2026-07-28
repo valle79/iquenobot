@@ -106,3 +106,14 @@ export function useDeleteContact() {
     onError: () => toast.error('Error al eliminar contacto'),
   })
 }
+
+export function useImportContacts() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (contacts: Record<string, string>[]) => contactService.importContacts(contacts),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contacts'] })
+    },
+  })
+}

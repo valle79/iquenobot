@@ -70,6 +70,9 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-resources/**").permitAll()
                         .requestMatchers("/webjars/**").permitAll()
                         
+                        // Uploaded files
+                        .requestMatchers("/uploads/**").permitAll()
+                        
                         // WebSocket endpoints
                         .requestMatchers("/ws/**").permitAll()
                         

@@ -10,6 +10,7 @@ public class IncomingMessage {
 
     private final String channelMessageId;
     private final ChannelType channel;
+    private final String channelConversationId;
     private final String sourceIdentifier;
     private final String sourceName;
     private final MessageType type;
@@ -21,11 +22,14 @@ public class IncomingMessage {
     private final LocalDateTime timestamp;
     private final String tenantId;
     private final String instanceId;
+    private final String conversationName;
     private final Map<String, Object> metadata;
+    private final boolean outbound;
 
     private IncomingMessage(Builder builder) {
         this.channelMessageId = builder.channelMessageId;
         this.channel = builder.channel;
+        this.channelConversationId = builder.channelConversationId;
         this.sourceIdentifier = builder.sourceIdentifier;
         this.sourceName = builder.sourceName;
         this.type = builder.type;
@@ -37,12 +41,16 @@ public class IncomingMessage {
         this.timestamp = builder.timestamp;
         this.tenantId = builder.tenantId;
         this.instanceId = builder.instanceId;
+        this.conversationName = builder.conversationName;
         this.metadata = builder.metadata;
+        this.outbound = builder.outbound;
     }
 
     public String getChannelMessageId() { return channelMessageId; }
     public ChannelType getChannel() { return channel; }
+    public String getChannelConversationId() { return channelConversationId; }
     public String getSourceIdentifier() { return sourceIdentifier; }
+    public boolean isInbound() { return !outbound; }
     public String getSourceName() { return sourceName; }
     public MessageType getType() { return type; }
     public String getContent() { return content; }
@@ -53,7 +61,9 @@ public class IncomingMessage {
     public LocalDateTime getTimestamp() { return timestamp; }
     public String getTenantId() { return tenantId; }
     public String getInstanceId() { return instanceId; }
+    public String getConversationName() { return conversationName; }
     public Map<String, Object> getMetadata() { return metadata; }
+    public boolean isOutbound() { return outbound; }
 
     public static Builder builder() {
         return new Builder();
@@ -62,6 +72,7 @@ public class IncomingMessage {
     public static class Builder {
         private String channelMessageId;
         private ChannelType channel;
+        private String channelConversationId;
         private String sourceIdentifier;
         private String sourceName;
         private MessageType type = MessageType.TEXT;
@@ -73,10 +84,13 @@ public class IncomingMessage {
         private LocalDateTime timestamp;
         private String tenantId;
         private String instanceId;
+        private String conversationName;
         private Map<String, Object> metadata;
+        private boolean outbound;
 
         public Builder channelMessageId(String channelMessageId) { this.channelMessageId = channelMessageId; return this; }
         public Builder channel(ChannelType channel) { this.channel = channel; return this; }
+        public Builder channelConversationId(String channelConversationId) { this.channelConversationId = channelConversationId; return this; }
         public Builder sourceIdentifier(String sourceIdentifier) { this.sourceIdentifier = sourceIdentifier; return this; }
         public Builder sourceName(String sourceName) { this.sourceName = sourceName; return this; }
         public Builder type(MessageType type) { this.type = type; return this; }
@@ -88,7 +102,9 @@ public class IncomingMessage {
         public Builder timestamp(LocalDateTime timestamp) { this.timestamp = timestamp; return this; }
         public Builder tenantId(String tenantId) { this.tenantId = tenantId; return this; }
         public Builder instanceId(String instanceId) { this.instanceId = instanceId; return this; }
+        public Builder conversationName(String conversationName) { this.conversationName = conversationName; return this; }
         public Builder metadata(Map<String, Object> metadata) { this.metadata = metadata; return this; }
+        public Builder outbound(boolean outbound) { this.outbound = outbound; return this; }
 
         public IncomingMessage build() {
             return new IncomingMessage(this);

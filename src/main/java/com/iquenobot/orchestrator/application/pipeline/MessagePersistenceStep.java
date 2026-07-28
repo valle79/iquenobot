@@ -8,6 +8,7 @@ import com.iquenobot.orchestrator.domain.model.ProcessingContext;
 import com.iquenobot.orchestrator.domain.service.PipelineStep;
 import com.iquenobot.shared.enums.MessageDirection;
 import com.iquenobot.shared.enums.MessageStatus;
+import com.iquenobot.shared.enums.SenderType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -33,11 +34,14 @@ public class MessagePersistenceStep implements PipelineStep, MessagePipeline.Pri
         var message = context.getIncomingMessage();
         Conversation conversation = context.getConversation();
 
+        boolean outbound = message.isOutbound();
+
         ConversationMessage persisted = ConversationMessage.builder()
                 .id(UUID.randomUUID())
                 .tenantId(context.getTenantId())
                 .conversation(conversation)
-                .direction(MessageDirection.INBOUND)
+                .direction(outbound ? MessageDirection.OUTBOUND : MessageDirection.INBOUND)
+                .senderType(outbound ? SenderType.AGENT : SenderType.CUSTOMER)
                 .type(message.getType())
                 .status(MessageStatus.SENT)
                 .content(message.getContent())
@@ -50,10 +54,9 @@ public class MessagePersistenceStep implements PipelineStep, MessagePipeline.Pri
 
         persisted = messageRepository.save(persisted);
 
-        conversation.incrementMessageCount();
-        conversation.incrementUnreadCount();
-        conversation.setLastMessageAt(LocalDateTime.now());
-        conversationRepository.save(conversation);
+        LocalDateTime now = LocalDateTime.now();
+        conversationRepository.incrementIncomingMessageMetrics(
+                conversation.getId(), context.getTenantId(), now);
 
         context.setPersistedMessage(persisted);
 

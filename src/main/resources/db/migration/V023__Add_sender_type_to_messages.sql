@@ -1,0 +1,2 @@
+ALTER TABLE conversation_messages
+    ADD COLUMN IF NOT EXISTS sender_type VARCHAR(10) NOT NULL DEFAULT 'CUSTOMER';

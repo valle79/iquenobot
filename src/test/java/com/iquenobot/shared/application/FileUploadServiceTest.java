@@ -23,7 +23,7 @@ class FileUploadServiceTest {
     void setUp() {
         fileUploadService = new FileUploadService();
         ReflectionTestUtils.setField(fileUploadService, "uploadPath", tempDir.toString());
-        ReflectionTestUtils.setField(fileUploadService, "baseUrl", "http://localhost:8080");
+        ReflectionTestUtils.setField(fileUploadService, "baseUrl", "http://localhost:8085");
         fileUploadService.init();
     }
 
@@ -35,7 +35,7 @@ class FileUploadServiceTest {
         String url = fileUploadService.uploadImage(file);
 
         assertNotNull(url);
-        assertTrue(url.startsWith("http://localhost:8080/uploads/images/"));
+        assertTrue(url.startsWith("http://localhost:8085/uploads/images/"));
         assertTrue(url.endsWith(".jpg"));
     }
 

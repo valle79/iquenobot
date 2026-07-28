@@ -2,6 +2,8 @@ package com.iquenobot.product.application;
 
 import com.iquenobot.product.domain.dto.CreateProductRequestDto;
 import com.iquenobot.product.domain.dto.ProductDto;
+import com.iquenobot.product.domain.dto.ProductImportResultDto;
+import com.iquenobot.product.domain.dto.ProductImportResultDto.ImportError;
 import com.iquenobot.product.domain.entity.Category;
 import com.iquenobot.product.domain.entity.Product;
 import com.iquenobot.product.domain.repository.CategoryRepository;
@@ -19,7 +21,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -139,7 +145,7 @@ public class ProductService {
         product.setCompareAtPrice(request.getCompareAtPrice());
         product.setCostPrice(request.getCostPrice());
         product.setStockQuantity(request.getStockQuantity());
-        product.setLowStockThreshold(request.getLowStockThreshold());
+        product.setLowStockThreshold(request.getLowStockThreshold() != null ? request.getLowStockThreshold() : 10);
         product.setStatus(request.getStatus());
         product.setImageUrl(request.getImageUrl());
         product.setImages(request.getImages());
@@ -203,6 +209,159 @@ public class ProductService {
     }
 
     @Transactional
+    public ProductImportResultDto importFromCsv(String csvContent) {
+        UUID tenantId = getTenantId();
+        ProductImportResultDto result = ProductImportResultDto.builder().build();
+        String[] lines = csvContent.split("\n");
+
+        if (lines.length < 2) {
+            result.setSkipped(0);
+            return result;
+        }
+
+        // Parse header
+        String[] headers = parseCsvLine(lines[0].trim());
+        
+        // Build column index map
+        Map<String, Integer> colIndex = new HashMap<>();
+        for (int i = 0; i < headers.length; i++) {
+            colIndex.put(headers[i].toLowerCase().replace(" ", "_"), i);
+        }
+
+        // Pre-fetch categories by name for matching
+        List<Category> allCategories = categoryRepository.findByTenantIdAndActiveAndDeletedFalseOrderByDisplayOrderAsc(tenantId, true);
+        Map<String, Category> categoryByName = new HashMap<>();
+        for (Category c : allCategories) {
+            categoryByName.put(c.getName().toLowerCase(), c);
+        }
+
+        List<Product> toSave = new ArrayList<>();
+        
+        for (int rowIdx = 1; rowIdx < lines.length; rowIdx++) {
+            String line = lines[rowIdx].trim();
+            if (line.isEmpty()) continue;
+
+            result.setTotalRows(result.getTotalRows() + 1);
+            String[] values = parseCsvLine(line);
+            String name = getColValue(values, colIndex, "name");
+
+            if (name == null || name.isBlank()) {
+                result.getErrors().add(ImportError.builder()
+                        .row(rowIdx + 1)
+                        .productName("(sin nombre)")
+                        .reason("El nombre es obligatorio")
+                        .build());
+                continue;
+            }
+
+            try {
+                String priceStr = getColValue(values, colIndex, "price");
+                BigDecimal price = BigDecimal.ZERO;
+                if (priceStr != null && !priceStr.isBlank()) {
+                    price = new BigDecimal(priceStr.replaceAll("[^\\d.]", ""));
+                }
+
+                Integer stock = 0;
+                String stockStr = getColValue(values, colIndex, "stock_quantity");
+                if (stockStr != null && !stockStr.isBlank()) {
+                    stock = Integer.parseInt(stockStr.replaceAll("[^\\d]", ""));
+                }
+
+                ProductStatus status = ProductStatus.ACTIVE;
+                String statusStr = getColValue(values, colIndex, "status");
+                if (statusStr != null && !statusStr.isBlank()) {
+                    try {
+                        status = ProductStatus.valueOf(statusStr.toUpperCase());
+                    } catch (IllegalArgumentException ignored) {}
+                }
+
+                String categoryName = getColValue(values, colIndex, "category_name");
+                Category category = null;
+                if (categoryName != null && !categoryName.isBlank()) {
+                    category = categoryByName.get(categoryName.toLowerCase());
+                }
+
+                BigDecimal weight = parseDecimal(getColValue(values, colIndex, "weight"));
+                BigDecimal width = parseDecimal(getColValue(values, colIndex, "width"));
+                BigDecimal height = parseDecimal(getColValue(values, colIndex, "height"));
+                BigDecimal length = parseDecimal(getColValue(values, colIndex, "length"));
+
+                Product product = Product.builder()
+                        .id(UUID.randomUUID())
+                        .tenantId(tenantId)
+                        .name(name.trim())
+                        .sku(getColValue(values, colIndex, "sku"))
+                        .description(getColValue(values, colIndex, "description"))
+                        .shortDescription(getColValue(values, colIndex, "short_description"))
+                        .price(price)
+                        .stockQuantity(stock)
+                        .lowStockThreshold(10)
+                        .status(status)
+                        .category(category)
+                        .tags(getColValue(values, colIndex, "tags"))
+                        .imageUrl(getColValue(values, colIndex, "image_url"))
+                        .weight(weight)
+                        .width(width)
+                        .height(height)
+                        .length(length)
+                        .featured(false)
+                        .createdBy(UUID.fromString(TenantContext.getUserId()))
+                        .updatedBy(UUID.fromString(TenantContext.getUserId()))
+                        .build();
+
+                toSave.add(product);
+                result.setCreated(result.getCreated() + 1);
+            } catch (Exception e) {
+                result.getErrors().add(ImportError.builder()
+                        .row(rowIdx + 1)
+                        .productName(name)
+                        .reason("Error al procesar: " + e.getMessage())
+                        .build());
+            }
+        }
+
+        if (!toSave.isEmpty()) {
+            productRepository.saveAll(toSave);
+            log.info("Bulk import: {} products saved for tenant: {}", toSave.size(), tenantId);
+        }
+
+        return result;
+    }
+
+    private BigDecimal parseDecimal(String value) {
+        if (value == null || value.isBlank()) return null;
+        try {
+            return new BigDecimal(value.replaceAll("[^\\d.]", ""));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private String getColValue(String[] values, java.util.Map<String, Integer> colIndex, String colName) {
+        Integer idx = colIndex.get(colName);
+        if (idx == null || idx >= values.length) return null;
+        return values[idx].trim();
+    }
+
+    private String[] parseCsvLine(String line) {
+        java.util.List<String> fields = new java.util.ArrayList<>();
+        boolean inQuotes = false;
+        StringBuilder current = new StringBuilder();
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            if (c == '"') {
+                inQuotes = !inQuotes;
+            } else if (c == ',' && !inQuotes) {
+                fields.add(current.toString());
+                current = new StringBuilder();
+            } else {
+                current.append(c);
+            }
+        }
+        fields.add(current.toString());
+        return fields.toArray(new String[0]);
+    }
+
     public void delete(UUID id) {
         UUID tenantId = getTenantId();
         Product product = productRepository.findByIdAndTenantIdAndDeletedFalse(id, tenantId)

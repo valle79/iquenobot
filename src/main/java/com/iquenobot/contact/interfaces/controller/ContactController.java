@@ -3,6 +3,8 @@ package com.iquenobot.contact.interfaces.controller;
 import com.iquenobot.contact.application.ContactService;
 import com.iquenobot.contact.domain.dto.ContactDto;
 import com.iquenobot.contact.domain.dto.CreateContactRequestDto;
+import com.iquenobot.contact.domain.dto.ImportContactsRequestDto;
+import com.iquenobot.contact.domain.dto.ImportContactsResultDto;
 import com.iquenobot.shared.domain.dto.ApiResponse;
 import com.iquenobot.shared.domain.dto.PagedResponse;
 import com.iquenobot.shared.enums.ContactStatus;
@@ -82,6 +84,16 @@ public class ContactController {
         ContactDto contact = contactService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(contact, "Contacto creado exitosamente"));
+    }
+
+    @PostMapping("/import")
+    @Operation(summary = "Importar contactos", description = "Importa contactos desde un archivo CSV enviado como JSON")
+    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'SUPERVISOR')")
+    public ResponseEntity<ApiResponse<ImportContactsResultDto>> importContacts(
+            @Valid @RequestBody ImportContactsRequestDto request) {
+        ImportContactsResultDto result = contactService.importContacts(request);
+        return ResponseEntity.ok(ApiResponse.success(result,
+                result.getCreated() + " contactos importados exitosamente"));
     }
 
     @PutMapping("/{id}")

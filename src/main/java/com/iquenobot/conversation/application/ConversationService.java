@@ -1,5 +1,7 @@
 package com.iquenobot.conversation.application;
 
+import com.iquenobot.ai.domain.dto.WhatsAppMessageDto;
+import com.iquenobot.ai.domain.service.IWhatsAppProvider;
 import com.iquenobot.auth.domain.entity.User;
 import com.iquenobot.auth.domain.repository.UserRepository;
 import com.iquenobot.contact.application.ContactService;
@@ -14,6 +16,8 @@ import com.iquenobot.conversation.domain.entity.ConversationMessage;
 import com.iquenobot.conversation.domain.repository.ConversationMessageRepository;
 import com.iquenobot.conversation.domain.repository.ConversationRepository;
 import com.iquenobot.conversation.interfaces.mapper.ConversationMapper;
+import com.iquenobot.orchestrator.interfaces.event.MessageSentEvent;
+import com.iquenobot.setting.domain.repository.SettingRepository;
 import com.iquenobot.shared.domain.dto.PagedResponse;
 import com.iquenobot.shared.domain.util.TenantContext;
 import com.iquenobot.shared.enums.ChannelType;
@@ -22,15 +26,19 @@ import com.iquenobot.shared.enums.ConversationStatus;
 import com.iquenobot.shared.enums.MessageDirection;
 import com.iquenobot.shared.enums.MessageStatus;
 import com.iquenobot.shared.enums.MessageType;
+import com.iquenobot.shared.enums.SenderType;
 import com.iquenobot.shared.exception.BusinessException;
 import com.iquenobot.shared.exception.ResourceNotFoundException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -46,6 +54,9 @@ public class ConversationService {
     private final UserRepository userRepository;
     private final ConversationMapper conversationMapper;
     private final ContactService contactService;
+    private final IWhatsAppProvider whatsAppProvider;
+    private final SettingRepository settingRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public ConversationDto getById(UUID id) {
@@ -145,11 +156,14 @@ public class ConversationService {
         Page<Conversation> existingConversations = conversationRepository
                 .findByTenantIdAndContactIdAndDeletedFalse(tenantId, request.getContactId(), Pageable.unpaged());
         
-        boolean hasActiveConversation = existingConversations.getContent().stream()
-                .anyMatch(Conversation::isActive);
+        Optional<Conversation> activeConversation = existingConversations.getContent().stream()
+                .filter(Conversation::isActive)
+                .findFirst();
         
-        if (hasActiveConversation) {
-            throw new BusinessException("Ya existe una conversación activa con este contacto");
+        if (activeConversation.isPresent()) {
+            log.info("Returning existing active conversation: {} for contact: {}",
+                    activeConversation.get().getId(), contact.getId());
+            return conversationMapper.toDto(activeConversation.get());
         }
 
         // Build conversation
@@ -220,26 +234,68 @@ public class ConversationService {
                 .replyToMessageId(request.getReplyToMessageId())
                 .senderName(user.getFullName())
                 .senderEmail(user.getEmail())
+                .senderType(SenderType.AGENT)
                 .fromBot(false)
                 .sentAt(LocalDateTime.now())
                 .build();
 
         message = messageRepository.save(message);
 
-        // Update conversation
-        conversation.incrementMessageCount();
-        conversation.recordFirstResponse();
-        conversationRepository.save(conversation);
+        // Update conversation (atomic, avoids optimistic locking)
+        var now = LocalDateTime.now();
+        conversationRepository.incrementOutgoingMessageMetrics(conversation.getId(), tenantId, now);
+        var responseTimeSeconds = conversation.getCreatedAt() != null
+                ? Duration.between(conversation.getCreatedAt(), now).toSeconds()
+                : null;
+        conversationRepository.recordFirstResponse(conversation.getId(), now, responseTimeSeconds);
 
-        // Update contact
-        Contact contact = conversation.getContact();
-        contact.incrementMessageCount();
-        contactRepository.save(contact);
+        // Update contact (atomic, avoids optimistic locking)
+        contactRepository.incrementMessageCount(conversation.getContact().getId());
+
+        // Send via Evolution API if WhatsApp channel
+        if (conversation.getChannel() == ChannelType.WHATSAPP && conversation.getContact().getPhone() != null) {
+            try {
+                String instanceId = getWhatsAppInstanceId(tenantId);
+                if (instanceId != null) {
+                    WhatsAppMessageDto waMsg = WhatsAppMessageDto.builder()
+                            .to(conversation.getContact().getPhone())
+                            .type(MessageType.TEXT)
+                            .text(request.getContent())
+                            .build();
+                    String channelMessageId = whatsAppProvider.sendMessage(instanceId, waMsg);
+                    if (channelMessageId != null) {
+                        message.setChannelMessageId(channelMessageId);
+                        messageRepository.save(message);
+                    }
+                    log.info("WhatsApp message sent via Evolution API, channelId: {}", channelMessageId);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to send WhatsApp message via Evolution API: {}", e.getMessage());
+            }
+        }
+
+        // Publish event for real-time WebSocket push
+        eventPublisher.publishEvent(new MessageSentEvent(
+                tenantId.toString(),
+                conversation.getId().toString(),
+                message.getId().toString(),
+                message.getContent(),
+                MessageDirection.OUTBOUND.name(),
+                message.getType() != null ? message.getType().name() : "TEXT",
+                message.getSenderName()
+        ));
 
         log.info("Message sent: {} in conversation: {} by user: {}", 
                  message.getId(), conversation.getId(), userId);
 
         return conversationMapper.toMessageDto(message);
+    }
+
+    private String getWhatsAppInstanceId(UUID tenantId) {
+        return settingRepository
+                .findByTenantIdAndCategoryAndKeyAndDeletedFalse(tenantId, "whatsapp", "instance_id")
+                .map(setting -> setting.getValue())
+                .orElse(null);
     }
 
     @Transactional

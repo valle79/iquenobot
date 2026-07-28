@@ -18,6 +18,7 @@ import com.iquenobot.shared.enums.ConversationStatus;
 import com.iquenobot.shared.enums.MessageDirection;
 import com.iquenobot.shared.enums.MessageStatus;
 import com.iquenobot.shared.enums.MessageType;
+import com.iquenobot.shared.enums.SenderType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -47,7 +48,9 @@ public class WhatsAppWebhookService {
 
     @Transactional
     public void processIncomingMessage(String instanceId, WhatsAppWebhookDto payload) {
+
         UUID tenantId = findTenantByInstanceId(instanceId);
+
         if (tenantId == null) {
             log.warn("No tenant found for WhatsApp instance: {}", instanceId);
             return;
@@ -57,13 +60,21 @@ public class WhatsAppWebhookService {
             TenantContext.setTenantId(tenantId.toString());
 
             String senderPhone = payload.getFrom();
-            String senderName = payload.getData() != null
-                    ? (String) payload.getData().get("pushName")
-                    : null;
+
+            if (senderPhone == null || senderPhone.isBlank()) {
+                log.warn("Incoming WhatsApp message without sender phone. Payload: {}", payload);
+                return;
+            }
+
+            String senderName = extractSenderName(payload);
 
             Contact contact = findOrCreateContact(tenantId, senderPhone, senderName);
 
-            Conversation conversation = findOrCreateConversation(tenantId, contact, payload);
+            Conversation conversation = findOrCreateConversation(
+                    tenantId,
+                    contact,
+                    instanceId
+            );
 
             createIncomingMessage(conversation, contact, payload);
 
@@ -74,10 +85,19 @@ public class WhatsAppWebhookService {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // TENANT RESOLUTION
+    // -------------------------------------------------------------------------
+
     private UUID findTenantByInstanceId(String instanceId) {
+
         return instanceCache.computeIfAbsent(instanceId, id ->
                 settingRepository
-                        .findByCategoryAndKeyAndValueAndDeletedFalse(WHATSAPP_CATEGORY, INSTANCE_ID_KEY, id)
+                        .findByCategoryAndKeyAndValueAndDeletedFalse(
+                                WHATSAPP_CATEGORY,
+                                INSTANCE_ID_KEY,
+                                id
+                        )
                         .map(Setting::getTenantId)
                         .orElse(null)
         );
@@ -91,31 +111,59 @@ public class WhatsAppWebhookService {
         instanceCache.clear();
     }
 
+    // -------------------------------------------------------------------------
+    // CONTACT
+    // -------------------------------------------------------------------------
+
     private Contact findOrCreateContact(UUID tenantId, String phone, String name) {
+
         return contactRepository
                 .findByPhoneAndTenantIdAndDeletedFalse(phone, tenantId)
                 .orElseGet(() -> {
+
                     Contact newContact = Contact.builder()
                             .id(UUID.randomUUID())
                             .tenantId(tenantId)
                             .phone(phone)
                             .whatsappPhone(phone)
-                            .fullName(name != null ? name : phone)
+                            .fullName(name != null && !name.isBlank()
+                                    ? name
+                                    : phone)
                             .status(ContactStatus.ACTIVE)
                             .conversationCount(0)
                             .messageCount(0)
                             .subscribed(true)
                             .build();
-                    return contactRepository.save(newContact);
+
+                    Contact saved = contactRepository.save(newContact);
+
+                    log.info("New WhatsApp contact created: {} ({})",
+                            saved.getFullName(),
+                            saved.getPhone());
+
+                    return saved;
                 });
     }
 
-    private Conversation findOrCreateConversation(UUID tenantId, Contact contact, WhatsAppWebhookDto payload) {
-        String channelConversationId = payload.getInstanceId() + ":" + contact.getPhone();
+    // -------------------------------------------------------------------------
+    // CONVERSATION
+    // -------------------------------------------------------------------------
+
+    private Conversation findOrCreateConversation(
+            UUID tenantId,
+            Contact contact,
+            String instanceId
+    ) {
+
+        String channelConversationId = instanceId + ":" + contact.getPhone();
 
         return conversationRepository
-                .findByChannelConversationIdAndTenantIdAndDeletedFalse(channelConversationId, tenantId)
+                .findByChannelConversationIdAndTenantIdAndDeletedFalse(
+                        channelConversationId,
+                        tenantId
+                )
                 .orElseGet(() -> {
+
                     Conversation newConversation = Conversation.builder()
                             .id(UUID.randomUUID())
                             .tenantId(tenantId)
@@ -129,68 +177,165 @@ public class WhatsAppWebhookService {
                             .unreadCount(0)
                             .botConversation(false)
                             .build();
-                    return conversationRepository.save(newConversation);
+
+                    Conversation saved = conversationRepository.save(newConversation);
+
+                    log.info("New WhatsApp conversation created: {}", saved.getId());
+
+                    return saved;
                 });
     }
 
-    private void createIncomingMessage(Conversation conversation, Contact contact, WhatsAppWebhookDto payload) {
+    // -------------------------------------------------------------------------
+    // MESSAGE
+    // -------------------------------------------------------------------------
+
+    private void createIncomingMessage(
+            Conversation conversation,
+            Contact contact,
+            WhatsAppWebhookDto payload
+    ) {
+
+        // Evitar duplicados por channelMessageId
+        if (payload.getMessageId() != null
+                && messageRepository.existsByChannelMessageId(payload.getMessageId())) {
+
+            log.debug("Duplicate WhatsApp message ignored: {}", payload.getMessageId());
+            return;
+        }
+
         ConversationMessage message = ConversationMessage.builder()
                 .id(UUID.randomUUID())
                 .tenantId(conversation.getTenantId())
                 .conversation(conversation)
+
+                // 👇 IMPORTANTE
                 .direction(MessageDirection.INBOUND)
+                .senderType(SenderType.CUSTOMER)
+
                 .type(resolveMessageType(payload.getType()))
                 .status(MessageStatus.SENT)
-                .content(payload.getText())
+
+                .content(payload.getText() != null ? payload.getText() : "")
+
                 .channelMessageId(payload.getMessageId())
+
                 .senderName(contact.getFullName())
                 .senderPhone(contact.getPhone())
+
                 .fromBot(false)
-                .sentAt(payload.getTimestamp() != null ? payload.getTimestamp() : LocalDateTime.now())
+
+                .sentAt(payload.getTimestamp() != null
+                        ? payload.getTimestamp()
+                        : LocalDateTime.now())
+
                 .build();
 
         messageRepository.save(message);
 
+        // ---------------------------------------------------------------------
+        // Conversation metrics
+        // ---------------------------------------------------------------------
+
         conversation.incrementMessageCount();
         conversation.incrementUnreadCount();
         conversation.setLastMessageAt(LocalDateTime.now());
+
         conversationRepository.save(conversation);
+
+        // ---------------------------------------------------------------------
+        // Contact metrics
+        // ---------------------------------------------------------------------
 
         contact.incrementMessageCount();
         contact.setLastContactedAt(LocalDateTime.now());
+
         contactRepository.save(contact);
 
-        log.info("Incoming WhatsApp message processed: {} from {} in conversation {}",
-                payload.getMessageId(), contact.getPhone(), conversation.getId());
+        log.info(
+                "Incoming WhatsApp message processed: messageId={} phone={} conversation={}",
+                payload.getMessageId(),
+                contact.getPhone(),
+                conversation.getId()
+        );
     }
 
-    private void triggerChatbot(UUID tenantId, Conversation conversation, Contact contact, WhatsAppWebhookDto payload) {
+    // -------------------------------------------------------------------------
+    // CHATBOT
+    // -------------------------------------------------------------------------
+
+    private void triggerChatbot(
+            UUID tenantId,
+            Conversation conversation,
+            Contact contact,
+            WhatsAppWebhookDto payload
+    ) {
+
         if (payload.getText() == null || payload.getText().isBlank()) {
             return;
         }
 
         try {
-            chatbotService.processMessage(payload.getText(), java.util.Map.of(
-                    "conversationId", conversation.getId().toString(),
-                    "tenantId", tenantId.toString(),
-                    "contactId", contact.getId().toString(),
-                    "channel", "WHATSAPP"
-            ));
+
+            chatbotService.processMessage(
+                    payload.getText(),
+                    Map.of(
+                            "conversationId", conversation.getId().toString(),
+                            "tenantId", tenantId.toString(),
+                            "contactId", contact.getId().toString(),
+                            "channel", "WHATSAPP"
+                    )
+            );
+
         } catch (Exception e) {
-            log.warn("Chatbot processing failed for message {}: {}", payload.getMessageId(), e.getMessage());
+
+            log.warn(
+                    "Chatbot processing failed for message {}: {}",
+                    payload.getMessageId(),
+                    e.getMessage(),
+                    e
+            );
         }
     }
 
+    // -------------------------------------------------------------------------
+    // HELPERS
+    // -------------------------------------------------------------------------
+
+    @SuppressWarnings("unchecked")
+    private String extractSenderName(WhatsAppWebhookDto payload) {
+
+        if (payload.getData() == null) {
+            return null;
+        }
+
+        Object pushName = payload.getData().get("pushName");
+
+        return pushName instanceof String ? (String) pushName : null;
+    }
+
     private MessageType resolveMessageType(String type) {
-        if (type == null) return MessageType.TEXT;
+
+        if (type == null || type.isBlank()) {
+            return MessageType.TEXT;
+        }
+
         return switch (type.toUpperCase()) {
-            case "IMAGE" -> MessageType.IMAGE;
-            case "VIDEO" -> MessageType.VIDEO;
-            case "AUDIO" -> MessageType.AUDIO;
-            case "DOCUMENT" -> MessageType.DOCUMENT;
-            case "LOCATION" -> MessageType.LOCATION;
-            case "CONTACT" -> MessageType.CONTACT;
-            case "STICKER" -> MessageType.STICKER;
+
+            case "IMAGE", "IMAGEMESSAGE" -> MessageType.IMAGE;
+
+            case "VIDEO", "VIDEOMESSAGE" -> MessageType.VIDEO;
+
+            case "AUDIO", "AUDIOMESSAGE" -> MessageType.AUDIO;
+
+            case "DOCUMENT", "DOCUMENTMESSAGE" -> MessageType.DOCUMENT;
+
+            case "LOCATION", "LOCATIONMESSAGE" -> MessageType.LOCATION;
+
+            case "CONTACT", "CONTACTMESSAGE" -> MessageType.CONTACT;
+
+            case "STICKER", "STICKERMESSAGE" -> MessageType.STICKER;
+
             default -> MessageType.TEXT;
         };
     }

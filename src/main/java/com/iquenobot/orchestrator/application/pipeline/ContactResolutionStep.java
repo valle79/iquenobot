@@ -48,7 +48,7 @@ public class ContactResolutionStep implements PipelineStep, MessagePipeline.Prio
     }
 
     private Optional<Contact> findExistingContact(UUID tenantId, IncomingMessage message) {
-        String source = message.getSourceIdentifier();
+        String source = normalizePhone(message.getSourceIdentifier());
         ChannelType channel = message.getChannel();
 
         return switch (channel) {
@@ -74,7 +74,7 @@ public class ContactResolutionStep implements PipelineStep, MessagePipeline.Prio
 
     private Contact createContact(UUID tenantId, IncomingMessage message) {
         ChannelType channel = message.getChannel();
-        String sourceId = message.getSourceIdentifier();
+        String sourceId = normalizePhone(message.getSourceIdentifier());
         String sourceName = message.getSourceName();
 
         Contact.ContactBuilder<?, ?> builder = Contact.builder()
@@ -102,6 +102,11 @@ public class ContactResolutionStep implements PipelineStep, MessagePipeline.Prio
         log.info("New contact created: id={} channel={} sourceId={}",
                 contact.getId(), channel, sourceId);
         return contact;
+    }
+
+    private String normalizePhone(String phone) {
+        if (phone == null) return "";
+        return phone.replaceAll("[^0-9]", "");
     }
 
     private static class TenantContextHolder {

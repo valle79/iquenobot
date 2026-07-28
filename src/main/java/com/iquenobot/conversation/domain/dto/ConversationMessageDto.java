@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.iquenobot.shared.enums.MessageDirection;
 import com.iquenobot.shared.enums.MessageType;
 import com.iquenobot.shared.enums.MessageStatus;
+import com.iquenobot.shared.enums.SenderType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,6 +36,7 @@ public class ConversationMessageDto {
     private String senderPhone;
     private String senderEmail;
     private boolean fromBot;
+    private SenderType senderType;
     private String botIntent;
     private Float botConfidence;
     

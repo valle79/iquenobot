@@ -44,6 +44,11 @@ public class ConversationResolutionStep implements PipelineStep, MessagePipeline
                 .findByChannelConversationIdAndTenantIdAndDeletedFalse(channelConversationId, tenantId)
                 .orElseGet(() -> createConversation(context, channelConversationId));
 
+        if (message.getConversationName() != null && !message.getConversationName().isBlank()) {
+            conversation.setSubject(message.getConversationName());
+            conversation = conversationRepository.save(conversation);
+        }
+
         context.setConversation(conversation);
         context.setChannelConversationId(channelConversationId);
 
@@ -53,9 +58,12 @@ public class ConversationResolutionStep implements PipelineStep, MessagePipeline
     }
 
     private String buildChannelConversationId(IncomingMessage message) {
-        return message.getInstanceId() != null
-                ? message.getInstanceId() + ":" + message.getSourceIdentifier()
-                : message.getChannel().name() + ":" + message.getSourceIdentifier();
+        String conversationKey = message.getChannelConversationId();
+        if (conversationKey == null || conversationKey.isBlank()) {
+            conversationKey = message.getSourceIdentifier();
+        }
+        String normalized = conversationKey.replaceAll("[^0-9]", "");
+        return message.getChannel().name() + ":" + normalized;
     }
 
     private Conversation createConversation(ProcessingContext context, String channelConversationId) {

@@ -12,6 +12,7 @@ import {
   Globe,
   Bot,
   Clock,
+  BookOpen,
   Save,
   Eye,
   EyeOff,
@@ -26,9 +27,9 @@ import { Toggle } from '@/shared/atoms/Toggle/Toggle'
 import { WorkingHoursEditor } from '@/modules/settings/components/WorkingHoursEditor'
 import { useAuthStore } from '@/core/auth/auth.store'
 import { api } from '@/core/api/client'
-import { settingService } from '@/services/setting.service'
 import { useSettingsByCategory, useUpdateSettings } from '@/modules/settings/hooks/useSettings'
 import { DEFAULT_WORKING_HOURS, DAY_ORDER } from '@/types/orchestrator'
+import KnowledgeBasePage from '@/modules/knowledge/KnowledgeBasePage'
 import type { ApiResponse } from '@/types/api'
 import type { UserDto } from '@/types/auth'
 import type { WorkingHoursSchedule } from '@/types/orchestrator'
@@ -39,6 +40,7 @@ const settingsTabs = [
   { id: 'bot', label: 'Bot', icon: <Bot size={16} /> },
   { id: 'ai', label: 'Inteligencia Artificial', icon: <Cpu size={16} /> },
   { id: 'working_hours', label: 'Horario', icon: <Clock size={16} /> },
+  { id: 'knowledge', label: 'Conocimiento', icon: <BookOpen size={16} /> },
   { id: 'notifications', label: 'Notificaciones', icon: <Bell size={16} /> },
   { id: 'security', label: 'Seguridad', icon: <Shield size={16} /> },
   { id: 'general', label: 'General', icon: <Globe size={16} /> },
@@ -184,6 +186,8 @@ function CompanySettings() {
 }
 
 const botSchema = z.object({
+  enabled: z.boolean(),
+  autoReply: z.boolean(),
   humanHandoffEnabled: z.boolean(),
   fallbackMessage: z.string().min(1, 'El mensaje de respaldo es obligatorio'),
 })
@@ -209,17 +213,22 @@ function BotSettings() {
   } = useForm<BotForm>({
     resolver: zodResolver(botSchema),
     values: {
+      enabled: getAiVal('enabled', 'false') === 'true',
+      autoReply: getAiVal('auto_reply', 'false') === 'true',
       humanHandoffEnabled: getBotVal('human_handoff', 'true') === 'true',
       fallbackMessage: getBotVal('fallback_message', 'Lo siento, voy a conectarte con un agente humano.'),
     },
   })
 
-  const humanHandoff = watch('humanHandoffEnabled')
-  const aiEnabled = getAiVal('enabled', 'false') === 'true'
-  const autoReply = getAiVal('auto_reply', 'false') === 'true'
-
   const handleSave = async (data: BotForm) => {
-    await settingService.update({
+    await updateSettings.mutateAsync({
+      category: 'ai',
+      settings: [
+        { key: 'enabled', value: String(data.enabled), type: 'boolean' },
+        { key: 'auto_reply', value: String(data.autoReply), type: 'boolean' },
+      ],
+    })
+    await updateSettings.mutateAsync({
       category: 'bot',
       settings: [
         { key: 'human_handoff', value: String(data.humanHandoffEnabled), type: 'boolean' },
@@ -240,7 +249,7 @@ function BotSettings() {
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Bot habilitado</p>
               <p className="text-xs text-gray-500">Activa o desactiva el chatbot para responder mensajes</p>
             </div>
-            <Toggle checked={aiEnabled} onChange={() => {}} disabled />
+            <Toggle checked={watch('enabled')} onChange={(checked) => setValue('enabled', checked)} />
           </div>
 
           <div className="flex items-center justify-between">
@@ -248,7 +257,7 @@ function BotSettings() {
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Auto-respuesta</p>
               <p className="text-xs text-gray-500">El bot responde automáticamente a los mensajes entrantes</p>
             </div>
-            <Toggle checked={autoReply} onChange={() => {}} disabled />
+            <Toggle checked={watch('autoReply')} onChange={(checked) => setValue('autoReply', checked)} />
           </div>
 
           <div className="flex items-center justify-between">
@@ -257,7 +266,7 @@ function BotSettings() {
               <p className="text-xs text-gray-500">Permitir que el bot transfiera conversaciones a un agente humano</p>
             </div>
             <Toggle
-              checked={humanHandoff}
+              checked={watch('humanHandoffEnabled')}
               onChange={(checked) => setValue('humanHandoffEnabled', checked)}
             />
           </div>
@@ -411,35 +420,52 @@ function WorkingHoursSettings() {
   const getBotVal = (key: string, fallback = '') =>
     botSettings?.find((s) => s.key === key)?.value ?? fallback
 
-  const [enabled, setEnabled] = useState(() => getGeneralVal('business_hours_enabled', 'true') === 'true')
-  const [schedule, setSchedule] = useState<WorkingHoursSchedule>(() => {
-    try {
-      const raw = getGeneralVal('business_hours')
-      return raw ? JSON.parse(raw) : DEFAULT_WORKING_HOURS
-    } catch {
-      return DEFAULT_WORKING_HOURS
-    }
-  })
-  const [closedMessage, setClosedMessage] = useState(() =>
-    getBotVal('after_hours_message', 'Estamos fuera de horario laboral. Te atenderemos en nuestro horario de atención.')
+  const [enabled, setEnabled] = useState(true)
+  const [schedule, setSchedule] = useState<WorkingHoursSchedule>(DEFAULT_WORKING_HOURS)
+  const [closedMessage, setClosedMessage] = useState(
+    'Estamos fuera de horario laboral. Te atenderemos en nuestro horario de atención.'
   )
-  const [timezone, setTimezone] = useState(() => getGeneralVal('timezone', 'America/Guayaquil'))
+  const [timezone, setTimezone] = useState('America/Guayaquil')
+
+  useEffect(() => {
+    if (generalSettings) {
+      setEnabled(getGeneralVal('business_hours_enabled', 'true') === 'true')
+      try {
+        const raw = getGeneralVal('business_hours')
+        if (raw) setSchedule(JSON.parse(raw))
+      } catch {}
+      setTimezone(getGeneralVal('timezone', 'America/Guayaquil'))
+    }
+  }, [generalSettings])
+
+  useEffect(() => {
+    if (botSettings) {
+      setClosedMessage(
+        getBotVal('after_hours_message', 'Estamos fuera de horario laboral. Te atenderemos en nuestro horario de atención.')
+      )
+    }
+  }, [botSettings])
 
   const handleSave = async () => {
-    await settingService.update({
-      category: 'general',
-      settings: [
-        { key: 'business_hours_enabled', value: String(enabled), type: 'boolean' },
-        { key: 'business_hours', value: JSON.stringify(schedule), type: 'json' },
-        { key: 'timezone', value: timezone, type: 'text' },
-      ],
-    })
-    await settingService.update({
-      category: 'bot',
-      settings: [
-        { key: 'after_hours_message', value: closedMessage, type: 'text' },
-      ],
-    })
+    try {
+      await updateSettings.mutateAsync({
+        category: 'general',
+        settings: [
+          { key: 'business_hours_enabled', value: String(enabled), type: 'boolean' },
+          { key: 'business_hours', value: JSON.stringify(schedule), type: 'json' },
+          { key: 'timezone', value: timezone, type: 'text' },
+        ],
+      })
+      await updateSettings.mutateAsync({
+        category: 'bot',
+        settings: [
+          { key: 'after_hours_message', value: closedMessage, type: 'text' },
+        ],
+      })
+    } catch (err) {
+      console.error('Error al guardar horario laboral:', err)
+      alert('Error al guardar: ' + (err instanceof Error ? err.message : String(err)))
+    }
   }
 
   return (
@@ -719,6 +745,7 @@ const tabComponents: Record<string, React.FC> = {
   bot: BotSettings,
   ai: AISettings,
   working_hours: WorkingHoursSettings,
+  knowledge: KnowledgeBasePage,
   notifications: NotificationSettings,
   security: SecuritySettings,
   general: GeneralSettings,

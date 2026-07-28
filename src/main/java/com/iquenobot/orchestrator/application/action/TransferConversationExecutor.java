@@ -36,7 +36,9 @@ public class TransferConversationExecutor implements ActionExecutor {
     @Override
     @Transactional
     public void execute(Decision decision, ProcessingContext context) {
-        var conv = context.getConversation();
+        var conv = conversationRepository.findById(context.getConversation().getId())
+                .orElseThrow(() -> new IllegalStateException(
+                        "Conversation not found: " + context.getConversation().getId()));
 
         conv.handoffFromBot();
 
@@ -45,8 +47,6 @@ public class TransferConversationExecutor implements ActionExecutor {
         if (agent != null) {
             conv.assignTo(agent);
         }
-
-        conversationRepository.save(conv);
 
         eventPublisher.publish(new AgentAssignedEvent(
                 context.getTenantId().toString(),

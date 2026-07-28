@@ -3,6 +3,7 @@ package com.iquenobot.product.interfaces.controller;
 import com.iquenobot.product.application.ProductService;
 import com.iquenobot.product.domain.dto.CreateProductRequestDto;
 import com.iquenobot.product.domain.dto.ProductDto;
+import com.iquenobot.product.domain.dto.ProductImportResultDto;
 import com.iquenobot.shared.domain.dto.ApiResponse;
 import com.iquenobot.shared.domain.dto.PagedResponse;
 import com.iquenobot.shared.enums.ProductStatus;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -139,6 +142,19 @@ public class ProductController {
             @RequestParam Integer quantity) {
         ProductDto product = productService.decreaseStock(id, quantity);
         return ResponseEntity.ok(ApiResponse.success(product, "Stock disminuido exitosamente"));
+    }
+
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Importar productos desde CSV", description = "Importa productos en lote desde un archivo CSV")
+    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'SUPERVISOR')")
+    public ResponseEntity<ApiResponse<ProductImportResultDto>> importProducts(@RequestParam("file") MultipartFile file) {
+        try {
+            String csvContent = new String(file.getBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            ProductImportResultDto result = productService.importFromCsv(csvContent);
+            return ResponseEntity.ok(ApiResponse.success(result, "Importación completada"));
+        } catch (Exception e) {
+            throw new RuntimeException("Error al leer el archivo CSV: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")

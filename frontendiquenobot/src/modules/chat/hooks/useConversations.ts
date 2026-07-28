@@ -3,6 +3,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { conversationService } from '@/services/conversation.service'
 import { useChatStore } from '../stores/chat.store'
 import { toast } from 'sonner'
+import type { CreateConversationRequest } from '@/types/chat'
 
 export function useConversations(filter?: { assigned?: 'mine' | 'unassigned' }) {
   const { setConversations, setLoading } = useChatStore()
@@ -38,6 +39,22 @@ export function useConversation(id: string | undefined) {
     queryKey: ['conversation', id],
     queryFn: () => conversationService.getById(id!),
     enabled: !!id,
+  })
+}
+
+export function useCreateConversation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (dto: CreateConversationRequest) => {
+      return conversationService.create(dto)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Error al crear la conversación')
+    },
   })
 }
 

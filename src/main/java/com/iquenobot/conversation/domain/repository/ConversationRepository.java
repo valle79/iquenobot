@@ -6,7 +6,10 @@ import com.iquenobot.shared.enums.ConversationStatus;
 import com.iquenobot.shared.enums.ConversationPriority;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -91,4 +94,58 @@ public interface ConversationRepository extends JpaRepository<Conversation, UUID
     @Query("SELECT AVG(c.satisfactionRating) FROM Conversation c WHERE c.tenantId = :tenantId " +
            "AND c.satisfactionRating IS NOT NULL AND c.deleted = false")
     Double getAverageSatisfactionRating(@Param("tenantId") UUID tenantId);
+
+    @Modifying
+    @Query("""
+            UPDATE Conversation c SET
+                c.messageCount = c.messageCount + 1,
+                c.unreadCount = c.unreadCount + 1,
+                c.lastMessageAt = :lastMessageAt,
+                c.updatedAt = :lastMessageAt
+            WHERE c.id = :id AND c.tenantId = :tenantId
+            """)
+    int incrementIncomingMessageMetrics(@Param("id") UUID id,
+                                        @Param("tenantId") UUID tenantId,
+                                        @Param("lastMessageAt") java.time.LocalDateTime lastMessageAt);
+
+    @Modifying
+    @Query("""
+            UPDATE Conversation c SET
+                c.unreadCount = 0,
+                c.updatedAt = :now
+            WHERE c.id = :id AND c.tenantId = :tenantId
+            """)
+    int resetUnreadCount(@Param("id") UUID id,
+                         @Param("tenantId") UUID tenantId,
+                         @Param("now") java.time.LocalDateTime now);
+
+    @Modifying
+    @Query("""
+            UPDATE Conversation c SET
+                c.messageCount = c.messageCount + 1,
+                c.lastMessageAt = :lastMessageAt,
+                c.updatedAt = :lastMessageAt
+            WHERE c.id = :id AND c.tenantId = :tenantId
+            """)
+    int incrementOutgoingMessageMetrics(@Param("id") UUID id,
+                                        @Param("tenantId") UUID tenantId,
+                                        @Param("lastMessageAt") java.time.LocalDateTime lastMessageAt);
+
+    @Modifying
+    @Query("""
+            UPDATE Conversation c SET
+                c.firstResponseAt = :firstResponseAt,
+                c.responseTimeSeconds = :responseTimeSeconds
+            WHERE c.id = :id AND c.firstResponseAt IS NULL
+            """)
+    int recordFirstResponse(@Param("id") UUID id,
+                            @Param("firstResponseAt") java.time.LocalDateTime firstResponseAt,
+                            @Param("responseTimeSeconds") Long responseTimeSeconds);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT c FROM Conversation c WHERE c.channelConversationId = :channelConversationId " +
+           "AND c.tenantId = :tenantId AND c.deleted = false")
+    Optional<Conversation> findByChannelConversationIdForUpdate(
+            @Param("channelConversationId") String channelConversationId,
+            @Param("tenantId") UUID tenantId);
 }

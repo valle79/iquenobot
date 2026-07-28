@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
-    @Value("${app.base-url:http://localhost:8080}")
+    @Value("${app.base-url:http://localhost:8085}")
     private String baseUrl;
 
     @Bean

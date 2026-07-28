@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Plus, Search, MoreHorizontal, Ban, CheckCircle, Trash2, MessageCircle, Pencil } from 'lucide-react'
+import { Plus, Search, MoreHorizontal, Ban, CheckCircle, Trash2, MessageCircle, Pencil, Upload } from 'lucide-react'
 import { useContacts, useBlockContact, useUnblockContact, useDeleteContact } from '../hooks/useContacts'
 import { ContactFormModal } from '../components/ContactFormModal'
+import { ImportContactsModal } from '../components/ImportContactsModal'
 import { DataTable } from '@/shared/organisms/DataTable/DataTable'
 import { Button } from '@/shared/atoms/Button/Button'
 import { Badge } from '@/shared/atoms/Badge/Badge'
@@ -31,6 +32,7 @@ export default function ContactsPage() {
   const [blockTarget, setBlockTarget] = useState<ContactDto | null>(null)
   const [formTarget, setFormTarget] = useState<ContactDto | null>(null)
   const [formOpen, setFormOpen] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
 
   const statusOptions = [
     { value: '', label: 'Todos los estados' },
@@ -165,10 +167,16 @@ export default function ContactsPage() {
             Gestiona tus contactos ({totalElements} total)
           </p>
         </div>
-        <Button onClick={() => { setFormTarget(null); setFormOpen(true) }}>
-          <Plus size={18} />
-          Nuevo contacto
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportOpen(true)}>
+            <Upload size={18} />
+            Importar CSV
+          </Button>
+          <Button onClick={() => { setFormTarget(null); setFormOpen(true) }}>
+            <Plus size={18} />
+            Nuevo contacto
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center gap-3">
@@ -227,6 +235,7 @@ export default function ContactsPage() {
       />
 
       <ContactFormModal open={formOpen} contact={formTarget} onClose={() => { setFormOpen(false); setFormTarget(null) }} />
+      <ImportContactsModal open={importOpen} onClose={() => setImportOpen(false)} />
     </div>
   )
 }

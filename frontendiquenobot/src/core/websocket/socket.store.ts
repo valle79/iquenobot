@@ -20,7 +20,8 @@ let reconnectTimer: ReturnType<typeof setTimeout> | null = null
 let currentWs: WebSocket | null = null
 
 function createConnection(token: string): WebSocket {
-  const url = `${WS_URL.replace(/^http/, 'ws')}/ws/notifications?token=${token}`
+  const base = WS_URL || window.location.origin
+  const url = `${base.replace(/^http/, 'ws')}/ws/notifications?token=${token}`
   const ws = new WebSocket(url)
 
   ws.onopen = () => {

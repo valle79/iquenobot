@@ -43,10 +43,10 @@ public class Contact extends SoftDeletableEntity {
     @Column(name = "email", length = 255)
     private String email;
 
-    @Column(name = "phone", length = 20)
+    @Column(name = "phone", length = 50)
     private String phone;
 
-    @Column(name = "whatsapp_phone", length = 20)
+    @Column(name = "whatsapp_phone", length = 50)
     private String whatsappPhone;
 
     @Column(name = "company", length = 200)

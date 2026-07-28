@@ -117,7 +117,7 @@ export function ChatWindow() {
   }
 
   return (
-    <div className="relative flex flex-1 flex-col">
+    <div className="relative flex flex-1 flex-col min-h-0">
       {conversation?.botConversation && conversationId && (
         <ConversationContextPanel
           conversationId={conversationId}

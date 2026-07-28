@@ -10,8 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -28,12 +26,10 @@ public class MetricsUpdateStep implements PipelineStep, MessagePipeline.Prioriti
         Contact contact = context.getContact();
         Conversation conversation = context.getConversation();
 
-        contact.incrementMessageCount();
-        contact.setLastContactedAt(LocalDateTime.now());
-        contactRepository.save(contact);
+        contactRepository.incrementMessageCount(contact.getId());
 
-        log.debug("Metrics updated: contactMessages={} conversationMessages={}",
-                contact.getMessageCount(), conversation.getMessageCount());
+        log.debug("Metrics updated: contact={} conversation={}",
+                contact.getId(), conversation.getId());
         return context;
     }
 }

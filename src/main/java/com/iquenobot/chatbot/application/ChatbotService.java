@@ -17,10 +17,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -32,6 +35,8 @@ public class ChatbotService {
     private final ChatbotIntentRepository intentRepository;
     private final IAIProvider aiProvider;
     private final KnowledgeBaseService knowledgeBaseService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Random random = new Random();
 
     @Transactional
     public ChatbotResponseDto processMessage(String message, Map<String, Object> context) {
@@ -43,7 +48,7 @@ public class ChatbotService {
         ChatbotIntent intent = detectIntent(tenantId, message);
         
         // 2. Try to match a flow
-        ChatbotFlow flow = matchFlow(tenantId, message, intent);
+        ChatbotFlow flow = matchFlow(tenantId, message, intent, context);
         
         // 3. Generate response
         if (flow != null) {
@@ -76,14 +81,23 @@ public class ChatbotService {
     }
 
     @Transactional(readOnly = true)
-    public ChatbotFlow matchFlow(UUID tenantId, String message, ChatbotIntent intent) {
+    public ChatbotFlow matchFlow(UUID tenantId, String message, ChatbotIntent intent, Map<String, Object> context) {
         // 1. Try keyword trigger
         List<ChatbotFlow> flows = flowRepository.findByKeyword(tenantId, message);
         if (!flows.isEmpty()) {
             return flows.get(0);
         }
-        
-        // 2. Try intent trigger
+
+        // 2. Try WELCOME trigger (first message in conversation)
+        if (context != null && Boolean.TRUE.equals(context.get("isFirstMessage"))) {
+            flows = flowRepository.findByTenantIdAndTriggerTypeAndActiveAndDeletedFalse(
+                    tenantId, ChatbotFlowTrigger.WELCOME, true);
+            if (!flows.isEmpty()) {
+                return flows.get(0);
+            }
+        }
+
+        // 3. Try intent trigger
         if (intent != null) {
             flows = flowRepository.findByTenantIdAndTriggerTypeAndActiveAndDeletedFalse(
                     tenantId, ChatbotFlowTrigger.INTENT, true);
@@ -91,7 +105,7 @@ public class ChatbotService {
                 return flows.get(0);
             }
         }
-        
+
         return null;
     }
 
@@ -103,9 +117,13 @@ public class ChatbotService {
             flow.incrementSuccess();
             flowRepository.save(flow);
             
-            // In production, parse flowConfig JSON and execute steps
+            String botMessage = extractFlowMessage(flow.getFlowConfig());
+            if (botMessage == null) {
+                botMessage = flow.getFallbackMessage() != null ? flow.getFallbackMessage() : "Procesando tu solicitud...";
+            }
+            
             return ChatbotResponseDto.builder()
-                    .message(flow.getFallbackMessage() != null ? flow.getFallbackMessage() : "Procesando tu solicitud...")
+                    .message(botMessage)
                     .flowExecuted(flow.getName())
                     .requiresHumanAgent(false)
                     .suggestedActions(new ArrayList<>())
@@ -118,13 +136,26 @@ public class ChatbotService {
         }
     }
 
+    private String extractFlowMessage(String flowConfig) {
+        if (flowConfig == null || flowConfig.isBlank()) return null;
+        try {
+            var node = objectMapper.readTree(flowConfig);
+            var msg = node.get("message");
+            return msg != null ? msg.asText() : null;
+        } catch (JsonProcessingException e) {
+            log.warn("Invalid flowConfig JSON: {}", e.getMessage());
+            return null;
+        }
+    }
+
     @Transactional
     public ChatbotResponseDto executeIntent(ChatbotIntent intent, String message) {
         log.info("Executing intent: {}", intent.getIntentName());
         
-        // Parse responses and select one (in production, use more sophisticated logic)
         String[] responses = extractResponses(intent.getResponses());
-        String selectedResponse = responses.length > 0 ? responses[0] : "¿En qué puedo ayudarte?";
+        String selectedResponse = responses.length > 0
+                ? responses[random.nextInt(responses.length)]
+                : "¿En qué puedo ayudarte?";
         
         return ChatbotResponseDto.builder()
                 .message(selectedResponse)
@@ -175,17 +206,37 @@ public class ChatbotService {
     }
 
     private String[] extractKeywords(String json) {
-        // Simple JSON parsing (in production, use proper JSON parser)
-        if (json == null) return new String[0];
-        return json.replace("[", "").replace("]", "")
-                .replace("\"", "").split(",");
+        if (json == null || json.isBlank()) return new String[0];
+        try {
+            var arr = objectMapper.readTree(json);
+            if (arr.isArray()) {
+                String[] result = new String[arr.size()];
+                for (int i = 0; i < arr.size(); i++) {
+                    result[i] = arr.get(i).asText();
+                }
+                return result;
+            }
+        } catch (JsonProcessingException e) {
+            log.warn("Invalid keywords JSON: {}", e.getMessage());
+        }
+        return new String[0];
     }
 
     private String[] extractResponses(String json) {
-        // Simple JSON parsing (in production, use proper JSON parser)
-        if (json == null) return new String[0];
-        return json.replace("[", "").replace("]", "")
-                .replace("\"", "").split(",");
+        if (json == null || json.isBlank()) return new String[0];
+        try {
+            var arr = objectMapper.readTree(json);
+            if (arr.isArray()) {
+                String[] result = new String[arr.size()];
+                for (int i = 0; i < arr.size(); i++) {
+                    result[i] = arr.get(i).asText();
+                }
+                return result;
+            }
+        } catch (JsonProcessingException e) {
+            log.warn("Invalid responses JSON: {}", e.getMessage());
+        }
+        return new String[0];
     }
 
     private UUID getTenantId() {

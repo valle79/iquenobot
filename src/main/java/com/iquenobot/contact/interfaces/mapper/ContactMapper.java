@@ -16,6 +16,7 @@ public interface ContactMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "tenantId", ignore = true)
     @Mapping(target = "fullName", ignore = true)
+    @Mapping(target = "normalizedPhone", ignore = true)
     @Mapping(target = "status", constant = "ACTIVE")
     @Mapping(target = "conversationCount", constant = "0")
     @Mapping(target = "messageCount", constant = "0")

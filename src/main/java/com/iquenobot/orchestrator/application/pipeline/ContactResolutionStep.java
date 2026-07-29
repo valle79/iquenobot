@@ -7,6 +7,7 @@ import com.iquenobot.orchestrator.domain.service.PipelineStep;
 import com.iquenobot.orchestrator.domain.model.IncomingMessage;
 import com.iquenobot.shared.enums.ContactStatus;
 import com.iquenobot.shared.enums.ChannelType;
+import com.iquenobot.shared.util.PhoneNormalizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -47,67 +48,141 @@ public class ContactResolutionStep implements PipelineStep, MessagePipeline.Prio
         return context;
     }
 
-    private Optional<Contact> findExistingContact(UUID tenantId, IncomingMessage message) {
-        String source = normalizePhone(message.getSourceIdentifier());
-        ChannelType channel = message.getChannel();
+private Optional<Contact> findExistingContact(UUID tenantId, IncomingMessage message) {
 
-        return switch (channel) {
-            case WHATSAPP, SMS -> {
-                Optional<Contact> byPhone = contactRepository
-                        .findByPhoneAndTenantIdAndDeletedFalse(source, tenantId);
-                if (byPhone.isPresent()) yield byPhone;
+    String original = message.getSourceIdentifier();
+    String source = PhoneNormalizer.normalize(original);
+    ChannelType channel = message.getChannel();
 
-                yield contactRepository
-                        .findByWhatsappPhoneAndTenantIdAndDeletedFalse(source, tenantId);
+    log.warn("=== CONTACT SEARCH DEBUG ===");
+    log.warn("Original source: [{}]", original);
+    log.warn("Normalized source: [{}]", source);
+    log.warn("Tenant: [{}]", tenantId);
+    log.warn("Channel: [{}]", channel);
+
+    return switch (channel) {
+
+        case WHATSAPP, SMS -> {
+
+            Optional<Contact> byNormalized = contactRepository
+                    .findByNormalizedPhoneAndTenantIdAndDeletedFalse(source, tenantId);
+
+            log.warn("Search normalized_phone={} found={}",
+                    source, byNormalized.isPresent());
+
+            if (byNormalized.isPresent()) {
+                Contact c = byNormalized.get();
+                log.warn("FOUND by normalized_phone - id={} name={} phone={} normalized={}",
+                        c.getId(), c.getFullName(), c.getPhone(), c.getNormalizedPhone());
+                yield byNormalized;
             }
-            case EMAIL -> contactRepository
-                    .findByEmailAndTenantIdAndDeletedFalse(source, tenantId);
-            default -> {
-                Optional<Contact> byPhone = contactRepository
-                        .findByPhoneAndTenantIdAndDeletedFalse(source, tenantId);
-                if (byPhone.isPresent()) yield byPhone;
 
-                yield Optional.empty();
+            Optional<Contact> byPhone = contactRepository
+                    .findByPhoneAndTenantIdAndDeletedFalse(source, tenantId);
+
+            log.warn("Search phone={} found={}",
+                    source, byPhone.isPresent());
+
+            if (byPhone.isPresent()) {
+                Contact c = byPhone.get();
+                log.warn("FOUND by phone - id={} name={}",
+                        c.getId(), c.getFullName());
+                yield byPhone;
             }
-        };
-    }
 
-    private Contact createContact(UUID tenantId, IncomingMessage message) {
-        ChannelType channel = message.getChannel();
-        String sourceId = normalizePhone(message.getSourceIdentifier());
-        String sourceName = message.getSourceName();
+            Optional<Contact> byWhatsapp = contactRepository
+                    .findByWhatsappPhoneAndTenantIdAndDeletedFalse(source, tenantId);
 
-        Contact.ContactBuilder<?, ?> builder = Contact.builder()
-                .tenantId(tenantId)
-                .fullName(sourceName != null && !sourceName.isBlank() ? sourceName : sourceId)
-                .status(ContactStatus.ACTIVE)
-                .conversationCount(0)
-                .messageCount(0)
-                .subscribed(true);
+            log.warn("Search whatsapp_phone={} found={}",
+                    source, byWhatsapp.isPresent());
 
-        switch (channel) {
-            case WHATSAPP -> {
-                builder.phone(sourceId);
-                builder.whatsappPhone(sourceId);
+            if (byWhatsapp.isPresent()) {
+                Contact c = byWhatsapp.get();
+                log.warn("FOUND by whatsapp_phone - id={} name={}",
+                        c.getId(), c.getFullName());
             }
-            case SMS -> builder.phone(sourceId);
-            case EMAIL -> builder.email(sourceId);
-            default -> {
-                // Social media channels: store identifier in phone field as fallback
-                // since Contact has no dedicated social media columns
-            }
+
+            yield byWhatsapp;
         }
 
-        Contact contact = contactRepository.save(builder.build());
-        log.info("New contact created: id={} channel={} sourceId={}",
-                contact.getId(), channel, sourceId);
-        return contact;
+        case EMAIL -> {
+            Optional<Contact> byEmail = contactRepository
+                    .findByEmailAndTenantIdAndDeletedFalse(source, tenantId);
+
+            log.warn("Search email={} found={}", source, byEmail.isPresent());
+            yield byEmail;
+        }
+
+        default -> Optional.empty();
+    };
+}
+
+private Contact createContact(UUID tenantId, IncomingMessage message) {
+
+    ChannelType channel = message.getChannel();
+    String sourceId = PhoneNormalizer.normalize(message.getSourceIdentifier());
+    String sourceName = sanitizeContactName(message.getSourceName(), sourceId);
+
+    Contact.ContactBuilder<?, ?> builder = Contact.builder()
+            .tenantId(tenantId)
+            .fullName(sourceName)
+            .normalizedPhone(sourceId)
+            .status(ContactStatus.ACTIVE)
+            .conversationCount(0)
+            .messageCount(0)
+            .subscribed(true);
+
+    switch (channel) {
+        case WHATSAPP -> {
+            builder.phone(sourceId);
+            builder.whatsappPhone(sourceId);
+        }
+        case SMS -> builder.phone(sourceId);
+        case EMAIL -> builder.email(sourceId);
+        default -> {
+            // otros canales
+        }
     }
 
-    private String normalizePhone(String phone) {
-        if (phone == null) return "";
-        return phone.replaceAll("[^0-9]", "");
+    Contact contact = contactRepository.save(builder.build());
+
+    log.info("New contact created: id={} channel={} sourceId={} name={}",
+            contact.getId(), channel, sourceId, contact.getFullName());
+
+    return contact;
+}
+
+
+private String sanitizeContactName(String sourceName, String sourceId) {
+
+    if (sourceName == null || sourceName.isBlank()) {
+        return "Contacto sin nombre";
     }
+
+    String name = sourceName.trim();
+
+    // ❌ IDs numéricos largos (grupos, LID, JID, etc.)
+    if (name.matches("^\\\\d{10,}$")) {
+        return "Contacto sin nombre";
+    }
+
+    // ❌ JIDs de WhatsApp
+    if (name.contains("@g.us") || name.contains("@s.whatsapp.net")) {
+        return "Contacto sin nombre";
+    }
+
+    // ❌ Solo emojis o símbolos raros
+    if (name.matches("^[\\\\p{So}\\\\p{Cntrl}\\\\s]+$")) {
+        return "Contacto sin nombre";
+    }
+
+    // ❌ Igual al número telefónico
+    if (name.equals(sourceId)) {
+        return "Contacto sin nombre";
+    }
+
+    return name;
+}
 
     private static class TenantContextHolder {
         static void setUserId(String userId) {

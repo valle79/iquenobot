@@ -2,10 +2,15 @@ package com.iquenobot.admin.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.iquenobot.chatbot.domain.entity.ChatbotFlow;
+import com.iquenobot.chatbot.domain.entity.ChatbotIntent;
+import com.iquenobot.chatbot.domain.repository.ChatbotFlowRepository;
+import com.iquenobot.chatbot.domain.repository.ChatbotIntentRepository;
 import com.iquenobot.role.domain.entity.Role;
 import com.iquenobot.role.domain.repository.RoleRepository;
 import com.iquenobot.setting.domain.entity.Setting;
 import com.iquenobot.setting.domain.repository.SettingRepository;
+import com.iquenobot.shared.enums.ChatbotFlowTrigger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,7 +18,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -23,6 +27,8 @@ public class DefaultDataSeeder {
 
     private final RoleRepository roleRepository;
     private final SettingRepository settingRepository;
+    private final ChatbotIntentRepository chatbotIntentRepository;
+    private final ChatbotFlowRepository chatbotFlowRepository;
     private final ObjectMapper objectMapper;
 
     @Transactional(propagation = Propagation.MANDATORY)
@@ -164,5 +170,167 @@ public class DefaultDataSeeder {
                 .type(type)
                 .description(description)
                 .build();
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void seedDefaultChatbotIntents(UUID tenantId) {
+        List<ChatbotIntent> intents = List.of(
+                ChatbotIntent.builder()
+                        .id(UUID.randomUUID()).tenantId(tenantId)
+                        .intentName("saludo")
+                        .description("Saludos cordiales de bienvenida")
+                        .trainingPhrases(jsonArray("Hola", "Buenos días", "Buenas tardes", "Buenas noches", "Qué tal", "Hey", "Hola, cómo estás", "Buen día"))
+                        .responses(jsonArray(
+                                "¡Hola! ¿En qué puedo ayudarte el día de hoy? Estoy aquí para servirte.",
+                                "¡Buenos días! Bienvenido, ¿cómo puedo asistirte?",
+                                "¡Hola! Un gusto saludarte. ¿En qué puedo servirte?"
+                        ))
+                        .confidenceThreshold(0.7).active(true).priority(1).matchedCount(0L).build(),
+
+                ChatbotIntent.builder()
+                        .id(UUID.randomUUID()).tenantId(tenantId)
+                        .intentName("consulta_horario")
+                        .description("Consultas sobre horarios de atención")
+                        .trainingPhrases(jsonArray("horario", "horario de atención", "a qué hora abren", "a qué hora cierran", "atienden sábados", "atienden domingos", "fines de semana", "hasta qué hora atienden", "días de atención"))
+                        .responses(jsonArray(
+                                "Nuestro horario de atención es de lunes a viernes de 9:00 a.m. a 6:00 p.m. y los sábados de 9:00 a.m. a 1:00 p.m. ¿En qué más puedo ayudarte?",
+                                "Atendemos de lunes a viernes de 9am a 6pm, y sábados de 9am a 1pm. Domingo cerrado. ¿Algo más en que pueda servirte?"
+                        ))
+                        .confidenceThreshold(0.7).active(true).priority(2).matchedCount(0L).build(),
+
+                ChatbotIntent.builder()
+                        .id(UUID.randomUUID()).tenantId(tenantId)
+                        .intentName("solicitar_precio")
+                        .description("Consultas sobre precios y cotizaciones")
+                        .trainingPhrases(jsonArray("precio", "costo", "cuánto vale", "cuánto cuesta", "tarifa", "presupuesto", "cotización", "quiero comprar", "me interesa"))
+                        .responses(jsonArray(
+                                "Gracias por tu interés. Permíteme consultar los precios actualizados para brindarte la mejor información. ¿Podrías indicarme qué producto o servicio te interesa?",
+                                "Con gusto te ayudo con los precios. ¿Qué producto o servicio deseas consultar? Así puedo darte una cotización personalizada."
+                        ))
+                        .confidenceThreshold(0.7).active(true).priority(3).matchedCount(0L).build(),
+
+                ChatbotIntent.builder()
+                        .id(UUID.randomUUID()).tenantId(tenantId)
+                        .intentName("ubicacion")
+                        .description("Consultas sobre dirección y ubicación")
+                        .trainingPhrases(jsonArray("dirección", "ubicación", "dónde están", "cómo llegar", "mapa", "oficina", "local", "dónde queda"))
+                        .responses(jsonArray(
+                                "Nos encontramos en [Dirección de la empresa]. ¿Deseas que te envíe la ubicación por Google Maps?",
+                                "Puedes visitarnos en [Dirección de la empresa]. Estaremos encantados de atenderte en nuestro local."
+                        ))
+                        .confidenceThreshold(0.7).active(true).priority(4).matchedCount(0L).build(),
+
+                ChatbotIntent.builder()
+                        .id(UUID.randomUUID()).tenantId(tenantId)
+                        .intentName("contactar_asesor")
+                        .description("Solicitud de contacto con un agente humano")
+                        .trainingPhrases(jsonArray("agente", "asesor", "hablar con alguien", "persona", "operador", "atención al cliente", "ejecutivo", "representante", "transferir"))
+                        .responses(jsonArray(
+                                "Por supuesto, te conectamos con un asesor en este momento. Por favor, espera un instante.",
+                                "Claro, un asesor se comunicará contigo a la brevedad. Gracias por tu paciencia.",
+                                "Entiendo, en un momento te atenderá un agente. Por favor, mantente en línea."
+                        ))
+                        .confidenceThreshold(0.7).active(true).priority(5).matchedCount(0L).build(),
+
+                ChatbotIntent.builder()
+                        .id(UUID.randomUUID()).tenantId(tenantId)
+                        .intentName("consulta_envio")
+                        .description("Consultas sobre envíos y entregas")
+                        .trainingPhrases(jsonArray("envío", "delivery", "despacho", "entrega", "cuándo llega", "tiempo de entrega", "demora", "seguimiento de pedido", "rastrear"))
+                        .responses(jsonArray(
+                                "El tiempo de entrega estimado es de 2 a 5 días hábiles dentro de Lima y de 5 a 7 días hábiles para provincias. ¿Te gustaría rastrear tu pedido?",
+                                "Realizamos envíos a todo el Perú. El costo y tiempo de entrega varían según tu ubicación. ¿Podrías indicarme tu distrito o ciudad para darte mayor precisión?"
+                        ))
+                        .confidenceThreshold(0.7).active(true).priority(6).matchedCount(0L).build(),
+
+                ChatbotIntent.builder()
+                        .id(UUID.randomUUID()).tenantId(tenantId)
+                        .intentName("forma_pago")
+                        .description("Consultas sobre métodos de pago")
+                        .trainingPhrases(jsonArray("pago", "pagar", "tarjeta", "transferencia", "yape", "plin", "efectivo", "depósito", "métodos de pago"))
+                        .responses(jsonArray(
+                                "Aceptamos pagos con tarjeta de crédito/débito, transferencia bancaria, Yape y Plin. ¿Cuál es tu método de pago preferido?",
+                                "Puedes pagar con tarjeta (Visa, Mastercard), transferencia bancaria, Yape o Plin. ¿Cuál te resulta más conveniente?"
+                        ))
+                        .confidenceThreshold(0.7).active(true).priority(7).matchedCount(0L).build(),
+
+                ChatbotIntent.builder()
+                        .id(UUID.randomUUID()).tenantId(tenantId)
+                        .intentName("queja_reclamo")
+                        .description("Atención de quejas o reclamos")
+                        .trainingPhrases(jsonArray("queja", "reclamo", "problema", "insatisfecho", "error", "mal servicio", "devolución", "me quejo"))
+                        .responses(jsonArray(
+                                "Lamento mucho el inconveniente. Permíteme revisar tu caso para darte una solución rápida. ¿Podrías contarme un poco más sobre lo sucedido?",
+                                "Agradecemos tu feedback, ya que nos ayuda a mejorar. Un asesor especializado revisará tu caso y te contactará a la brevedad.",
+                                "Lamento el problema que has experimentado. Déjame tus datos y un supervisor se comunicará contigo en los próximos minutos para resolverlo."
+                        ))
+                        .confidenceThreshold(0.7).active(true).priority(8).matchedCount(0L).build(),
+
+                ChatbotIntent.builder()
+                        .id(UUID.randomUUID()).tenantId(tenantId)
+                        .intentName("informacion_empresa")
+                        .description("Solicitud de información general de la empresa")
+                        .trainingPhrases(jsonArray("quiénes son", "empresa", "acerca de", "información", "quién es", "sobre ustedes", "qué hacen"))
+                        .responses(jsonArray(
+                                "Somos una empresa comprometida con brindar el mejor servicio a nuestros clientes. ¿Hay algo específico que te gustaría saber sobre nosotros? Con gusto te informamos.",
+                                "Con gusto te brindamos información sobre nuestra empresa. ¿Hay algo en particular que te gustaría conocer?"
+                        ))
+                        .confidenceThreshold(0.7).active(true).priority(9).matchedCount(0L).build(),
+
+                ChatbotIntent.builder()
+                        .id(UUID.randomUUID()).tenantId(tenantId)
+                        .intentName("despedida")
+                        .description("Despedidas cordiales")
+                        .trainingPhrases(jsonArray("gracias", "adiós", "chau", "hasta luego", "nos vemos", "que tengas buen día", "muchas gracias", "gracias por tu atención"))
+                        .responses(jsonArray(
+                                "Gracias a ti por contactarnos. ¡Que tengas un excelente día! Si necesitas algo más, aquí estamos.",
+                                "Ha sido un placer atenderte. No dudes en escribirnos si requieres algo más. ¡Hasta pronto!",
+                                "¡Gracias por comunicarte! Quedo atento por si surge cualquier otra consulta. Que tengas un maravilloso día."
+                        ))
+                        .confidenceThreshold(0.7).active(true).priority(10).matchedCount(0L).build()
+        );
+        chatbotIntentRepository.saveAll(intents);
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void seedDefaultChatbotFlows(UUID tenantId) {
+        List<ChatbotFlow> flows = List.of(
+                ChatbotFlow.builder()
+                        .id(UUID.randomUUID()).tenantId(tenantId)
+                        .name("Bienvenida")
+                        .description("Saludo inicial cuando un cliente escribe por primera vez")
+                        .triggerType(ChatbotFlowTrigger.WELCOME)
+                        .flowConfig("{\"message\":\"¡Hola! Soy el asistente virtual de la empresa. Estoy aquí para ayudarte. Puedes consultarme sobre horarios, precios, productos, o si prefieres, puedo comunicarte con un asesor. ¿En qué puedo servirte el día de hoy?\"}")
+                        .active(true).priority(1).build(),
+
+                ChatbotFlow.builder()
+                        .id(UUID.randomUUID()).tenantId(tenantId)
+                        .name("Consulta de precios")
+                        .description("Guía al cliente cuando pregunta por precios")
+                        .triggerType(ChatbotFlowTrigger.KEYWORD)
+                        .triggerKeywords("precio, costo, cuánto vale, tarifa, cotización")
+                        .flowConfig("{\"message\":\"Entiendo que deseas información sobre precios. Permíteme ayudarte con eso. ¿Podrías indicarme exactamente qué producto o servicio te interesa? Así puedo brindarte una cotización precisa y personalizada.\"}")
+                        .fallbackMessage("Gracias por tu consulta. Un asesor se comunicará contigo para darte los precios actualizados.")
+                        .active(true).priority(2).build(),
+
+                ChatbotFlow.builder()
+                        .id(UUID.randomUUID()).tenantId(tenantId)
+                        .name("Soporte técnico")
+                        .description("Deriva a soporte técnico cuando el cliente reporta un problema")
+                        .triggerType(ChatbotFlowTrigger.KEYWORD)
+                        .triggerKeywords("soporte, ayuda técnica, problema técnico, falla, error, no funciona")
+                        .flowConfig("{\"message\":\"Lamento que estés experimentando dificultades. Permíteme tomar nota de tu caso para que un especialista en soporte técnico te contacte a la mayor brevedad. Por favor, cuéntame brevemente cuál es el problema que estás presentando.\"}")
+                        .fallbackMessage("Gracias por reportarlo. Un técnico especializado revisará tu caso y te contactará pronto.")
+                        .active(true).priority(3).build()
+        );
+        chatbotFlowRepository.saveAll(flows);
+    }
+
+    private String jsonArray(String... values) {
+        try {
+            return objectMapper.writeValueAsString(values);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to create JSON array", e);
+        }
     }
 }

@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Data
 @Builder
@@ -28,5 +27,5 @@ public class WhatsAppWebhookDto {
     private String filename;
     private String mimeType;
     private LocalDateTime timestamp;
-    private Map<String, Object> data;
+    private Object data;
 }

@@ -125,6 +125,14 @@ public class TenantProvisioningService {
         dataSeeder.seedDefaultSecurityConfig(tenant.getId());
         log.info("Default security config seeded for tenant: {}", tenant.getId());
 
+        // 14. Seed default chatbot intents
+        dataSeeder.seedDefaultChatbotIntents(tenant.getId());
+        log.info("Default chatbot intents seeded for tenant: {}", tenant.getId());
+
+        // 15. Seed default chatbot flows
+        dataSeeder.seedDefaultChatbotFlows(tenant.getId());
+        log.info("Default chatbot flows seeded for tenant: {}", tenant.getId());
+
         log.info("Tenant provisioning COMPLETE for: {} (id={})", tenant.getCompanyName(), tenant.getId());
         return toTenantDto(tenant);
     }

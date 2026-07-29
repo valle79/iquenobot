@@ -12,6 +12,7 @@ import com.iquenobot.shared.domain.util.TenantContext;
 import com.iquenobot.shared.enums.ContactStatus;
 import com.iquenobot.shared.exception.BusinessException;
 import com.iquenobot.shared.exception.ResourceNotFoundException;
+import com.iquenobot.shared.util.PhoneNormalizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -89,9 +90,11 @@ public class ContactService {
     public ContactDto create(CreateContactRequestDto request) {
         UUID tenantId = getTenantId();
 
-        // Validate phone uniqueness
-        if (request.getPhone() != null && 
-            contactRepository.existsByPhoneAndTenantIdAndDeletedFalse(request.getPhone(), tenantId)) {
+        String normalized = PhoneNormalizer.normalize(request.getPhone());
+
+        // Validate phone uniqueness via normalized phone
+        if (normalized != null &&
+            contactRepository.findByNormalizedPhoneAndTenantIdAndDeletedFalse(normalized, tenantId).isPresent()) {
             throw new BusinessException("Ya existe un contacto con ese número de teléfono");
         }
 
@@ -104,6 +107,7 @@ public class ContactService {
         Contact contact = contactMapper.toEntity(request);
         contact.setId(UUID.randomUUID());
         contact.setTenantId(tenantId);
+        contact.setNormalizedPhone(normalized);
         contact.updateFullName();
         
         contact = contactRepository.save(contact);
@@ -119,9 +123,11 @@ public class ContactService {
         Contact contact = contactRepository.findByIdAndTenantIdAndDeletedFalse(id, tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Contacto no encontrado"));
 
-        // Validate phone uniqueness (excluding current contact)
-        if (request.getPhone() != null && !request.getPhone().equals(contact.getPhone())) {
-            if (contactRepository.existsByPhoneAndTenantIdAndDeletedFalse(request.getPhone(), tenantId)) {
+        String newNormalized = PhoneNormalizer.normalize(request.getPhone());
+
+        // Validate phone uniqueness via normalized (excluding current contact)
+        if (newNormalized != null && !newNormalized.equals(contact.getNormalizedPhone())) {
+            if (contactRepository.findByNormalizedPhoneAndTenantIdAndDeletedFalse(newNormalized, tenantId).isPresent()) {
                 throw new BusinessException("Ya existe un contacto con ese número de teléfono");
             }
         }
@@ -138,6 +144,7 @@ public class ContactService {
         contact.setLastName(request.getLastName());
         contact.setEmail(request.getEmail());
         contact.setPhone(request.getPhone());
+        contact.setNormalizedPhone(newNormalized);
         contact.setWhatsappPhone(request.getWhatsappPhone());
         contact.setCompany(request.getCompany());
         contact.setJobTitle(request.getJobTitle());
@@ -166,16 +173,21 @@ public class ContactService {
                 .map(r -> sanitizePhone(r.getOrDefault("phone", "")))
                 .filter(p -> !p.isBlank())
                 .toList();
+        List<String> normalizedPhones = rawPhones.stream()
+                .map(PhoneNormalizer::normalize)
+                .filter(p -> p != null)
+                .toList();
         List<String> rawEmails = request.getContacts().stream()
                 .map(r -> r.getOrDefault("email", "").trim().toLowerCase())
                 .filter(e -> !e.isBlank())
                 .toList();
 
-        Set<String> existingPhones = new HashSet<>(contactRepository.findExistingPhones(tenantId, rawPhones));
+        Set<String> existingNormalizedPhones = new HashSet<>(contactRepository.findExistingNormalizedPhones(tenantId, normalizedPhones));
         Set<String> existingEmails = new HashSet<>(contactRepository.findExistingEmails(tenantId, rawEmails));
 
         for (Map<String, String> row : request.getContacts()) {
             String rawPhone = sanitizePhone(row.getOrDefault("phone", ""));
+            String normalizedPhone = PhoneNormalizer.normalize(rawPhone);
             String rawWhatsapp = sanitizePhone(row.getOrDefault("whatsappPhone", ""));
             String email = row.getOrDefault("email", "").trim().toLowerCase();
 
@@ -185,13 +197,15 @@ public class ContactService {
                     messages.add("Email ya existe: " + email);
                     continue;
                 }
-                if (!rawPhone.isBlank() && existingPhones.contains(rawPhone)) {
+                if (normalizedPhone != null && existingNormalizedPhones.contains(normalizedPhone)) {
                     skipped++;
                     messages.add("Tel\u00e9fono ya existe: " + rawPhone);
                     continue;
                 }
 
-                existingPhones.add(rawPhone);
+                if (normalizedPhone != null) {
+                    existingNormalizedPhones.add(normalizedPhone);
+                }
                 existingEmails.add(email);
 
                 String firstName = truncate(row.getOrDefault("firstName", ""), 100);
@@ -206,6 +220,7 @@ public class ContactService {
                         .fullName(fullName)
                         .email(truncate(email, 255))
                         .phone(rawPhone)
+                        .normalizedPhone(normalizedPhone)
                         .whatsappPhone(!rawWhatsapp.isBlank() ? rawWhatsapp : (!rawPhone.isBlank() ? rawPhone : null))
                         .company(truncate(row.getOrDefault("company", ""), 200))
                         .jobTitle(truncate(row.getOrDefault("jobTitle", ""), 100))
@@ -295,13 +310,15 @@ public class ContactService {
 
     public Contact findOrCreateByPhone(String phone, String name) {
         UUID tenantId = getTenantId();
+        String normalized = PhoneNormalizer.normalize(phone);
         
-        return contactRepository.findByPhoneAndTenantIdAndDeletedFalse(phone, tenantId)
+        return contactRepository.findByNormalizedPhoneAndTenantIdAndDeletedFalse(normalized, tenantId)
                 .orElseGet(() -> {
                     Contact newContact = Contact.builder()
                             .id(UUID.randomUUID())
                             .tenantId(tenantId)
                             .phone(phone)
+                            .normalizedPhone(normalized)
                             .whatsappPhone(phone)
                             .fullName(name)
                             .status(ContactStatus.ACTIVE)

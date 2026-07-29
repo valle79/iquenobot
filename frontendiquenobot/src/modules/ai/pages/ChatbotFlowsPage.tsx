@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, MoreHorizontal, Trash2, Pencil, GitBranch, Zap } from 'lucide-react'
+import { Plus, MoreHorizontal, Trash2, Pencil, GitBranch } from 'lucide-react'
 import { useChatbotFlows, useChatbotFlowMutations } from '../hooks/useChatbotFlows'
 import { FlowsFormModal } from '../components/FlowsFormModal'
 import { DataTable } from '@/shared/organisms/DataTable/DataTable'
@@ -12,8 +12,20 @@ import { dayjs } from '@/config/dayjs'
 import type { ColumnDef } from '@tanstack/react-table'
 import type { ChatbotFlowDto } from '@/types/chatbot'
 
+const triggerLabels: Record<string, string> = {
+  KEYWORD: 'Palabra clave',
+  WELCOME: 'Bienvenida',
+  INTENT: 'Intención',
+  PATTERN: 'Patrón',
+  AI: 'IA',
+  SCHEDULED: 'Programado',
+  EVENT: 'Evento',
+}
+
 const triggerColors: Record<string, 'success' | 'warning' | 'info' | 'neutral'> = {
   KEYWORD: 'success',
+  WELCOME: 'info',
+  INTENT: 'warning',
   PATTERN: 'warning',
   AI: 'info',
   SCHEDULED: 'neutral',
@@ -39,36 +51,12 @@ export default function ChatbotFlowsPage() {
       ),
     },
     {
-      header: 'Disparador',
+      header: 'Se activa cuando',
       accessorKey: 'triggerType',
       cell: ({ row }) => (
         <Badge variant={triggerColors[row.original.triggerType] ?? 'neutral'} size="sm">
-          {row.original.triggerType}
+          {triggerLabels[row.original.triggerType] || row.original.triggerType}
         </Badge>
-      ),
-    },
-    {
-      header: 'Prioridad',
-      accessorKey: 'priority',
-      cell: ({ row }) => (
-        <span className="text-sm text-gray-600 dark:text-gray-400">{row.original.priority}</span>
-      ),
-    },
-    {
-      header: 'Ejecuciones',
-      accessorKey: 'executionCount',
-      cell: ({ row }) => (
-        <div className="flex gap-3 text-sm">
-          <span className="text-green-600">{row.original.successCount} OK</span>
-          <span className="text-red-500">{row.original.failureCount} FAIL</span>
-        </div>
-      ),
-    },
-    {
-      header: 'IA',
-      accessorKey: 'useAI',
-      cell: ({ row }) => (
-        row.original.useAI ? <Badge variant="info" size="sm"><Zap size={12} /> IA</Badge> : <span className="text-sm text-gray-400">—</span>
       ),
     },
     {
@@ -114,27 +102,27 @@ export default function ChatbotFlowsPage() {
         <div className="flex items-center gap-3">
           <GitBranch size={24} className="text-brand-500" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Flujos</h1>
-            <p className="mt-1 text-sm text-gray-500">Gestiona los flujos del chatbot ({totalElements} total)</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Conversaciones Guiadas</h1>
+            <p className="mt-1 text-sm text-gray-500">El bot inicia una conversación paso a paso con el cliente ({totalElements} total)</p>
           </div>
         </div>
         <Button onClick={() => { setFormTarget(null); setFormOpen(true) }}>
-          <Plus size={18} /> Nuevo flujo
+          <Plus size={18} /> Nueva conversación
         </Button>
       </div>
 
-      <SearchBar placeholder="Buscar flujos..." value={search} onSearch={setSearch} className="max-w-xs" />
+      <SearchBar placeholder="Buscar conversaciones..." value={search} onSearch={setSearch} className="max-w-xs" />
 
       <DataTable
         columns={columns} data={flows} loading={isLoading}
         pageCount={totalPages} pageIndex={page} onPageChange={setPage}
-        totalRecords={totalElements} emptyMessage="No se encontraron flujos"
+        totalRecords={totalElements} emptyMessage="No hay conversaciones guiadas. Crea una para que el bot hable con los clientes."
       />
 
       <ConfirmDialog
         open={!!deleteTarget} onClose={() => setDeleteTarget(null)}
         onConfirm={() => { if (deleteTarget) deleteMutation.mutate(deleteTarget.id); setDeleteTarget(null) }}
-        title="Eliminar flujo"
+        title="Eliminar conversación"
         message={`¿Eliminar "${deleteTarget?.name}" permanentemente?`}
         confirmLabel="Eliminar" loading={deleteMutation.isPending}
       />

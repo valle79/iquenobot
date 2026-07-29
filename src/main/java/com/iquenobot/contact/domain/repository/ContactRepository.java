@@ -23,6 +23,8 @@ public interface ContactRepository extends JpaRepository<Contact, UUID> {
 
     Optional<Contact> findByWhatsappPhoneAndTenantIdAndDeletedFalse(String whatsappPhone, UUID tenantId);
 
+    Optional<Contact> findByNormalizedPhoneAndTenantIdAndDeletedFalse(String normalizedPhone, UUID tenantId);
+
     Optional<Contact> findByEmailAndTenantIdAndDeletedFalse(String email, UUID tenantId);
 
     Page<Contact> findByTenantIdAndDeletedFalse(UUID tenantId, Pageable pageable);
@@ -57,6 +59,9 @@ public interface ContactRepository extends JpaRepository<Contact, UUID> {
 
     @Query("SELECT c.phone FROM Contact c WHERE c.tenantId = :tenantId AND c.deleted = false AND c.phone IN :phones")
     List<String> findExistingPhones(@Param("tenantId") UUID tenantId, @Param("phones") List<String> phones);
+
+    @Query("SELECT c.normalizedPhone FROM Contact c WHERE c.tenantId = :tenantId AND c.deleted = false AND c.normalizedPhone IN :phones")
+    List<String> findExistingNormalizedPhones(@Param("tenantId") UUID tenantId, @Param("phones") List<String> phones);
 
     @Query("SELECT c.email FROM Contact c WHERE c.tenantId = :tenantId AND c.deleted = false AND c.email IN :emails")
     List<String> findExistingEmails(@Param("tenantId") UUID tenantId, @Param("emails") List<String> emails);

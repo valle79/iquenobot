@@ -49,6 +49,9 @@ public class Contact extends SoftDeletableEntity {
     @Column(name = "whatsapp_phone", length = 50)
     private String whatsappPhone;
 
+    @Column(name = "normalized_phone", length = 20)
+    private String normalizedPhone;
+
     @Column(name = "company", length = 200)
     private String company;
 

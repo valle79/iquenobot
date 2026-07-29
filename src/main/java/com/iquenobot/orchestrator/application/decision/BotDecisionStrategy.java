@@ -52,15 +52,19 @@ public class BotDecisionStrategy implements DecisionStrategy {
         var botConfig = context.getBotConfiguration();
 
         try {
+            var conversation = context.getConversation();
+            boolean isFirstMessage = conversation.getMessageCount() == 0;
+
             ChatbotResponseDto botResponse = chatbotService.processMessage(
                     msg.getContent(),
                     Map.of(
-                            "conversationId", context.getConversation().getId().toString(),
+                            "conversationId", conversation.getId().toString(),
                             "tenantId", context.getTenantId().toString(),
                             "contactId", context.getContact().getId().toString(),
                             "channel", msg.getChannel().name(),
                             "systemPrompt", botConfig != null ? botConfig.getSystemPrompt() : "",
-                            "temperature", String.valueOf(botConfig != null ? botConfig.getTemperature() : 0.7)
+                            "temperature", String.valueOf(botConfig != null ? botConfig.getTemperature() : 0.7),
+                            "isFirstMessage", isFirstMessage
                     )
             );
 

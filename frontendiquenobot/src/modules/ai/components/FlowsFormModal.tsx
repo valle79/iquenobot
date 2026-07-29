@@ -4,32 +4,27 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Modal } from '@/shared/atoms/Modal/Modal'
 import { Input } from '@/shared/atoms/Input/Input'
+import { Toggle } from '@/shared/atoms/Toggle/Toggle'
 import { Button } from '@/shared/atoms/Button/Button'
 import { useChatbotFlowMutations } from '../hooks/useChatbotFlows'
-import type { ChatbotFlowDto, ChatbotFlowTrigger } from '@/types/chatbot'
+import type { ChatbotFlowDto } from '@/types/chatbot'
 
 const schema = z.object({
   name: z.string().min(1, 'Requerido').max(100),
   description: z.string().optional(),
   triggerType: z.string().min(1, 'Requerido'),
   triggerKeywords: z.string().optional(),
-  triggerPattern: z.string().optional(),
-  flowConfig: z.string().min(1, 'Requerido'),
-  priority: z.string().optional(),
-  active: z.string(),
-  useAI: z.string(),
-  aiPrompt: z.string().optional(),
+  message: z.string().min(1, 'Escribe el mensaje que enviará el bot'),
   fallbackMessage: z.string().optional(),
+  active: z.boolean(),
 })
 
 type FormData = z.infer<typeof schema>
 
-const triggerOptions: { value: string; label: string }[] = [
-  { value: 'KEYWORD', label: 'Palabra clave' },
-  { value: 'PATTERN', label: 'Patrón' },
-  { value: 'AI', label: 'IA' },
-  { value: 'SCHEDULED', label: 'Programado' },
-  { value: 'EVENT', label: 'Evento' },
+const triggerOptions: { value: string; label: string; hint: string }[] = [
+  { value: 'KEYWORD', label: 'Palabra clave', hint: 'Se activa cuando el cliente escribe cierta palabra' },
+  { value: 'WELCOME', label: 'Bienvenida', hint: 'Se activa cuando el cliente inicia una conversación' },
+  { value: 'INTENT', label: 'Tras detectar una intención', hint: 'Se activa después de que el bot reconoce el tema' },
 ]
 
 interface Props {
@@ -38,15 +33,31 @@ interface Props {
   onClose: () => void
 }
 
+function extractMessage(flowConfig: string | undefined | null): string {
+  if (!flowConfig) return ''
+  try {
+    const parsed = JSON.parse(flowConfig)
+    return parsed.message || ''
+  } catch {
+    return ''
+  }
+}
+
+function buildFlowConfig(message: string, fallbackMessage?: string): string {
+  return JSON.stringify({ message, fallbackMessage: fallbackMessage || '' })
+}
+
 export function FlowsFormModal({ open, flow, onClose }: Props) {
   const isEdit = !!flow
   const { createMutation, updateMutation } = useChatbotFlowMutations()
 
-  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
+    defaultValues: { name: '', description: '', triggerType: 'KEYWORD', triggerKeywords: '', message: '', fallbackMessage: '', active: true },
   })
 
   const triggerType = watch('triggerType')
+  const active = watch('active')
 
   useEffect(() => {
     if (flow) {
@@ -55,19 +66,9 @@ export function FlowsFormModal({ open, flow, onClose }: Props) {
         description: flow.description || '',
         triggerType: flow.triggerType,
         triggerKeywords: flow.triggerKeywords || '',
-        triggerPattern: flow.triggerPattern || '',
-        flowConfig: flow.flowConfig,
-        priority: String(flow.priority ?? 0),
-        active: String(flow.active),
-        useAI: String(flow.useAI),
-        aiPrompt: flow.aiPrompt || '',
+        message: extractMessage(flow.flowConfig),
         fallbackMessage: flow.fallbackMessage || '',
-      })
-    } else {
-      reset({
-        name: '', description: '', triggerType: 'KEYWORD', triggerKeywords: '', triggerPattern: '',
-        flowConfig: '{"messages": []}', priority: '0', active: 'true', useAI: 'false',
-        aiPrompt: '', fallbackMessage: '',
+        active: flow.active,
       })
     }
   }, [flow, reset])
@@ -77,14 +78,11 @@ export function FlowsFormModal({ open, flow, onClose }: Props) {
       const dto = {
         name: data.name,
         description: data.description || undefined,
-        triggerType: data.triggerType as ChatbotFlowTrigger,
-        triggerKeywords: data.triggerKeywords || undefined,
-        triggerPattern: data.triggerPattern || undefined,
-        flowConfig: data.flowConfig,
-        priority: data.priority ? Number(data.priority) : undefined,
-        active: data.active === 'true',
-        useAI: data.useAI === 'true',
-        aiPrompt: data.aiPrompt || undefined,
+        triggerType: data.triggerType,
+        triggerKeywords: data.triggerType === 'KEYWORD' ? data.triggerKeywords : undefined,
+        flowConfig: buildFlowConfig(data.message, data.fallbackMessage),
+        active: data.active,
+        priority: 0,
         fallbackMessage: data.fallbackMessage || undefined,
       }
       if (isEdit && flow) {
@@ -99,61 +97,52 @@ export function FlowsFormModal({ open, flow, onClose }: Props) {
   const isLoading = createMutation.isPending || updateMutation.isPending
 
   return (
-    <Modal open={open} onClose={onClose} title={isEdit ? 'Editar flujo' : 'Nuevo flujo'} size="lg">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <Input label="Nombre del flujo" placeholder="Flujo de bienvenida" {...register('name')} error={errors.name?.message} />
+    <Modal open={open} onClose={onClose} title={isEdit ? 'Editar conversación guiada' : 'Nueva conversación guiada'} size="lg">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+
+        <Input label="Nombre" placeholder="ej: bienvenida, consulta_precio, agradecimiento" {...register('name')} error={errors.name?.message} />
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
-          <textarea {...register('description')} rows={2}
-            className="h-16 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
-            placeholder="Descripción opcional..." />
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Descripción (opcional)</label>
+          <textarea {...register('description')} rows={1}
+            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
+            placeholder="¿Cuándo se usa esta conversación?" />
         </div>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tipo de disparador</label>
-            <select {...register('triggerType')}
-              className="h-9 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
-              {triggerOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
-          <Input label="Prioridad" type="number" placeholder="0" {...register('priority')} />
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Activo</label>
-            <select {...register('active')}
-              className="h-9 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
-              <option value="true">Sí</option>
-              <option value="false">No</option>
-            </select>
-          </div>
+
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">¿Cuándo se activa?</label>
+          <select {...register('triggerType')}
+            className="h-9 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
+            {triggerOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+          <p className="text-xs text-gray-400">{triggerOptions.find(o => o.value === triggerType)?.hint}</p>
         </div>
+
         {triggerType === 'KEYWORD' && (
-          <Input label="Palabras clave" placeholder="hola, buenos días, saludos" {...register('triggerKeywords')} />
+          <Input label="Palabras clave" placeholder="ej: precio, costo, cuánto vale" {...register('triggerKeywords')} />
+          <p className="text-xs text-gray-400">Separa con comas. El bot se activará cuando el cliente escriba alguna de estas palabras.</p>
         )}
-        {triggerType === 'PATTERN' && (
-          <Input label="Patrón (regex)" placeholder="hola|buenos (días|tardes)" {...register('triggerPattern')} />
-        )}
+
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Configuración del flujo (JSON) <span className="text-red-500">*</span></label>
-          <textarea {...register('flowConfig')} rows={4}
-            className="h-24 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-mono placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
-            placeholder='{"messages": [{"type": "text", "content": "Hola"}]}' />
-          {errors.flowConfig && <p className="text-xs text-red-500">{errors.flowConfig.message}</p>}
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Mensaje que envía el bot</label>
+          <textarea {...register('message')} rows={3}
+            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
+            placeholder={"¡Hola! ¿En qué puedo ayudarte?\n\nOpciones:\n1. Consultar precio\n2. Hablar con un asesor"} />
+          {errors.message && <p className="text-xs text-red-500">{errors.message.message}</p>}
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Usar IA</label>
-            <select {...register('useAI')}
-              className="h-9 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
-              <option value="false">No</option>
-              <option value="true">Sí</option>
-            </select>
+
+        <Input label="Mensaje si no entiende (opcional)" placeholder="ej: Lo siento, no entendí. ¿Puedes repetirlo?" {...register('fallbackMessage')} />
+
+        <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 dark:border-gray-700 dark:bg-gray-800/50">
+          <div>
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Activo</p>
+            <p className="text-xs text-gray-500">Si lo desactivas, el bot ignorará esta conversación</p>
           </div>
-          <Input label="Prompt de IA" placeholder="Eres un asistente..." {...register('aiPrompt')} />
+          <Toggle checked={active} onChange={(v) => setValue('active', v)} size="sm" />
         </div>
-        <Input label="Mensaje de fallback" placeholder="Lo siento, no entendí..." {...register('fallbackMessage')} />
-        <div className="flex justify-end gap-3 pt-4">
+
+        <div className="flex justify-end gap-3 pt-1">
           <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button type="submit" loading={isLoading}>{isEdit ? 'Guardar cambios' : 'Crear flujo'}</Button>
+          <Button type="submit" loading={isLoading}>{isEdit ? 'Guardar cambios' : 'Crear conversación'}</Button>
         </div>
       </form>
     </Modal>

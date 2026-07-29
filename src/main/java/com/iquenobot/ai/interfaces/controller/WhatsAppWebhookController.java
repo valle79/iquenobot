@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1/whatsapp/webhook")
 @RequiredArgsConstructor
@@ -26,20 +29,47 @@ public class WhatsAppWebhookController {
     private final WhatsAppWebhookAdapter webhookAdapter;
 
     @PostMapping("/{instanceId}")
-    @Operation(summary = "Recibir webhook de WhatsApp",
+    @Operation(
+            summary = "Recibir webhook de WhatsApp",
             description = "Endpoint público para recibir mensajes entrantes desde Evolution API. " +
-                    "El Conversation Orchestrator decide automáticamente la acción a tomar.")
+                    "El Conversation Orchestrator decide automáticamente la acción a tomar."
+    )
     public ResponseEntity<ApiResponse<Void>> receiveWebhook(
             @PathVariable String instanceId,
             @Valid @RequestBody WhatsAppWebhookDto payload) {
+
         log.info("=== WEBHOOK WHATSAPP RECIBIDO ===");
         log.info("Instance: {} Event: {}", instanceId, payload.getEvent());
+
         log.info("Payload - event: {}, instanceId: {}, from: {}, messageId: {}, type: {}, text: {}",
-                payload.getEvent(), payload.getInstanceId(), payload.getFrom(),
-                payload.getMessageId(), payload.getType(), payload.getText());
+                payload.getEvent(),
+                payload.getInstanceId(),
+                payload.getFrom(),
+                payload.getMessageId(),
+                payload.getType(),
+                payload.getText());
+
+        // -------------------------------------------------------------
+        // Compatibilidad: data puede venir como OBJETO o ARRAY
+        // -------------------------------------------------------------
+        Object rawData = payload.getData();
+
+        String dataKeys = "N/A";
+
+        if (rawData instanceof Map<?, ?> map) {
+            dataKeys = map.keySet().toString();
+        } else if (rawData instanceof List<?> list) {
+
+            if (!list.isEmpty() && list.get(0) instanceof Map<?, ?> map) {
+                dataKeys = map.keySet().toString() + " (from array)";
+            } else {
+                dataKeys = "ARRAY(size=" + list.size() + ")";
+            }
+        }
+
         log.info("Payload - data present: {}, data keys: {}",
-                payload.getData() != null ? "SI" : "NO",
-                payload.getData() != null ? payload.getData().keySet() : "N/A");
+                rawData != null ? "SI" : "NO",
+                dataKeys);
 
         try {
             ProcessingResult result = webhookAdapter.processWebhook(instanceId, payload);
@@ -50,6 +80,7 @@ public class WhatsAppWebhookController {
                 log.warn("Webhook processing returned error: code={} message={}",
                         result.getErrorCode(), result.getMessage());
             }
+
         } catch (Exception e) {
             log.error("Error processing webhook: {}", e.getMessage(), e);
         }

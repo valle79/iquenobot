@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, MoreHorizontal, Trash2, Pencil, Brain, Zap } from 'lucide-react'
+import { Plus, MoreHorizontal, Trash2, Pencil, Brain } from 'lucide-react'
 import { useChatbotIntents, useChatbotIntentMutations } from '../hooks/useChatbotIntents'
 import { IntentsFormModal } from '../components/IntentsFormModal'
 import { DataTable } from '@/shared/organisms/DataTable/DataTable'
@@ -21,7 +21,7 @@ export default function ChatbotIntentsPage() {
 
   const columns: ColumnDef<ChatbotIntentDto>[] = [
     {
-      header: 'Intención',
+      header: 'Nombre',
       accessorKey: 'intentName',
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
@@ -31,36 +31,25 @@ export default function ChatbotIntentsPage() {
       ),
     },
     {
-      header: 'Frases',
-      accessorKey: 'trainingPhrases',
+      header: 'Descripción',
+      accessorKey: 'description',
       cell: ({ row }) => (
         <span className="max-w-[200px] truncate text-sm text-gray-500">
-          {row.original.trainingPhrases}
+          {row.original.description || '—'}
         </span>
       ),
     },
     {
-      header: 'Confianza',
-      accessorKey: 'confidenceThreshold',
-      cell: ({ row }) => (
-        <span className="text-sm font-medium">
-          {(row.original.confidenceThreshold * 100).toFixed(0)}%
-        </span>
-      ),
-    },
-    {
-      header: 'Prioridad',
-      accessorKey: 'priority',
-      cell: ({ row }) => (
-        <span className="text-sm text-gray-600 dark:text-gray-400">{row.original.priority}</span>
-      ),
-    },
-    {
-      header: 'Match',
-      accessorKey: 'matchedCount',
-      cell: ({ row }) => (
-        <span className="text-sm text-gray-600 dark:text-gray-400">{row.original.matchedCount}</span>
-      ),
+      header: 'Frases de ejemplo',
+      accessorKey: 'trainingPhrases',
+      cell: ({ row }) => {
+        const phrases = (() => { try { const a = JSON.parse(row.original.trainingPhrases); return Array.isArray(a) ? a : []; } catch { return []; } })()
+        return (
+          <span className="max-w-[200px] truncate text-sm text-gray-500">
+            {phrases.slice(0, 3).join(', ')}{phrases.length > 3 ? '...' : ''}
+          </span>
+        )
+      },
     },
     {
       header: 'Activo',
@@ -105,27 +94,27 @@ export default function ChatbotIntentsPage() {
         <div className="flex items-center gap-3">
           <Brain size={24} className="text-brand-500" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Intenciones</h1>
-            <p className="mt-1 text-sm text-gray-500">Gestiona las intenciones del chatbot ({totalElements} total)</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Auto-Respuestas</h1>
+            <p className="mt-1 text-sm text-gray-500">Cuando el cliente escriba algo relacionado, el bot responde automáticamente ({totalElements} total)</p>
           </div>
         </div>
         <Button onClick={() => { setFormTarget(null); setFormOpen(true) }}>
-          <Plus size={18} /> Nueva intención
+          <Plus size={18} /> Nueva auto-respuesta
         </Button>
       </div>
 
-      <SearchBar placeholder="Buscar intenciones..." value={search} onSearch={setSearch} className="max-w-xs" />
+      <SearchBar placeholder="Buscar auto-respuestas..." value={search} onSearch={setSearch} className="max-w-xs" />
 
       <DataTable
         columns={columns} data={intents} loading={isLoading}
         pageCount={totalPages} pageIndex={page} onPageChange={setPage}
-        totalRecords={totalElements} emptyMessage="No se encontraron intenciones"
+        totalRecords={totalElements} emptyMessage="No hay auto-respuestas. Crea una para que el bot responda automáticamente."
       />
 
       <ConfirmDialog
         open={!!deleteTarget} onClose={() => setDeleteTarget(null)}
         onConfirm={() => { if (deleteTarget) deleteMutation.mutate(deleteTarget.id); setDeleteTarget(null) }}
-        title="Eliminar intención"
+        title="Eliminar auto-respuesta"
         message={`¿Eliminar "${deleteTarget?.intentName}" permanentemente?`}
         confirmLabel="Eliminar" loading={deleteMutation.isPending}
       />

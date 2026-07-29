@@ -379,18 +379,18 @@ public class ConversationService {
     public void markAsRead(UUID conversationId) {
         UUID tenantId = getTenantId();
 
-        Conversation conversation = conversationRepository
+        conversationRepository
                 .findByIdAndTenantIdAndDeletedFalse(conversationId, tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Conversación no encontrada"));
 
         int markedCount = messageRepository.markConversationMessagesAsRead(
                 conversationId, LocalDateTime.now());
-        
-        conversation.resetUnreadCount();
-        conversationRepository.save(conversation);
 
-        log.info("Marked {} messages as read in conversation {} for tenant {}", 
-                 markedCount, conversationId, tenantId);
+        int updatedRows = conversationRepository.resetUnreadCount(
+                conversationId, tenantId, LocalDateTime.now());
+
+        log.info("Marked {} messages as read in conversation {} for tenant {} (conversation rows updated={})",
+                markedCount, conversationId, tenantId, updatedRows);
     }
 
     @Transactional

@@ -35782,3 +35782,808 @@ com.iquenobot.shared.exception.BusinessException: Error al enviar mensaje por Wh
 2026-07-29 18:41:43 [orchestrator-event-1] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=1910d7a9-d9b5-4fdb-914f-8410dd31d29d action=SEND_TEXT time=4429ms
 2026-07-29 18:41:43 [tomcat-handler-36] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
 2026-07-29 18:41:43 [orchestrator-event-1] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=SEND_TEXT time=4429ms
+2026-07-29 18:45:22 [tomcat-handler-38] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-29 18:45:22 [tomcat-handler-38] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-29 18:45:22 [tomcat-handler-38] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-29 18:45:22 [tomcat-handler-38] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, contextInfo, messageType, messageTimestamp, instanceId, source]
+2026-07-29 18:45:22 [tomcat-handler-38] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-29 18:45:22 [tomcat-handler-38] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51972349298@s.whatsapp.net, remoteJidAlt=51972349298@s.whatsapp.net, fromMe=true, id=A50370CA7EB24BF04362EBA60AC79E0D, participant=, addressingMode=lid}, pushName=LuisDev, status=SERVER_ACK, message={conversation=Aya vas a cocinar en mi casa dices así bailando}, contextInfo={mentionedJid=[], groupMentions=[], statusAttributions=[], stanzaId=ACC5C5A64E07E5DF72E00A216B5167BC, participant=124236895125506@lid, quotedMessage={conversation=https://www.facebook.com/share/r/1BM3tXicsU/}, quotedType=0}, messageType=conversation, messageTimestamp=1785368722, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-29 18:45:22 [tomcat-handler-38] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51972349298 | type=conversation | msgId=A50370CA7EB24BF04362EBA60AC79E0D
+2026-07-29 18:45:22 [tomcat-handler-38] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: OUTBOUND
+2026-07-29 18:45:22 [tomcat-handler-38] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51972349298 direction=OUTBOUND type=TEXT content=Aya vas a cocinar en mi casa dices así bailando
+2026-07-29 18:45:22 [tomcat-handler-38] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:45:22 [tomcat-handler-38] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-29 18:45:22 [tomcat-handler-38] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:45:22 [tomcat-handler-38] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-29 18:45:22 [tomcat-handler-38] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-29 18:45:22 [tomcat-handler-38] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 335ms
+2026-07-29 18:45:22 [tomcat-handler-38] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-29 18:45:22 [tomcat-handler-38] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51972349298]
+2026-07-29 18:45:22 [tomcat-handler-38] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51972349298]
+2026-07-29 18:45:22 [tomcat-handler-38] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-29 18:45:22 [tomcat-handler-38] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-29 18:45:23 [tomcat-handler-38] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51972349298 found=true
+2026-07-29 18:45:23 [tomcat-handler-38] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰  phone=+51972349298 normalized=+51972349298
+2026-07-29 18:45:23 [tomcat-handler-38] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰 
+2026-07-29 18:45:23 [tomcat-handler-38] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 303ms
+2026-07-29 18:45:23 [tomcat-handler-38] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd status=IN_PROGRESS channel=WHATSAPP
+2026-07-29 18:45:23 [tomcat-handler-38] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 279ms
+2026-07-29 18:45:23 [tomcat-handler-38] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-29 18:45:23 [tomcat-handler-38] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 325ms
+2026-07-29 18:45:23 [tomcat-handler-38] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-29 18:45:23 [tomcat-handler-38] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 185ms
+2026-07-29 18:45:24 [tomcat-handler-38] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=5 consecutiveBotResponses=0 firstMessage=false
+2026-07-29 18:45:24 [tomcat-handler-38] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 152ms
+2026-07-29 18:45:24 [tomcat-handler-38] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=1934d9ab-4fd2-4fbb-b3ac-f1e96c670105 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd type=TEXT
+2026-07-29 18:45:24 [tomcat-handler-38] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 457ms
+2026-07-29 18:45:24 [tomcat-handler-38] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=613fe49d-95fa-4df1-95d9-88bf45ec6126 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:45:24 [tomcat-handler-38] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 316ms
+2026-07-29 18:45:24 [tomcat-handler-38] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd|contactId=613fe49d-95fa-4df1-95d9-88bf45ec6126|messageId=A50370CA7EB24BF04362EBA60AC79E0D|channel=WHATSAPP|type=TEXT
+2026-07-29 18:45:24 [tomcat-handler-38] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 1ms
+2026-07-29 18:45:24 [tomcat-handler-38] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2354ms
+2026-07-29 18:45:24 [tomcat-handler-38] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:45:24 [tomcat-handler-38] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-29 18:45:24 [orchestrator-event-5] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd channel=WHATSAPP
+2026-07-29 18:45:24 [tomcat-handler-38] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-29 18:45:24 [orchestrator-event-3] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=A50370CA7EB24BF04362EBA60AC79E0D
+2026-07-29 18:45:24 [tomcat-handler-38] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-29 18:45:24 [tomcat-handler-38] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-29 18:45:24 [tomcat-handler-38] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd: No automated action configured for this message
+2026-07-29 18:45:24 [tomcat-handler-38] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:45:24 [tomcat-handler-38] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2355ms. decision=NO_ACTION
+2026-07-29 18:45:24 [tomcat-handler-38] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-29 18:45:24 [orchestrator-event-1] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd action=NO_ACTION time=2355ms
+2026-07-29 18:45:24 [orchestrator-event-1] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2355ms
+2026-07-29 18:45:24 [orchestrator-event-4] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2355ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:45:24 [orchestrator-event-5] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-29 18:45:49 [tomcat-handler-40] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-29 18:45:49 [tomcat-handler-40] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-29 18:45:49 [tomcat-handler-40] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-29 18:45:49 [tomcat-handler-40] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, messageType, messageTimestamp, instanceId, source]
+2026-07-29 18:45:49 [tomcat-handler-40] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-29 18:45:49 [tomcat-handler-40] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51972349298@s.whatsapp.net, remoteJidAlt=51972349298@s.whatsapp.net, fromMe=true, id=A5B333517CC73529AB1A1F2256171EBA, participant=, addressingMode=lid}, pushName=LuisDev, status=SERVER_ACK, message={conversation=Uyyyyy eso será un sueño hecho realidad 😍😍😍}, messageType=conversation, messageTimestamp=1785368749, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-29 18:45:49 [tomcat-handler-40] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51972349298 | type=conversation | msgId=A5B333517CC73529AB1A1F2256171EBA
+2026-07-29 18:45:49 [tomcat-handler-40] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: OUTBOUND
+2026-07-29 18:45:49 [tomcat-handler-40] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51972349298 direction=OUTBOUND type=TEXT content=Uyyyyy eso será un sueño hecho realidad 😍😍😍
+2026-07-29 18:45:49 [tomcat-handler-40] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:45:49 [tomcat-handler-40] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-29 18:45:49 [tomcat-handler-40] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:45:49 [tomcat-handler-40] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-29 18:45:50 [tomcat-handler-40] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-29 18:45:50 [tomcat-handler-40] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 309ms
+2026-07-29 18:45:50 [tomcat-handler-40] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-29 18:45:50 [tomcat-handler-40] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51972349298]
+2026-07-29 18:45:50 [tomcat-handler-40] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51972349298]
+2026-07-29 18:45:50 [tomcat-handler-40] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-29 18:45:50 [tomcat-handler-40] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-29 18:45:50 [tomcat-handler-40] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51972349298 found=true
+2026-07-29 18:45:50 [tomcat-handler-40] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰  phone=+51972349298 normalized=+51972349298
+2026-07-29 18:45:50 [tomcat-handler-40] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰 
+2026-07-29 18:45:50 [tomcat-handler-40] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 306ms
+2026-07-29 18:45:50 [tomcat-handler-40] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd status=IN_PROGRESS channel=WHATSAPP
+2026-07-29 18:45:50 [tomcat-handler-40] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 334ms
+2026-07-29 18:45:51 [tomcat-handler-40] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-29 18:45:51 [tomcat-handler-40] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 315ms
+2026-07-29 18:45:51 [tomcat-handler-40] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-29 18:45:51 [tomcat-handler-40] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 170ms
+2026-07-29 18:45:51 [tomcat-handler-40] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=6 consecutiveBotResponses=0 firstMessage=false
+2026-07-29 18:45:51 [tomcat-handler-40] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 166ms
+2026-07-29 18:45:51 [tomcat-handler-40] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=c77f7432-d146-47f2-be45-183c3d88e4ef conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd type=TEXT
+2026-07-29 18:45:51 [tomcat-handler-40] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 491ms
+2026-07-29 18:45:52 [tomcat-handler-40] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=613fe49d-95fa-4df1-95d9-88bf45ec6126 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:45:52 [tomcat-handler-40] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 316ms
+2026-07-29 18:45:52 [tomcat-handler-40] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd|contactId=613fe49d-95fa-4df1-95d9-88bf45ec6126|messageId=A5B333517CC73529AB1A1F2256171EBA|channel=WHATSAPP|type=TEXT
+2026-07-29 18:45:52 [tomcat-handler-40] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 0ms
+2026-07-29 18:45:52 [tomcat-handler-40] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2414ms
+2026-07-29 18:45:52 [tomcat-handler-40] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:45:52 [tomcat-handler-40] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-29 18:45:52 [orchestrator-event-1] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=A5B333517CC73529AB1A1F2256171EBA
+2026-07-29 18:45:52 [orchestrator-event-3] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd channel=WHATSAPP
+2026-07-29 18:45:52 [tomcat-handler-40] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-29 18:45:52 [tomcat-handler-40] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-29 18:45:52 [tomcat-handler-40] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-29 18:45:52 [tomcat-handler-40] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd: No automated action configured for this message
+2026-07-29 18:45:52 [tomcat-handler-40] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:45:52 [tomcat-handler-40] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2424ms. decision=NO_ACTION
+2026-07-29 18:45:52 [orchestrator-event-5] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd action=NO_ACTION time=2424ms
+2026-07-29 18:45:52 [orchestrator-event-2] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2424ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:45:52 [orchestrator-event-1] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-29 18:45:52 [tomcat-handler-40] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-29 18:45:52 [orchestrator-event-5] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2424ms
+2026-07-29 18:46:24 [tomcat-handler-42] WARN  c.i.security.application.JwtService - JWT token expired: JWT expired 255559 milliseconds ago at 2026-07-29T23:42:09.000Z. Current time: 2026-07-29T23:46:24.559Z. Allowed clock skew: 0 milliseconds.
+2026-07-29 18:46:24 [tomcat-handler-42] DEBUG c.i.security.application.JwtService - Token validation failed: JWT expired 255559 milliseconds ago at 2026-07-29T23:42:09.000Z. Current time: 2026-07-29T23:46:24.559Z. Allowed clock skew: 0 milliseconds.
+2026-07-29 18:46:24 [tomcat-handler-42] WARN  c.i.s.s.JwtAuthenticationEntryPoint - Unauthorized access attempt to: /api/v1/conversations/active from IP: 0:0:0:0:0:0:0:1
+2026-07-29 18:46:24 [tomcat-handler-43] DEBUG c.i.auth.application.AuthService - Refreshing token
+2026-07-29 18:46:25 [tomcat-handler-43] DEBUG c.i.auth.application.AuthService - Token refreshed successfully for user: admin@miempresa.com
+2026-07-29 18:46:25 [tomcat-handler-44] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 95e009fb-66e9-437c-9d35-be4df58d425f for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:25 [tomcat-handler-44] DEBUG c.i.shared.security.TenantFilter - Enabled tenant filter for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:28 [tomcat-handler-46] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 95e009fb-66e9-437c-9d35-be4df58d425f for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:28 [tomcat-handler-47] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 95e009fb-66e9-437c-9d35-be4df58d425f for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:28 [tomcat-handler-45] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 95e009fb-66e9-437c-9d35-be4df58d425f for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:28 [tomcat-handler-46] DEBUG c.i.shared.security.TenantFilter - Enabled tenant filter for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:28 [tomcat-handler-45] DEBUG c.i.shared.security.TenantFilter - Enabled tenant filter for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:28 [tomcat-handler-47] DEBUG c.i.shared.security.TenantFilter - Enabled tenant filter for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:28 [tomcat-handler-48] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 95e009fb-66e9-437c-9d35-be4df58d425f for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:28 [tomcat-handler-48] DEBUG c.i.shared.security.TenantFilter - Enabled tenant filter for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:29 [tomcat-handler-48] INFO  c.i.c.a.ConversationService - Marked 4 messages as read in conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-29 18:46:29 [tomcat-handler-47] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-29 18:46:32 [tomcat-handler-50] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 95e009fb-66e9-437c-9d35-be4df58d425f for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:32 [tomcat-handler-51] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 95e009fb-66e9-437c-9d35-be4df58d425f for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:32 [tomcat-handler-49] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 95e009fb-66e9-437c-9d35-be4df58d425f for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:32 [tomcat-handler-49] DEBUG c.i.shared.security.TenantFilter - Enabled tenant filter for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:32 [tomcat-handler-51] DEBUG c.i.shared.security.TenantFilter - Enabled tenant filter for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:32 [tomcat-handler-50] DEBUG c.i.shared.security.TenantFilter - Enabled tenant filter for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:32 [tomcat-handler-51] INFO  c.i.c.a.ConversationService - Marked 2 messages as read in conversation 1910d7a9-d9b5-4fdb-914f-8410dd31d29d for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-29 18:46:37 [tomcat-handler-52] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 95e009fb-66e9-437c-9d35-be4df58d425f for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:37 [tomcat-handler-52] DEBUG c.i.shared.security.TenantFilter - Enabled tenant filter for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:38 [tomcat-handler-52] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-29 18:46:57 [tomcat-handler-54] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 95e009fb-66e9-437c-9d35-be4df58d425f for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:57 [tomcat-handler-53] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 95e009fb-66e9-437c-9d35-be4df58d425f for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:57 [tomcat-handler-55] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 95e009fb-66e9-437c-9d35-be4df58d425f for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:57 [tomcat-handler-55] DEBUG c.i.shared.security.TenantFilter - Enabled tenant filter for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:57 [tomcat-handler-53] DEBUG c.i.shared.security.TenantFilter - Enabled tenant filter for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:57 [tomcat-handler-54] DEBUG c.i.shared.security.TenantFilter - Enabled tenant filter for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:46:58 [tomcat-handler-54] INFO  c.i.c.a.ConversationService - Marked 4 messages as read in conversation b4e5ca5d-7ade-438d-9613-92c1d9acef4d for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-29 18:47:04 [tomcat-handler-56] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 95e009fb-66e9-437c-9d35-be4df58d425f for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:47:04 [tomcat-handler-56] DEBUG c.i.shared.security.TenantFilter - Enabled tenant filter for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:47:04 [tomcat-handler-56] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-29 18:47:50 [tomcat-handler-57] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-29 18:47:50 [tomcat-handler-57] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-29 18:47:50 [tomcat-handler-57] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-29 18:47:50 [tomcat-handler-57] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, contextInfo, messageType, messageTimestamp, instanceId, source]
+2026-07-29 18:47:50 [tomcat-handler-57] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-29 18:47:50 [tomcat-handler-57] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51972349298@s.whatsapp.net, remoteJidAlt=51972349298@s.whatsapp.net, fromMe=false, id=AC77852EA0951A3B5A1D88CED3FFCA00, participant=, addressingMode=lid}, pushName=Karlhita Albites 🥰🥰, status=DELIVERY_ACK, message={messageContextInfo={threadId=[], deviceListMetadata={senderKeyIndexes=[], recipientKeyIndexes=[], senderTimestamp={low=1784939599, high=0, unsigned=true}, recipientKeyHash={0=247, 1=105, 2=235, 3=253, 4=176, 5=169, 6=148, 7=75, 8=193, 9=195}, recipientTimestamp={low=1785358695, high=0, unsigned=true}}, deviceListMetadataVersion=2, messageSecret={0=184, 1=201, 2=145, 3=25, 4=101, 5=154, 6=154, 7=107, 8=74, 9=175, 10=66, 11=26, 12=43, 13=15, 14=76, 15=69, 16=110, 17=127, 18=146, 19=53, 20=229, 21=37, 22=207, 23=100, 24=241, 25=125, 26=92, 27=222, 28=52, 29=138, 30=84, 31=214}}, conversation=🫪🫪🫪}, contextInfo={mentionedJid=[], groupMentions=[], statusAttributions=[], stanzaId=A50370CA7EB24BF04362EBA60AC79E0D, participant=181161838002355@lid, quotedMessage={conversation=Aya vas a cocinar en mi casa dices así bailando}, quotedType=0}, messageType=conversation, messageTimestamp=1785368870, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-29 18:47:50 [tomcat-handler-57] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51972349298 | type=conversation | msgId=AC77852EA0951A3B5A1D88CED3FFCA00
+2026-07-29 18:47:50 [tomcat-handler-57] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: INBOUND
+2026-07-29 18:47:50 [tomcat-handler-57] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51972349298 direction=INBOUND type=TEXT content=🫪🫪🫪
+2026-07-29 18:47:50 [tomcat-handler-57] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:47:50 [tomcat-handler-57] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-29 18:47:50 [tomcat-handler-57] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:47:50 [tomcat-handler-57] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-29 18:47:51 [tomcat-handler-57] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-29 18:47:51 [tomcat-handler-57] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 307ms
+2026-07-29 18:47:51 [tomcat-handler-57] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-29 18:47:51 [tomcat-handler-57] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51972349298]
+2026-07-29 18:47:51 [tomcat-handler-57] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51972349298]
+2026-07-29 18:47:51 [tomcat-handler-57] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-29 18:47:51 [tomcat-handler-57] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-29 18:47:51 [tomcat-handler-57] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51972349298 found=true
+2026-07-29 18:47:51 [tomcat-handler-57] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰  phone=+51972349298 normalized=+51972349298
+2026-07-29 18:47:51 [tomcat-handler-57] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰 
+2026-07-29 18:47:51 [tomcat-handler-57] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 306ms
+2026-07-29 18:47:51 [tomcat-handler-57] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd status=IN_PROGRESS channel=WHATSAPP
+2026-07-29 18:47:51 [tomcat-handler-57] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 285ms
+2026-07-29 18:47:51 [tomcat-handler-57] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-29 18:47:51 [tomcat-handler-57] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 290ms
+2026-07-29 18:47:52 [tomcat-handler-57] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-29 18:47:52 [tomcat-handler-57] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 143ms
+2026-07-29 18:47:52 [tomcat-handler-57] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=7 consecutiveBotResponses=0 firstMessage=false
+2026-07-29 18:47:52 [tomcat-handler-57] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 153ms
+2026-07-29 18:47:52 [tomcat-handler-57] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=9d3c4571-f460-4707-ac0c-a6c4d72671a3 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd type=TEXT
+2026-07-29 18:47:52 [tomcat-handler-57] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 435ms
+2026-07-29 18:47:52 [tomcat-handler-57] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=613fe49d-95fa-4df1-95d9-88bf45ec6126 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:47:52 [tomcat-handler-57] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 290ms
+2026-07-29 18:47:52 [tomcat-handler-57] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd|contactId=613fe49d-95fa-4df1-95d9-88bf45ec6126|messageId=AC77852EA0951A3B5A1D88CED3FFCA00|channel=WHATSAPP|type=TEXT
+2026-07-29 18:47:52 [tomcat-handler-57] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 0ms
+2026-07-29 18:47:52 [tomcat-handler-57] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2211ms
+2026-07-29 18:47:52 [tomcat-handler-57] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:47:52 [tomcat-handler-57] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-29 18:47:52 [orchestrator-event-3] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd channel=WHATSAPP
+2026-07-29 18:47:52 [orchestrator-event-2] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=AC77852EA0951A3B5A1D88CED3FFCA00
+2026-07-29 18:47:52 [tomcat-handler-57] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-29 18:47:52 [tomcat-handler-57] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-29 18:47:52 [tomcat-handler-57] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-29 18:47:52 [tomcat-handler-57] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd: No automated action configured for this message
+2026-07-29 18:47:52 [tomcat-handler-57] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:47:52 [tomcat-handler-57] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2212ms. decision=NO_ACTION
+2026-07-29 18:47:52 [orchestrator-event-5] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd action=NO_ACTION time=2212ms
+2026-07-29 18:47:52 [orchestrator-event-3] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-29 18:47:52 [orchestrator-event-4] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2212ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:47:52 [tomcat-handler-57] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-29 18:47:52 [orchestrator-event-5] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2212ms
+2026-07-29 18:47:53 [tomcat-handler-58] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-29 18:47:53 [tomcat-handler-58] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-29 18:47:53 [tomcat-handler-58] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-29 18:47:53 [tomcat-handler-58] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, messageType, messageTimestamp, instanceId, source]
+2026-07-29 18:47:53 [tomcat-handler-58] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-29 18:47:53 [tomcat-handler-58] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51972349298@s.whatsapp.net, remoteJidAlt=51972349298@s.whatsapp.net, fromMe=false, id=ACC6DDD6412BAA013E280347B3315242, participant=, addressingMode=lid}, pushName=Karlhita Albites 🥰🥰, status=DELIVERY_ACK, message={conversation=Vree, messageContextInfo={threadId=[], deviceListMetadata={senderKeyIndexes=[], recipientKeyIndexes=[], senderTimestamp={low=1784939599, high=0, unsigned=true}, recipientKeyHash={0=247, 1=105, 2=235, 3=253, 4=176, 5=169, 6=148, 7=75, 8=193, 9=195}, recipientTimestamp={low=1785358695, high=0, unsigned=true}}, deviceListMetadataVersion=2, messageSecret={0=114, 1=233, 2=205, 3=244, 4=74, 5=24, 6=166, 7=36, 8=132, 9=119, 10=195, 11=94, 12=88, 13=89, 14=102, 15=108, 16=20, 17=106, 18=40, 19=149, 20=154, 21=124, 22=209, 23=132, 24=100, 25=202, 26=31, 27=154, 28=164, 29=229, 30=129, 31=129}}}, messageType=conversation, messageTimestamp=1785368873, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-29 18:47:53 [tomcat-handler-58] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51972349298 | type=conversation | msgId=ACC6DDD6412BAA013E280347B3315242
+2026-07-29 18:47:53 [tomcat-handler-58] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: INBOUND
+2026-07-29 18:47:53 [tomcat-handler-58] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51972349298 direction=INBOUND type=TEXT content=Vree
+2026-07-29 18:47:53 [tomcat-handler-58] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:47:53 [tomcat-handler-58] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-29 18:47:53 [tomcat-handler-58] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:47:53 [tomcat-handler-58] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 1ms
+2026-07-29 18:47:53 [tomcat-handler-58] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-29 18:47:53 [tomcat-handler-58] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 296ms
+2026-07-29 18:47:53 [tomcat-handler-58] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-29 18:47:53 [tomcat-handler-58] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51972349298]
+2026-07-29 18:47:53 [tomcat-handler-58] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51972349298]
+2026-07-29 18:47:53 [tomcat-handler-58] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-29 18:47:53 [tomcat-handler-58] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-29 18:47:54 [tomcat-handler-58] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51972349298 found=true
+2026-07-29 18:47:54 [tomcat-handler-58] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰  phone=+51972349298 normalized=+51972349298
+2026-07-29 18:47:54 [tomcat-handler-58] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰 
+2026-07-29 18:47:54 [tomcat-handler-58] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 291ms
+2026-07-29 18:47:54 [tomcat-handler-58] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd status=IN_PROGRESS channel=WHATSAPP
+2026-07-29 18:47:54 [tomcat-handler-58] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 291ms
+2026-07-29 18:47:54 [tomcat-handler-58] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-29 18:47:54 [tomcat-handler-58] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 163ms
+2026-07-29 18:47:54 [tomcat-handler-58] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-29 18:47:54 [tomcat-handler-58] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 151ms
+2026-07-29 18:47:54 [tomcat-handler-58] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=8 consecutiveBotResponses=0 firstMessage=false
+2026-07-29 18:47:54 [tomcat-handler-58] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 158ms
+2026-07-29 18:47:55 [tomcat-handler-58] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=7195c05c-26a7-4fa9-82bb-a195aaa792a1 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd type=TEXT
+2026-07-29 18:47:55 [tomcat-handler-58] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 430ms
+2026-07-29 18:47:55 [tomcat-handler-58] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=613fe49d-95fa-4df1-95d9-88bf45ec6126 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:47:55 [tomcat-handler-58] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 297ms
+2026-07-29 18:47:55 [tomcat-handler-58] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd|contactId=613fe49d-95fa-4df1-95d9-88bf45ec6126|messageId=ACC6DDD6412BAA013E280347B3315242|channel=WHATSAPP|type=TEXT
+2026-07-29 18:47:55 [tomcat-handler-58] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 0ms
+2026-07-29 18:47:55 [tomcat-handler-58] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2079ms
+2026-07-29 18:47:55 [tomcat-handler-58] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:47:55 [orchestrator-event-3] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=ACC6DDD6412BAA013E280347B3315242
+2026-07-29 18:47:55 [tomcat-handler-58] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-29 18:47:55 [orchestrator-event-2] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd channel=WHATSAPP
+2026-07-29 18:47:55 [tomcat-handler-58] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-29 18:47:55 [tomcat-handler-58] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-29 18:47:55 [tomcat-handler-58] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-29 18:47:55 [tomcat-handler-58] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd: No automated action configured for this message
+2026-07-29 18:47:55 [tomcat-handler-58] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:47:55 [orchestrator-event-5] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd action=NO_ACTION time=2079ms
+2026-07-29 18:47:55 [tomcat-handler-58] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2079ms. decision=NO_ACTION
+2026-07-29 18:47:55 [orchestrator-event-1] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2079ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:47:55 [orchestrator-event-3] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-29 18:47:55 [orchestrator-event-5] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2079ms
+2026-07-29 18:47:55 [tomcat-handler-58] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-29 18:48:05 [tomcat-handler-60] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-29 18:48:05 [tomcat-handler-60] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-29 18:48:05 [tomcat-handler-60] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-29 18:48:05 [tomcat-handler-60] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, messageType, messageTimestamp, instanceId, source]
+2026-07-29 18:48:05 [tomcat-handler-60] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-29 18:48:05 [tomcat-handler-60] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51972349298@s.whatsapp.net, remoteJidAlt=51972349298@s.whatsapp.net, fromMe=false, id=ACC12A488FDE1B9B1548B824A49DCF05, participant=, addressingMode=lid}, pushName=Karlhita Albites 🥰🥰, status=DELIVERY_ACK, message={conversation=Es lo que ti haces amor, messageContextInfo={threadId=[], deviceListMetadata={senderKeyIndexes=[], recipientKeyIndexes=[], senderTimestamp={low=1784939599, high=0, unsigned=true}, recipientKeyHash={0=247, 1=105, 2=235, 3=253, 4=176, 5=169, 6=148, 7=75, 8=193, 9=195}, recipientTimestamp={low=1785358695, high=0, unsigned=true}}, deviceListMetadataVersion=2, messageSecret={0=53, 1=84, 2=77, 3=137, 4=247, 5=59, 6=124, 7=234, 8=89, 9=14, 10=65, 11=20, 12=111, 13=141, 14=170, 15=33, 16=174, 17=223, 18=40, 19=141, 20=74, 21=208, 22=240, 23=241, 24=196, 25=105, 26=67, 27=238, 28=81, 29=78, 30=102, 31=56}}}, messageType=conversation, messageTimestamp=1785368886, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-29 18:48:06 [tomcat-handler-60] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51972349298 | type=conversation | msgId=ACC12A488FDE1B9B1548B824A49DCF05
+2026-07-29 18:48:06 [tomcat-handler-60] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: INBOUND
+2026-07-29 18:48:06 [tomcat-handler-60] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51972349298 direction=INBOUND type=TEXT content=Es lo que ti haces amor
+2026-07-29 18:48:06 [tomcat-handler-60] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:48:06 [tomcat-handler-60] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-29 18:48:06 [tomcat-handler-60] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:48:06 [tomcat-handler-60] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-29 18:48:06 [tomcat-handler-60] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-29 18:48:06 [tomcat-handler-60] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 321ms
+2026-07-29 18:48:06 [tomcat-handler-60] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-29 18:48:06 [tomcat-handler-60] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51972349298]
+2026-07-29 18:48:06 [tomcat-handler-60] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51972349298]
+2026-07-29 18:48:06 [tomcat-handler-60] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-29 18:48:06 [tomcat-handler-60] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-29 18:48:06 [tomcat-handler-60] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51972349298 found=true
+2026-07-29 18:48:06 [tomcat-handler-60] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰  phone=+51972349298 normalized=+51972349298
+2026-07-29 18:48:06 [tomcat-handler-60] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰 
+2026-07-29 18:48:06 [tomcat-handler-60] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 273ms
+2026-07-29 18:48:06 [tomcat-handler-60] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd status=IN_PROGRESS channel=WHATSAPP
+2026-07-29 18:48:07 [tomcat-handler-60] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 316ms
+2026-07-29 18:48:07 [tomcat-handler-60] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-29 18:48:07 [tomcat-handler-60] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 159ms
+2026-07-29 18:48:07 [tomcat-handler-60] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-29 18:48:07 [tomcat-handler-60] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 294ms
+2026-07-29 18:48:07 [tomcat-handler-60] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=9 consecutiveBotResponses=0 firstMessage=false
+2026-07-29 18:48:07 [tomcat-handler-60] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 164ms
+2026-07-29 18:48:07 [tomcat-handler-60] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=fe7f2770-9af7-47e5-b7ee-8751a791b8d7 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd type=TEXT
+2026-07-29 18:48:08 [tomcat-handler-60] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 436ms
+2026-07-29 18:48:08 [tomcat-handler-60] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=613fe49d-95fa-4df1-95d9-88bf45ec6126 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:48:08 [tomcat-handler-60] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 289ms
+2026-07-29 18:48:08 [tomcat-handler-60] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd|contactId=613fe49d-95fa-4df1-95d9-88bf45ec6126|messageId=ACC12A488FDE1B9B1548B824A49DCF05|channel=WHATSAPP|type=TEXT
+2026-07-29 18:48:08 [tomcat-handler-60] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 0ms
+2026-07-29 18:48:08 [tomcat-handler-60] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2254ms
+2026-07-29 18:48:08 [tomcat-handler-60] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:48:08 [tomcat-handler-60] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-29 18:48:08 [orchestrator-event-2] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd channel=WHATSAPP
+2026-07-29 18:48:08 [tomcat-handler-60] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-29 18:48:08 [orchestrator-event-1] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=ACC12A488FDE1B9B1548B824A49DCF05
+2026-07-29 18:48:08 [tomcat-handler-60] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-29 18:48:08 [tomcat-handler-60] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-29 18:48:08 [tomcat-handler-60] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd: No automated action configured for this message
+2026-07-29 18:48:08 [tomcat-handler-60] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:48:08 [tomcat-handler-60] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2257ms. decision=NO_ACTION
+2026-07-29 18:48:08 [orchestrator-event-5] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd action=NO_ACTION time=2256ms
+2026-07-29 18:48:08 [orchestrator-event-4] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2256ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:48:08 [orchestrator-event-5] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2256ms
+2026-07-29 18:48:08 [orchestrator-event-2] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-29 18:48:08 [tomcat-handler-60] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-29 18:48:10 [tomcat-handler-61] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-29 18:48:10 [tomcat-handler-61] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-29 18:48:10 [tomcat-handler-61] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-29 18:48:10 [tomcat-handler-61] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, messageType, messageTimestamp, instanceId, source]
+2026-07-29 18:48:10 [tomcat-handler-61] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-29 18:48:10 [tomcat-handler-61] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51972349298@s.whatsapp.net, remoteJidAlt=51972349298@s.whatsapp.net, fromMe=false, id=AC09E368421FE26087475AF569FE20C4, participant=, addressingMode=lid}, pushName=Karlhita Albites 🥰🥰, status=DELIVERY_ACK, message={conversation=Ahora amor, messageContextInfo={threadId=[], deviceListMetadata={senderKeyIndexes=[], recipientKeyIndexes=[], senderTimestamp={low=1784939599, high=0, unsigned=true}, recipientKeyHash={0=247, 1=105, 2=235, 3=253, 4=176, 5=169, 6=148, 7=75, 8=193, 9=195}, recipientTimestamp={low=1785358695, high=0, unsigned=true}}, deviceListMetadataVersion=2, messageSecret={0=174, 1=202, 2=56, 3=175, 4=234, 5=58, 6=232, 7=245, 8=169, 9=146, 10=181, 11=221, 12=4, 13=218, 14=84, 15=25, 16=233, 17=63, 18=224, 19=9, 20=64, 21=238, 22=134, 23=143, 24=252, 25=34, 26=226, 27=26, 28=221, 29=85, 30=224, 31=222}}}, messageType=conversation, messageTimestamp=1785368890, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-29 18:48:10 [tomcat-handler-61] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51972349298 | type=conversation | msgId=AC09E368421FE26087475AF569FE20C4
+2026-07-29 18:48:10 [tomcat-handler-61] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: INBOUND
+2026-07-29 18:48:10 [tomcat-handler-61] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51972349298 direction=INBOUND type=TEXT content=Ahora amor
+2026-07-29 18:48:10 [tomcat-handler-61] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:48:10 [tomcat-handler-61] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-29 18:48:10 [tomcat-handler-61] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:48:10 [tomcat-handler-61] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-29 18:48:11 [tomcat-handler-61] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-29 18:48:11 [tomcat-handler-61] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 320ms
+2026-07-29 18:48:11 [tomcat-handler-61] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-29 18:48:11 [tomcat-handler-61] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51972349298]
+2026-07-29 18:48:11 [tomcat-handler-61] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51972349298]
+2026-07-29 18:48:11 [tomcat-handler-61] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-29 18:48:11 [tomcat-handler-61] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-29 18:48:11 [tomcat-handler-61] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51972349298 found=true
+2026-07-29 18:48:11 [tomcat-handler-61] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰  phone=+51972349298 normalized=+51972349298
+2026-07-29 18:48:11 [tomcat-handler-61] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰 
+2026-07-29 18:48:11 [tomcat-handler-61] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 304ms
+2026-07-29 18:48:11 [tomcat-handler-61] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd status=IN_PROGRESS channel=WHATSAPP
+2026-07-29 18:48:11 [tomcat-handler-61] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 292ms
+2026-07-29 18:48:11 [tomcat-handler-61] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-29 18:48:11 [tomcat-handler-61] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 151ms
+2026-07-29 18:48:12 [tomcat-handler-61] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-29 18:48:12 [tomcat-handler-61] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 303ms
+2026-07-29 18:48:12 [tomcat-handler-61] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=10 consecutiveBotResponses=0 firstMessage=false
+2026-07-29 18:48:12 [tomcat-handler-61] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 149ms
+2026-07-29 18:48:12 [tomcat-handler-61] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=bfa286a6-98a6-4b2c-8267-633ccb625c2f conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd type=TEXT
+2026-07-29 18:48:12 [tomcat-handler-61] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 436ms
+2026-07-29 18:48:13 [tomcat-handler-61] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=613fe49d-95fa-4df1-95d9-88bf45ec6126 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:48:13 [tomcat-handler-61] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 286ms
+2026-07-29 18:48:13 [tomcat-handler-61] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd|contactId=613fe49d-95fa-4df1-95d9-88bf45ec6126|messageId=AC09E368421FE26087475AF569FE20C4|channel=WHATSAPP|type=TEXT
+2026-07-29 18:48:13 [tomcat-handler-61] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 0ms
+2026-07-29 18:48:13 [tomcat-handler-61] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2244ms
+2026-07-29 18:48:13 [tomcat-handler-61] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:48:13 [tomcat-handler-61] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-29 18:48:13 [tomcat-handler-61] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-29 18:48:13 [orchestrator-event-4] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=AC09E368421FE26087475AF569FE20C4
+2026-07-29 18:48:13 [tomcat-handler-61] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-29 18:48:13 [orchestrator-event-1] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd channel=WHATSAPP
+2026-07-29 18:48:13 [tomcat-handler-61] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-29 18:48:13 [tomcat-handler-61] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd: No automated action configured for this message
+2026-07-29 18:48:13 [tomcat-handler-61] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:48:13 [orchestrator-event-2] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd action=NO_ACTION time=2246ms
+2026-07-29 18:48:13 [tomcat-handler-61] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2247ms. decision=NO_ACTION
+2026-07-29 18:48:13 [orchestrator-event-3] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2246ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:48:13 [orchestrator-event-2] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2246ms
+2026-07-29 18:48:13 [orchestrator-event-4] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-29 18:48:13 [tomcat-handler-61] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-29 18:49:25 [tomcat-handler-63] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-29 18:49:25 [tomcat-handler-63] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-29 18:49:25 [tomcat-handler-63] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-29 18:49:25 [tomcat-handler-63] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, messageType, messageTimestamp, instanceId, source]
+2026-07-29 18:49:25 [tomcat-handler-63] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-29 18:49:25 [tomcat-handler-63] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51972349298@s.whatsapp.net, remoteJidAlt=51972349298@s.whatsapp.net, fromMe=true, id=A57869FB8988A20B2800846A298C2319, participant=, addressingMode=lid}, pushName=LuisDev, status=SERVER_ACK, message={conversation=Jijijiji}, messageType=conversation, messageTimestamp=1785368966, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-29 18:49:26 [tomcat-handler-63] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51972349298 | type=conversation | msgId=A57869FB8988A20B2800846A298C2319
+2026-07-29 18:49:26 [tomcat-handler-63] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: OUTBOUND
+2026-07-29 18:49:26 [tomcat-handler-63] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51972349298 direction=OUTBOUND type=TEXT content=Jijijiji
+2026-07-29 18:49:26 [tomcat-handler-63] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:49:26 [tomcat-handler-63] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-29 18:49:26 [tomcat-handler-63] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:49:26 [tomcat-handler-63] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-29 18:49:26 [tomcat-handler-63] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-29 18:49:26 [tomcat-handler-63] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 281ms
+2026-07-29 18:49:26 [tomcat-handler-63] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-29 18:49:26 [tomcat-handler-63] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51972349298]
+2026-07-29 18:49:26 [tomcat-handler-63] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51972349298]
+2026-07-29 18:49:26 [tomcat-handler-63] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-29 18:49:26 [tomcat-handler-63] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-29 18:49:26 [tomcat-handler-63] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51972349298 found=true
+2026-07-29 18:49:26 [tomcat-handler-63] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰  phone=+51972349298 normalized=+51972349298
+2026-07-29 18:49:26 [tomcat-handler-63] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰 
+2026-07-29 18:49:26 [tomcat-handler-63] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 297ms
+2026-07-29 18:49:26 [tomcat-handler-63] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd status=IN_PROGRESS channel=WHATSAPP
+2026-07-29 18:49:27 [tomcat-handler-63] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 297ms
+2026-07-29 18:49:27 [tomcat-handler-63] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-29 18:49:27 [tomcat-handler-63] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 150ms
+2026-07-29 18:49:27 [tomcat-handler-63] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-29 18:49:27 [tomcat-handler-63] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 279ms
+2026-07-29 18:49:27 [tomcat-handler-63] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=11 consecutiveBotResponses=0 firstMessage=false
+2026-07-29 18:49:27 [tomcat-handler-63] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 148ms
+2026-07-29 18:49:27 [tomcat-handler-63] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=77147d33-33d3-4e6e-8005-216d780a9750 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd type=TEXT
+2026-07-29 18:49:28 [tomcat-handler-63] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 459ms
+2026-07-29 18:49:28 [tomcat-handler-63] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=613fe49d-95fa-4df1-95d9-88bf45ec6126 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:28 [tomcat-handler-63] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 310ms
+2026-07-29 18:49:28 [tomcat-handler-63] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd|contactId=613fe49d-95fa-4df1-95d9-88bf45ec6126|messageId=A57869FB8988A20B2800846A298C2319|channel=WHATSAPP|type=TEXT
+2026-07-29 18:49:28 [tomcat-handler-63] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 0ms
+2026-07-29 18:49:28 [tomcat-handler-63] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2221ms
+2026-07-29 18:49:28 [tomcat-handler-63] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:28 [orchestrator-event-1] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd channel=WHATSAPP
+2026-07-29 18:49:28 [orchestrator-event-3] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=A57869FB8988A20B2800846A298C2319
+2026-07-29 18:49:28 [tomcat-handler-63] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-29 18:49:28 [tomcat-handler-63] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-29 18:49:28 [tomcat-handler-63] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-29 18:49:28 [tomcat-handler-63] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-29 18:49:28 [tomcat-handler-63] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd: No automated action configured for this message
+2026-07-29 18:49:28 [tomcat-handler-63] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:28 [orchestrator-event-5] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2225ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:49:28 [orchestrator-event-4] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd action=NO_ACTION time=2225ms
+2026-07-29 18:49:28 [tomcat-handler-63] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2225ms. decision=NO_ACTION
+2026-07-29 18:49:28 [orchestrator-event-1] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-29 18:49:28 [orchestrator-event-4] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2225ms
+2026-07-29 18:49:28 [tomcat-handler-63] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-29 18:49:28 [tomcat-handler-64] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-29 18:49:28 [tomcat-handler-64] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-29 18:49:28 [tomcat-handler-64] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-29 18:49:28 [tomcat-handler-64] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, messageType, messageTimestamp, instanceId, source]
+2026-07-29 18:49:28 [tomcat-handler-64] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-29 18:49:28 [tomcat-handler-64] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51972349298@s.whatsapp.net, remoteJidAlt=51972349298@s.whatsapp.net, fromMe=true, id=A5A707169B2A05323ED117AD88BF5534, participant=, addressingMode=lid}, pushName=LuisDev, status=SERVER_ACK, message={conversation=Hacia}, messageType=conversation, messageTimestamp=1785368968, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-29 18:49:28 [tomcat-handler-64] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51972349298 | type=conversation | msgId=A5A707169B2A05323ED117AD88BF5534
+2026-07-29 18:49:28 [tomcat-handler-64] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: OUTBOUND
+2026-07-29 18:49:28 [tomcat-handler-64] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51972349298 direction=OUTBOUND type=TEXT content=Hacia
+2026-07-29 18:49:28 [tomcat-handler-64] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:49:28 [tomcat-handler-64] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-29 18:49:28 [tomcat-handler-64] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:49:28 [tomcat-handler-64] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-29 18:49:29 [tomcat-handler-64] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-29 18:49:29 [tomcat-handler-64] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 294ms
+2026-07-29 18:49:29 [tomcat-handler-64] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-29 18:49:29 [tomcat-handler-64] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51972349298]
+2026-07-29 18:49:29 [tomcat-handler-64] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51972349298]
+2026-07-29 18:49:29 [tomcat-handler-64] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-29 18:49:29 [tomcat-handler-64] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-29 18:49:29 [tomcat-handler-64] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51972349298 found=true
+2026-07-29 18:49:29 [tomcat-handler-64] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰  phone=+51972349298 normalized=+51972349298
+2026-07-29 18:49:29 [tomcat-handler-64] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰 
+2026-07-29 18:49:29 [tomcat-handler-64] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 290ms
+2026-07-29 18:49:29 [tomcat-handler-64] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd status=IN_PROGRESS channel=WHATSAPP
+2026-07-29 18:49:29 [tomcat-handler-64] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 290ms
+2026-07-29 18:49:30 [tomcat-handler-64] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-29 18:49:30 [tomcat-handler-64] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 166ms
+2026-07-29 18:49:30 [tomcat-handler-64] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-29 18:49:30 [tomcat-handler-64] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 293ms
+2026-07-29 18:49:30 [tomcat-handler-64] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=12 consecutiveBotResponses=0 firstMessage=false
+2026-07-29 18:49:30 [tomcat-handler-64] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 160ms
+2026-07-29 18:49:30 [tomcat-handler-64] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=a8255fa6-8b59-4ede-91cf-4e91527c2186 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd type=TEXT
+2026-07-29 18:49:30 [tomcat-handler-64] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 418ms
+2026-07-29 18:49:31 [tomcat-handler-64] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=613fe49d-95fa-4df1-95d9-88bf45ec6126 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:31 [tomcat-handler-64] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 282ms
+2026-07-29 18:49:31 [tomcat-handler-64] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd|contactId=613fe49d-95fa-4df1-95d9-88bf45ec6126|messageId=A5A707169B2A05323ED117AD88BF5534|channel=WHATSAPP|type=TEXT
+2026-07-29 18:49:31 [tomcat-handler-64] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 0ms
+2026-07-29 18:49:31 [tomcat-handler-64] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2204ms
+2026-07-29 18:49:31 [tomcat-handler-64] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:31 [orchestrator-event-3] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd channel=WHATSAPP
+2026-07-29 18:49:31 [tomcat-handler-64] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-29 18:49:31 [orchestrator-event-5] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=A5A707169B2A05323ED117AD88BF5534
+2026-07-29 18:49:31 [tomcat-handler-64] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-29 18:49:31 [tomcat-handler-64] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-29 18:49:31 [tomcat-handler-64] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-29 18:49:31 [tomcat-handler-64] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd: No automated action configured for this message
+2026-07-29 18:49:31 [tomcat-handler-64] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:31 [tomcat-handler-64] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2207ms. decision=NO_ACTION
+2026-07-29 18:49:31 [orchestrator-event-3] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-29 18:49:31 [orchestrator-event-4] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd action=NO_ACTION time=2207ms
+2026-07-29 18:49:31 [orchestrator-event-2] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2207ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:49:31 [orchestrator-event-4] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2207ms
+2026-07-29 18:49:31 [tomcat-handler-64] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-29 18:49:38 [tomcat-handler-66] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-29 18:49:38 [tomcat-handler-66] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-29 18:49:38 [tomcat-handler-66] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-29 18:49:38 [tomcat-handler-66] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, contextInfo, messageType, messageTimestamp, instanceId, source]
+2026-07-29 18:49:38 [tomcat-handler-66] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-29 18:49:38 [tomcat-handler-66] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51972349298@s.whatsapp.net, remoteJidAlt=51972349298@s.whatsapp.net, fromMe=false, id=AC122A57478BA0F9E9F4F520539FB7BD, participant=, addressingMode=lid}, pushName=Karlhita Albites 🥰🥰, status=DELIVERY_ACK, message={messageContextInfo={threadId=[], deviceListMetadata={senderKeyIndexes=[], recipientKeyIndexes=[], senderTimestamp={low=1784939599, high=0, unsigned=true}, recipientKeyHash={0=247, 1=105, 2=235, 3=253, 4=176, 5=169, 6=148, 7=75, 8=193, 9=195}, recipientTimestamp={low=1785358695, high=0, unsigned=true}}, deviceListMetadataVersion=2, messageSecret={0=48, 1=106, 2=142, 3=75, 4=89, 5=233, 6=105, 7=24, 8=97, 9=104, 10=203, 11=225, 12=202, 13=119, 14=63, 15=104, 16=186, 17=85, 18=104, 19=205, 20=39, 21=112, 22=64, 23=236, 24=118, 25=76, 26=101, 27=58, 28=53, 29=33, 30=102, 31=72}}, conversation=https://www.facebook.com/share/v/1CHRr6TYCJ/}, contextInfo=null, messageType=conversation, messageTimestamp=1785368979, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-29 18:49:39 [tomcat-handler-66] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51972349298 | type=conversation | msgId=AC122A57478BA0F9E9F4F520539FB7BD
+2026-07-29 18:49:39 [tomcat-handler-66] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: INBOUND
+2026-07-29 18:49:39 [tomcat-handler-66] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51972349298 direction=INBOUND type=TEXT content=https://www.facebook.com/share/v/1CHRr6TYCJ/
+2026-07-29 18:49:39 [tomcat-handler-66] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:49:39 [tomcat-handler-66] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-29 18:49:39 [tomcat-handler-66] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:49:39 [tomcat-handler-66] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-29 18:49:39 [tomcat-handler-66] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-29 18:49:39 [tomcat-handler-66] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 289ms
+2026-07-29 18:49:39 [tomcat-handler-66] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-29 18:49:39 [tomcat-handler-66] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51972349298]
+2026-07-29 18:49:39 [tomcat-handler-66] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51972349298]
+2026-07-29 18:49:39 [tomcat-handler-66] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-29 18:49:39 [tomcat-handler-66] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-29 18:49:39 [tomcat-handler-66] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51972349298 found=true
+2026-07-29 18:49:39 [tomcat-handler-66] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰  phone=+51972349298 normalized=+51972349298
+2026-07-29 18:49:39 [tomcat-handler-66] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰 
+2026-07-29 18:49:39 [tomcat-handler-66] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 291ms
+2026-07-29 18:49:40 [tomcat-handler-66] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd status=IN_PROGRESS channel=WHATSAPP
+2026-07-29 18:49:40 [tomcat-handler-66] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 287ms
+2026-07-29 18:49:40 [tomcat-handler-66] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-29 18:49:40 [tomcat-handler-66] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 283ms
+2026-07-29 18:49:40 [tomcat-handler-66] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-29 18:49:40 [tomcat-handler-66] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 160ms
+2026-07-29 18:49:40 [tomcat-handler-66] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=13 consecutiveBotResponses=0 firstMessage=false
+2026-07-29 18:49:40 [tomcat-handler-66] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 157ms
+2026-07-29 18:49:40 [tomcat-handler-66] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=cc2c7c07-9095-427c-91bd-bd4a0d4de57a conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd type=TEXT
+2026-07-29 18:49:41 [tomcat-handler-66] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 443ms
+2026-07-29 18:49:41 [tomcat-handler-66] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=613fe49d-95fa-4df1-95d9-88bf45ec6126 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:41 [tomcat-handler-66] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 310ms
+2026-07-29 18:49:41 [tomcat-handler-66] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd|contactId=613fe49d-95fa-4df1-95d9-88bf45ec6126|messageId=AC122A57478BA0F9E9F4F520539FB7BD|channel=WHATSAPP|type=TEXT
+2026-07-29 18:49:41 [tomcat-handler-66] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 0ms
+2026-07-29 18:49:41 [tomcat-handler-66] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2221ms
+2026-07-29 18:49:41 [tomcat-handler-66] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:41 [orchestrator-event-5] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd channel=WHATSAPP
+2026-07-29 18:49:41 [orchestrator-event-3] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=AC122A57478BA0F9E9F4F520539FB7BD
+2026-07-29 18:49:41 [tomcat-handler-66] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-29 18:49:41 [tomcat-handler-66] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-29 18:49:41 [tomcat-handler-66] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-29 18:49:41 [tomcat-handler-66] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-29 18:49:41 [tomcat-handler-66] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd: No automated action configured for this message
+2026-07-29 18:49:41 [tomcat-handler-66] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:41 [orchestrator-event-4] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd action=NO_ACTION time=2226ms
+2026-07-29 18:49:41 [tomcat-handler-66] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2226ms. decision=NO_ACTION
+2026-07-29 18:49:41 [orchestrator-event-4] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2226ms
+2026-07-29 18:49:41 [tomcat-handler-66] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-29 18:49:41 [orchestrator-event-1] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2226ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:49:41 [orchestrator-event-5] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-29 18:49:47 [tomcat-handler-68] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-29 18:49:47 [tomcat-handler-68] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-29 18:49:47 [tomcat-handler-68] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-29 18:49:47 [tomcat-handler-68] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, messageType, messageTimestamp, instanceId, source]
+2026-07-29 18:49:47 [tomcat-handler-68] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-29 18:49:47 [tomcat-handler-68] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51972349298@s.whatsapp.net, remoteJidAlt=51972349298@s.whatsapp.net, fromMe=false, id=AC64AAF6703404DB4640A72A9831A1A7, participant=, addressingMode=lid}, pushName=Karlhita Albites 🥰🥰, status=DELIVERY_ACK, message={conversation=Mira su terno, messageContextInfo={threadId=[], deviceListMetadata={senderKeyIndexes=[], recipientKeyIndexes=[], senderTimestamp={low=1784939599, high=0, unsigned=true}, recipientKeyHash={0=247, 1=105, 2=235, 3=253, 4=176, 5=169, 6=148, 7=75, 8=193, 9=195}, recipientTimestamp={low=1785358695, high=0, unsigned=true}}, deviceListMetadataVersion=2, messageSecret={0=131, 1=154, 2=195, 3=17, 4=8, 5=50, 6=65, 7=26, 8=216, 9=57, 10=85, 11=92, 12=64, 13=33, 14=57, 15=120, 16=255, 17=80, 18=65, 19=77, 20=157, 21=119, 22=102, 23=130, 24=190, 25=9, 26=192, 27=220, 28=27, 29=181, 30=145, 31=186}}}, messageType=conversation, messageTimestamp=1785368987, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-29 18:49:47 [tomcat-handler-68] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51972349298 | type=conversation | msgId=AC64AAF6703404DB4640A72A9831A1A7
+2026-07-29 18:49:47 [tomcat-handler-68] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: INBOUND
+2026-07-29 18:49:47 [tomcat-handler-68] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51972349298 direction=INBOUND type=TEXT content=Mira su terno
+2026-07-29 18:49:47 [tomcat-handler-68] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:49:47 [tomcat-handler-68] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-29 18:49:47 [tomcat-handler-68] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:49:47 [tomcat-handler-68] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-29 18:49:47 [tomcat-handler-68] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-29 18:49:47 [tomcat-handler-68] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 300ms
+2026-07-29 18:49:47 [tomcat-handler-68] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-29 18:49:47 [tomcat-handler-68] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51972349298]
+2026-07-29 18:49:47 [tomcat-handler-68] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51972349298]
+2026-07-29 18:49:47 [tomcat-handler-68] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-29 18:49:47 [tomcat-handler-68] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-29 18:49:47 [tomcat-handler-68] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51972349298 found=true
+2026-07-29 18:49:47 [tomcat-handler-68] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰  phone=+51972349298 normalized=+51972349298
+2026-07-29 18:49:47 [tomcat-handler-68] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰 
+2026-07-29 18:49:48 [tomcat-handler-68] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 272ms
+2026-07-29 18:49:48 [tomcat-handler-68] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd status=IN_PROGRESS channel=WHATSAPP
+2026-07-29 18:49:48 [tomcat-handler-68] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 309ms
+2026-07-29 18:49:48 [tomcat-handler-68] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-29 18:49:48 [tomcat-handler-68] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 235ms
+2026-07-29 18:49:48 [tomcat-handler-68] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-29 18:49:48 [tomcat-handler-68] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 298ms
+2026-07-29 18:49:49 [tomcat-handler-68] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=14 consecutiveBotResponses=0 firstMessage=false
+2026-07-29 18:49:49 [tomcat-handler-68] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 149ms
+2026-07-29 18:49:49 [tomcat-handler-68] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=0da291f5-9ab8-4516-a0ac-812cabc3ab6e conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd type=TEXT
+2026-07-29 18:49:49 [tomcat-handler-68] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 418ms
+2026-07-29 18:49:49 [tomcat-handler-68] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=613fe49d-95fa-4df1-95d9-88bf45ec6126 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:49 [tomcat-handler-68] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 420ms
+2026-07-29 18:49:49 [tomcat-handler-68] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd|contactId=613fe49d-95fa-4df1-95d9-88bf45ec6126|messageId=AC64AAF6703404DB4640A72A9831A1A7|channel=WHATSAPP|type=TEXT
+2026-07-29 18:49:49 [tomcat-handler-68] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 0ms
+2026-07-29 18:49:49 [tomcat-handler-68] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2409ms
+2026-07-29 18:49:49 [tomcat-handler-68] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:49 [tomcat-handler-68] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-29 18:49:49 [orchestrator-event-4] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=AC64AAF6703404DB4640A72A9831A1A7
+2026-07-29 18:49:49 [orchestrator-event-3] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd channel=WHATSAPP
+2026-07-29 18:49:49 [tomcat-handler-68] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-29 18:49:49 [tomcat-handler-68] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-29 18:49:49 [tomcat-handler-68] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-29 18:49:49 [tomcat-handler-68] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd: No automated action configured for this message
+2026-07-29 18:49:49 [tomcat-handler-68] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:49 [tomcat-handler-68] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2413ms. decision=NO_ACTION
+2026-07-29 18:49:49 [orchestrator-event-2] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2409ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:49:49 [orchestrator-event-5] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd action=NO_ACTION time=2409ms
+2026-07-29 18:49:49 [tomcat-handler-68] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-29 18:49:49 [orchestrator-event-4] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-29 18:49:49 [orchestrator-event-5] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2409ms
+2026-07-29 18:49:51 [tomcat-handler-69] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-29 18:49:51 [tomcat-handler-69] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-29 18:49:51 [tomcat-handler-69] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-29 18:49:51 [tomcat-handler-69] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, messageType, messageTimestamp, instanceId, source]
+2026-07-29 18:49:51 [tomcat-handler-69] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-29 18:49:51 [tomcat-handler-69] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51972349298@s.whatsapp.net, remoteJidAlt=51972349298@s.whatsapp.net, fromMe=false, id=AC1751861BE949B434D98C60B80715B4, participant=, addressingMode=lid}, pushName=Karlhita Albites 🥰🥰, status=DELIVERY_ACK, message={conversation=K elegante, messageContextInfo={threadId=[], deviceListMetadata={senderKeyIndexes=[], recipientKeyIndexes=[], senderTimestamp={low=1784939599, high=0, unsigned=true}, recipientKeyHash={0=247, 1=105, 2=235, 3=253, 4=176, 5=169, 6=148, 7=75, 8=193, 9=195}, recipientTimestamp={low=1785358695, high=0, unsigned=true}}, deviceListMetadataVersion=2, messageSecret={0=129, 1=154, 2=155, 3=205, 4=254, 5=96, 6=120, 7=168, 8=208, 9=71, 10=69, 11=54, 12=225, 13=141, 14=125, 15=201, 16=224, 17=221, 18=4, 19=121, 20=240, 21=194, 22=158, 23=240, 24=84, 25=181, 26=144, 27=90, 28=137, 29=252, 30=97, 31=142}}}, messageType=conversation, messageTimestamp=1785368991, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-29 18:49:51 [tomcat-handler-69] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51972349298 | type=conversation | msgId=AC1751861BE949B434D98C60B80715B4
+2026-07-29 18:49:51 [tomcat-handler-69] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: INBOUND
+2026-07-29 18:49:51 [tomcat-handler-69] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51972349298 direction=INBOUND type=TEXT content=K elegante
+2026-07-29 18:49:51 [tomcat-handler-69] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:49:51 [tomcat-handler-69] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-29 18:49:51 [tomcat-handler-69] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:49:51 [tomcat-handler-69] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 1ms
+2026-07-29 18:49:52 [tomcat-handler-69] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-29 18:49:52 [tomcat-handler-69] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 297ms
+2026-07-29 18:49:52 [tomcat-handler-69] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-29 18:49:52 [tomcat-handler-69] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51972349298]
+2026-07-29 18:49:52 [tomcat-handler-69] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51972349298]
+2026-07-29 18:49:52 [tomcat-handler-69] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-29 18:49:52 [tomcat-handler-69] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-29 18:49:52 [tomcat-handler-69] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51972349298 found=true
+2026-07-29 18:49:52 [tomcat-handler-69] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰  phone=+51972349298 normalized=+51972349298
+2026-07-29 18:49:52 [tomcat-handler-69] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰 
+2026-07-29 18:49:52 [tomcat-handler-69] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 301ms
+2026-07-29 18:49:52 [tomcat-handler-69] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd status=IN_PROGRESS channel=WHATSAPP
+2026-07-29 18:49:52 [tomcat-handler-69] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 298ms
+2026-07-29 18:49:53 [tomcat-handler-69] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-29 18:49:53 [tomcat-handler-69] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 286ms
+2026-07-29 18:49:53 [tomcat-handler-69] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-29 18:49:53 [tomcat-handler-69] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 160ms
+2026-07-29 18:49:53 [tomcat-handler-69] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=15 consecutiveBotResponses=0 firstMessage=false
+2026-07-29 18:49:53 [tomcat-handler-69] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 170ms
+2026-07-29 18:49:53 [tomcat-handler-69] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=23dd5b76-eaa1-4e70-ac75-72d84135e5c4 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd type=TEXT
+2026-07-29 18:49:53 [tomcat-handler-69] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 419ms
+2026-07-29 18:49:54 [tomcat-handler-69] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=613fe49d-95fa-4df1-95d9-88bf45ec6126 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:54 [tomcat-handler-69] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 300ms
+2026-07-29 18:49:54 [tomcat-handler-69] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd|contactId=613fe49d-95fa-4df1-95d9-88bf45ec6126|messageId=AC1751861BE949B434D98C60B80715B4|channel=WHATSAPP|type=TEXT
+2026-07-29 18:49:54 [tomcat-handler-69] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 0ms
+2026-07-29 18:49:54 [tomcat-handler-69] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2232ms
+2026-07-29 18:49:54 [tomcat-handler-69] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:54 [orchestrator-event-3] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd channel=WHATSAPP
+2026-07-29 18:49:54 [orchestrator-event-2] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=AC1751861BE949B434D98C60B80715B4
+2026-07-29 18:49:54 [tomcat-handler-69] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-29 18:49:54 [tomcat-handler-69] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-29 18:49:54 [tomcat-handler-69] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-29 18:49:54 [tomcat-handler-69] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-29 18:49:54 [tomcat-handler-69] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd: No automated action configured for this message
+2026-07-29 18:49:54 [tomcat-handler-69] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:54 [orchestrator-event-5] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd action=NO_ACTION time=2232ms
+2026-07-29 18:49:54 [orchestrator-event-3] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-29 18:49:54 [tomcat-handler-69] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2232ms. decision=NO_ACTION
+2026-07-29 18:49:54 [tomcat-handler-69] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-29 18:49:54 [orchestrator-event-1] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2232ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:49:54 [orchestrator-event-5] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2232ms
+2026-07-29 18:49:55 [tomcat-handler-70] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-29 18:49:55 [tomcat-handler-70] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-29 18:49:55 [tomcat-handler-70] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-29 18:49:55 [tomcat-handler-70] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, messageType, messageTimestamp, instanceId, source]
+2026-07-29 18:49:55 [tomcat-handler-70] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-29 18:49:55 [tomcat-handler-70] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51972349298@s.whatsapp.net, remoteJidAlt=51972349298@s.whatsapp.net, fromMe=true, id=A5917CEE5E2CAC3668A192CE144041A9, participant=, addressingMode=lid}, pushName=LuisDev, status=SERVER_ACK, message={conversation=Ya volveremos a cocinar juntos algún momento}, messageType=conversation, messageTimestamp=1785368995, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-29 18:49:55 [tomcat-handler-70] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51972349298 | type=conversation | msgId=A5917CEE5E2CAC3668A192CE144041A9
+2026-07-29 18:49:55 [tomcat-handler-70] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: OUTBOUND
+2026-07-29 18:49:55 [tomcat-handler-70] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51972349298 direction=OUTBOUND type=TEXT content=Ya volveremos a cocinar juntos algún momento
+2026-07-29 18:49:55 [tomcat-handler-70] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:49:55 [tomcat-handler-70] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-29 18:49:55 [tomcat-handler-70] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:49:55 [tomcat-handler-70] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-29 18:49:55 [tomcat-handler-71] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-29 18:49:55 [tomcat-handler-71] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-29 18:49:55 [tomcat-handler-71] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-29 18:49:55 [tomcat-handler-71] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, messageType, messageTimestamp, instanceId, source]
+2026-07-29 18:49:55 [tomcat-handler-71] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-29 18:49:55 [tomcat-handler-71] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51972349298@s.whatsapp.net, remoteJidAlt=51972349298@s.whatsapp.net, fromMe=false, id=AC6B84191E35E3654EFCD7A5CE7A8399, participant=, addressingMode=lid}, pushName=Karlhita Albites 🥰🥰, status=DELIVERY_ACK, message={conversation=😍😍😍, messageContextInfo={threadId=[], deviceListMetadata={senderKeyIndexes=[], recipientKeyIndexes=[], senderTimestamp={low=1784939599, high=0, unsigned=true}, recipientKeyHash={0=247, 1=105, 2=235, 3=253, 4=176, 5=169, 6=148, 7=75, 8=193, 9=195}, recipientTimestamp={low=1785358695, high=0, unsigned=true}}, deviceListMetadataVersion=2, messageSecret={0=127, 1=246, 2=220, 3=244, 4=94, 5=134, 6=50, 7=149, 8=219, 9=156, 10=54, 11=68, 12=34, 13=177, 14=130, 15=188, 16=142, 17=125, 18=231, 19=72, 20=245, 21=126, 22=71, 23=43, 24=28, 25=27, 26=21, 27=106, 28=75, 29=229, 30=237, 31=94}}}, messageType=conversation, messageTimestamp=1785368995, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-29 18:49:55 [tomcat-handler-70] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-29 18:49:55 [tomcat-handler-70] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 342ms
+2026-07-29 18:49:55 [tomcat-handler-70] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-29 18:49:55 [tomcat-handler-70] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51972349298]
+2026-07-29 18:49:55 [tomcat-handler-70] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51972349298]
+2026-07-29 18:49:55 [tomcat-handler-70] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-29 18:49:55 [tomcat-handler-70] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-29 18:49:55 [tomcat-handler-71] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51972349298 | type=conversation | msgId=AC6B84191E35E3654EFCD7A5CE7A8399
+2026-07-29 18:49:55 [tomcat-handler-71] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: INBOUND
+2026-07-29 18:49:55 [tomcat-handler-71] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51972349298 direction=INBOUND type=TEXT content=😍😍😍
+2026-07-29 18:49:55 [tomcat-handler-71] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:49:55 [tomcat-handler-71] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-29 18:49:55 [tomcat-handler-71] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:49:55 [tomcat-handler-71] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-29 18:49:56 [tomcat-handler-70] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51972349298 found=true
+2026-07-29 18:49:56 [tomcat-handler-70] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰  phone=+51972349298 normalized=+51972349298
+2026-07-29 18:49:56 [tomcat-handler-70] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰 
+2026-07-29 18:49:56 [tomcat-handler-70] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 310ms
+2026-07-29 18:49:56 [tomcat-handler-71] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-29 18:49:56 [tomcat-handler-71] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 332ms
+2026-07-29 18:49:56 [tomcat-handler-71] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-29 18:49:56 [tomcat-handler-71] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51972349298]
+2026-07-29 18:49:56 [tomcat-handler-71] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51972349298]
+2026-07-29 18:49:56 [tomcat-handler-71] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-29 18:49:56 [tomcat-handler-71] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-29 18:49:56 [tomcat-handler-70] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd status=IN_PROGRESS channel=WHATSAPP
+2026-07-29 18:49:56 [tomcat-handler-71] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51972349298 found=true
+2026-07-29 18:49:56 [tomcat-handler-71] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰  phone=+51972349298 normalized=+51972349298
+2026-07-29 18:49:56 [tomcat-handler-71] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰 
+2026-07-29 18:49:56 [tomcat-handler-70] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 314ms
+2026-07-29 18:49:56 [tomcat-handler-71] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 338ms
+2026-07-29 18:49:56 [tomcat-handler-71] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd status=IN_PROGRESS channel=WHATSAPP
+2026-07-29 18:49:56 [tomcat-handler-70] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-29 18:49:56 [tomcat-handler-70] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 314ms
+2026-07-29 18:49:56 [tomcat-handler-71] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 285ms
+2026-07-29 18:49:57 [tomcat-handler-70] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-29 18:49:57 [tomcat-handler-70] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 159ms
+2026-07-29 18:49:57 [tomcat-handler-70] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=16 consecutiveBotResponses=0 firstMessage=false
+2026-07-29 18:49:57 [tomcat-handler-70] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 164ms
+2026-07-29 18:49:57 [tomcat-handler-71] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-29 18:49:57 [tomcat-handler-71] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 328ms
+2026-07-29 18:49:57 [tomcat-handler-70] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=3fa72f21-ee83-4318-a662-c8ee198ca390 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd type=TEXT
+2026-07-29 18:49:57 [tomcat-handler-71] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-29 18:49:57 [tomcat-handler-71] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 181ms
+2026-07-29 18:49:57 [tomcat-handler-71] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=16 consecutiveBotResponses=0 firstMessage=false
+2026-07-29 18:49:57 [tomcat-handler-71] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 169ms
+2026-07-29 18:49:57 [tomcat-handler-70] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 445ms
+2026-07-29 18:49:57 [tomcat-handler-71] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=d510a7ed-5322-43e2-91a1-d643ea5e9406 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd type=TEXT
+2026-07-29 18:49:57 [tomcat-handler-70] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=613fe49d-95fa-4df1-95d9-88bf45ec6126 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:57 [tomcat-handler-70] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 315ms
+2026-07-29 18:49:57 [tomcat-handler-70] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd|contactId=613fe49d-95fa-4df1-95d9-88bf45ec6126|messageId=A5917CEE5E2CAC3668A192CE144041A9|channel=WHATSAPP|type=TEXT
+2026-07-29 18:49:57 [tomcat-handler-70] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 0ms
+2026-07-29 18:49:57 [tomcat-handler-70] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2367ms
+2026-07-29 18:49:57 [tomcat-handler-70] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:57 [orchestrator-event-2] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd channel=WHATSAPP
+2026-07-29 18:49:57 [orchestrator-event-3] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=A5917CEE5E2CAC3668A192CE144041A9
+2026-07-29 18:49:57 [tomcat-handler-70] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-29 18:49:57 [tomcat-handler-70] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-29 18:49:57 [tomcat-handler-70] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-29 18:49:57 [tomcat-handler-70] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-29 18:49:57 [tomcat-handler-70] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd: No automated action configured for this message
+2026-07-29 18:49:57 [tomcat-handler-70] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:57 [tomcat-handler-70] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2367ms. decision=NO_ACTION
+2026-07-29 18:49:57 [orchestrator-event-5] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd action=NO_ACTION time=2367ms
+2026-07-29 18:49:57 [orchestrator-event-2] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-29 18:49:57 [orchestrator-event-4] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2367ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:49:57 [tomcat-handler-70] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-29 18:49:57 [orchestrator-event-5] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2367ms
+2026-07-29 18:49:58 [tomcat-handler-71] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 467ms
+2026-07-29 18:49:58 [tomcat-handler-71] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=613fe49d-95fa-4df1-95d9-88bf45ec6126 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:58 [tomcat-handler-71] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 277ms
+2026-07-29 18:49:58 [tomcat-handler-71] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd|contactId=613fe49d-95fa-4df1-95d9-88bf45ec6126|messageId=AC6B84191E35E3654EFCD7A5CE7A8399|channel=WHATSAPP|type=TEXT
+2026-07-29 18:49:58 [tomcat-handler-71] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 0ms
+2026-07-29 18:49:58 [tomcat-handler-71] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2381ms
+2026-07-29 18:49:58 [tomcat-handler-71] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:58 [orchestrator-event-3] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd channel=WHATSAPP
+2026-07-29 18:49:58 [tomcat-handler-71] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-29 18:49:58 [orchestrator-event-2] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=AC6B84191E35E3654EFCD7A5CE7A8399
+2026-07-29 18:49:58 [tomcat-handler-71] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-29 18:49:58 [tomcat-handler-71] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-29 18:49:58 [tomcat-handler-71] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-29 18:49:58 [tomcat-handler-71] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd: No automated action configured for this message
+2026-07-29 18:49:58 [tomcat-handler-71] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:49:58 [orchestrator-event-5] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd action=NO_ACTION time=2381ms
+2026-07-29 18:49:58 [tomcat-handler-71] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2381ms. decision=NO_ACTION
+2026-07-29 18:49:58 [orchestrator-event-5] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2381ms
+2026-07-29 18:49:58 [orchestrator-event-3] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2381ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:49:58 [orchestrator-event-2] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-29 18:49:58 [tomcat-handler-71] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-29 18:50:10 [tomcat-handler-74] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-29 18:50:10 [tomcat-handler-74] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-29 18:50:10 [tomcat-handler-74] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-29 18:50:10 [tomcat-handler-74] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, contextInfo, messageType, messageTimestamp, instanceId, source]
+2026-07-29 18:50:10 [tomcat-handler-74] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-29 18:50:10 [tomcat-handler-74] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51972349298@s.whatsapp.net, remoteJidAlt=51972349298@s.whatsapp.net, fromMe=false, id=ACB0A86889BBD43A5DBB87174A209FC2, participant=, addressingMode=lid}, pushName=Karlhita Albites 🥰🥰, status=DELIVERY_ACK, message={messageContextInfo={threadId=[], deviceListMetadata={senderKeyIndexes=[], recipientKeyIndexes=[], senderTimestamp={low=1784939599, high=0, unsigned=true}, recipientKeyHash={0=247, 1=105, 2=235, 3=253, 4=176, 5=169, 6=148, 7=75, 8=193, 9=195}, recipientTimestamp={low=1785358695, high=0, unsigned=true}}, deviceListMetadataVersion=2, messageSecret={0=52, 1=71, 2=101, 3=86, 4=212, 5=59, 6=131, 7=147, 8=160, 9=112, 10=115, 11=203, 12=141, 13=237, 14=229, 15=143, 16=12, 17=32, 18=191, 19=138, 20=120, 21=241, 22=95, 23=132, 24=227, 25=54, 26=106, 27=39, 28=161, 29=138, 30=81, 31=74}}, conversation=Sisi}, contextInfo={mentionedJid=[], groupMentions=[], statusAttributions=[], stanzaId=A5917CEE5E2CAC3668A192CE144041A9, participant=181161838002355@lid, quotedMessage={conversation=Ya volveremos a cocinar juntos algún momento}, quotedType=0}, messageType=conversation, messageTimestamp=1785369010, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-29 18:50:10 [tomcat-handler-74] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51972349298 | type=conversation | msgId=ACB0A86889BBD43A5DBB87174A209FC2
+2026-07-29 18:50:10 [tomcat-handler-74] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: INBOUND
+2026-07-29 18:50:10 [tomcat-handler-74] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51972349298 direction=INBOUND type=TEXT content=Sisi
+2026-07-29 18:50:10 [tomcat-handler-74] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:50:10 [tomcat-handler-74] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-29 18:50:10 [tomcat-handler-74] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51972349298
+2026-07-29 18:50:10 [tomcat-handler-74] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-29 18:50:11 [tomcat-handler-74] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-29 18:50:11 [tomcat-handler-74] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 306ms
+2026-07-29 18:50:11 [tomcat-handler-74] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-29 18:50:11 [tomcat-handler-74] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51972349298]
+2026-07-29 18:50:11 [tomcat-handler-74] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51972349298]
+2026-07-29 18:50:11 [tomcat-handler-74] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-29 18:50:11 [tomcat-handler-74] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-29 18:50:11 [tomcat-handler-74] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51972349298 found=true
+2026-07-29 18:50:11 [tomcat-handler-74] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰  phone=+51972349298 normalized=+51972349298
+2026-07-29 18:50:11 [tomcat-handler-74] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=613fe49d-95fa-4df1-95d9-88bf45ec6126 name=Amor - Engreida😘😍🥰 
+2026-07-29 18:50:11 [tomcat-handler-74] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 302ms
+2026-07-29 18:50:11 [tomcat-handler-74] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd status=IN_PROGRESS channel=WHATSAPP
+2026-07-29 18:50:11 [tomcat-handler-74] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 298ms
+2026-07-29 18:50:12 [tomcat-handler-74] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-29 18:50:12 [tomcat-handler-74] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 295ms
+2026-07-29 18:50:12 [tomcat-handler-74] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-29 18:50:12 [tomcat-handler-74] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 168ms
+2026-07-29 18:50:12 [tomcat-handler-74] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=18 consecutiveBotResponses=0 firstMessage=false
+2026-07-29 18:50:12 [tomcat-handler-74] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 154ms
+2026-07-29 18:50:12 [tomcat-handler-74] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=a6d677c8-b8f3-425a-9c59-31d4bd39bd14 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd type=TEXT
+2026-07-29 18:50:12 [tomcat-handler-74] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 424ms
+2026-07-29 18:50:12 [tomcat-handler-74] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=613fe49d-95fa-4df1-95d9-88bf45ec6126 conversation=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:50:13 [tomcat-handler-74] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 280ms
+2026-07-29 18:50:13 [tomcat-handler-74] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd|contactId=613fe49d-95fa-4df1-95d9-88bf45ec6126|messageId=ACB0A86889BBD43A5DBB87174A209FC2|channel=WHATSAPP|type=TEXT
+2026-07-29 18:50:13 [tomcat-handler-74] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 0ms
+2026-07-29 18:50:13 [tomcat-handler-74] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2229ms
+2026-07-29 18:50:13 [tomcat-handler-74] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:50:13 [tomcat-handler-74] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-29 18:50:13 [orchestrator-event-5] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd channel=WHATSAPP
+2026-07-29 18:50:13 [orchestrator-event-3] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=ACB0A86889BBD43A5DBB87174A209FC2
+2026-07-29 18:50:13 [tomcat-handler-74] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-29 18:50:13 [tomcat-handler-74] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-29 18:50:13 [tomcat-handler-74] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-29 18:50:13 [tomcat-handler-74] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation d2a1ef24-6dc6-4db0-8204-7c59e6c257cd: No automated action configured for this message
+2026-07-29 18:50:13 [tomcat-handler-74] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd
+2026-07-29 18:50:13 [orchestrator-event-1] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=d2a1ef24-6dc6-4db0-8204-7c59e6c257cd action=NO_ACTION time=2231ms
+2026-07-29 18:50:13 [tomcat-handler-74] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2231ms. decision=NO_ACTION
+2026-07-29 18:50:13 [orchestrator-event-1] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2231ms
+2026-07-29 18:50:13 [tomcat-handler-74] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-29 18:50:13 [orchestrator-event-5] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-29 18:50:13 [orchestrator-event-4] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2231ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:50:44 [tomcat-handler-76] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 95e009fb-66e9-437c-9d35-be4df58d425f for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:50:44 [tomcat-handler-76] DEBUG c.i.shared.security.TenantFilter - Enabled tenant filter for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:50:45 [tomcat-handler-76] INFO  c.i.a.i.w.EvolutionApiProvider - Sending text message via Evolution API to: +51972349298
+2026-07-29 18:50:46 [tomcat-handler-76] INFO  c.i.a.i.w.EvolutionApiProvider - Message sent successfully. ID: 3EB03C9F4F6567689F8449
+2026-07-29 18:50:46 [tomcat-handler-76] INFO  c.i.c.a.ConversationService - WhatsApp message sent via Evolution API, channelId: 3EB03C9F4F6567689F8449
+2026-07-29 18:50:46 [tomcat-handler-76] INFO  c.i.c.a.ConversationService - Message sent: f2c9981d-4342-47bc-9d21-8550ca6a6c97 in conversation: d2a1ef24-6dc6-4db0-8204-7c59e6c257cd by user: 95e009fb-66e9-437c-9d35-be4df58d425f
+2026-07-29 18:51:16 [tomcat-handler-77] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 95e009fb-66e9-437c-9d35-be4df58d425f for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:51:16 [tomcat-handler-77] DEBUG c.i.shared.security.TenantFilter - Enabled tenant filter for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-29 18:51:17 [tomcat-handler-77] INFO  c.i.a.i.w.EvolutionApiProvider - Sending text message via Evolution API to: +51972349298
+2026-07-29 18:51:18 [tomcat-handler-77] INFO  c.i.a.i.w.EvolutionApiProvider - Message sent successfully. ID: 3EB034B85A6D9E0ACA709C
+2026-07-29 18:51:18 [tomcat-handler-77] INFO  c.i.c.a.ConversationService - WhatsApp message sent via Evolution API, channelId: 3EB034B85A6D9E0ACA709C
+2026-07-29 18:51:18 [tomcat-handler-77] INFO  c.i.c.a.ConversationService - Message sent: 1d586fbf-9841-4a02-81bc-2fa39de9788f in conversation: d2a1ef24-6dc6-4db0-8204-7c59e6c257cd by user: 95e009fb-66e9-437c-9d35-be4df58d425f

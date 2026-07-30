@@ -50,8 +50,22 @@ export const routes: RouteObject[] = [
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <RouteWrapper><DashboardPage /></RouteWrapper> },
-      { path: 'dashboard', element: <RouteWrapper><DashboardPage /></RouteWrapper> },
+      {
+        index: true,
+        element: (
+          <ProtectedRoute roles={['TENANT_ADMIN', 'SUPERVISOR']}>
+            <RouteWrapper><DashboardPage /></RouteWrapper>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard',
+        element: (
+          <ProtectedRoute roles={['TENANT_ADMIN', 'SUPERVISOR']}>
+            <RouteWrapper><DashboardPage /></RouteWrapper>
+          </ProtectedRoute>
+        ),
+      },
       { path: 'conversations', element: <RouteWrapper><ChatPage /></RouteWrapper> },
       { path: 'conversations/:id', element: <RouteWrapper><ChatPage /></RouteWrapper> },
       { path: 'contacts', element: <RouteWrapper><ContactsPage /></RouteWrapper> },
@@ -68,19 +82,96 @@ export const routes: RouteObject[] = [
           </ProtectedRoute>
         ),
       },
-      { path: 'analytics', element: <RouteWrapper><AnalyticsPage /></RouteWrapper> },
-      { path: 'roles', element: <RouteWrapper><RolesPage /></RouteWrapper> },
-      { path: 'permissions', element: <RouteWrapper><PermissionsPage /></RouteWrapper> },
-      { path: 'company', element: <RouteWrapper><TenantSettingsPage /></RouteWrapper> },
+      {
+        path: 'analytics',
+        element: (
+          <ProtectedRoute roles={['TENANT_ADMIN', 'SUPERVISOR']}>
+            <RouteWrapper><AnalyticsPage /></RouteWrapper>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'roles',
+        element: (
+          <ProtectedRoute roles={['TENANT_ADMIN']}>
+            <RouteWrapper><RolesPage /></RouteWrapper>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'permissions',
+        element: (
+          <ProtectedRoute roles={['TENANT_ADMIN']}>
+            <RouteWrapper><PermissionsPage /></RouteWrapper>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'company',
+        element: (
+          <ProtectedRoute roles={['TENANT_ADMIN']}>
+            <RouteWrapper><TenantSettingsPage /></RouteWrapper>
+          </ProtectedRoute>
+        ),
+      },
       { path: 'notifications', element: <RouteWrapper><NotificationsPage /></RouteWrapper> },
-      { path: 'settings', element: <RouteWrapper><SettingsPage /></RouteWrapper> },
-      { path: 'settings/*', element: <RouteWrapper><SettingsPage /></RouteWrapper> },
+      {
+        path: 'settings',
+        element: (
+          <ProtectedRoute roles={['TENANT_ADMIN', 'SUPERVISOR']}>
+            <RouteWrapper><SettingsPage /></RouteWrapper>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'settings/*',
+        element: (
+          <ProtectedRoute roles={['TENANT_ADMIN', 'SUPERVISOR']}>
+            <RouteWrapper><SettingsPage /></RouteWrapper>
+          </ProtectedRoute>
+        ),
+      },
       { path: 'profile', element: <RouteWrapper><ProfilePage /></RouteWrapper> },
-      { path: 'whatsapp', element: <RouteWrapper><WhatsAppPage /></RouteWrapper> },
-      { path: 'channels', element: <RouteWrapper><ChannelsPage /></RouteWrapper> },
-      { path: 'categories', element: <RouteWrapper><CategoriesPage /></RouteWrapper> },
-      { path: 'chatbot/intents', element: <RouteWrapper><ChatbotIntentsPage /></RouteWrapper> },
-      { path: 'chatbot/flows', element: <RouteWrapper><ChatbotFlowsPage /></RouteWrapper> },
+      {
+        path: 'whatsapp',
+        element: (
+          <ProtectedRoute roles={['TENANT_ADMIN', 'SUPERVISOR']}>
+            <RouteWrapper><WhatsAppPage /></RouteWrapper>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'channels',
+        element: (
+          <ProtectedRoute roles={['TENANT_ADMIN', 'SUPERVISOR']}>
+            <RouteWrapper><ChannelsPage /></RouteWrapper>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'categories',
+        element: (
+          <ProtectedRoute roles={['TENANT_ADMIN', 'SUPERVISOR']}>
+            <RouteWrapper><CategoriesPage /></RouteWrapper>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'chatbot/intents',
+        element: (
+          <ProtectedRoute roles={['TENANT_ADMIN', 'SUPERVISOR']}>
+            <RouteWrapper><ChatbotIntentsPage /></RouteWrapper>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'chatbot/flows',
+        element: (
+          <ProtectedRoute roles={['TENANT_ADMIN', 'SUPERVISOR']}>
+            <RouteWrapper><ChatbotFlowsPage /></RouteWrapper>
+          </ProtectedRoute>
+        ),
+      },
       {
         path: 'admin',
         element: (

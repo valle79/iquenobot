@@ -60,4 +60,6 @@ public interface LeadRepository extends JpaRepository<Lead, UUID> {
     long countByTenantIdAndStatusAndDeletedFalse(UUID tenantId, LeadStatus status);
 
     long countByTenantIdAndAssignedToIdAndDeletedFalse(UUID tenantId, UUID userId);
+
+    boolean existsByTenantIdAndContactIdAndCreatedAtAfter(UUID tenantId, UUID contactId, LocalDateTime dateTime);
 }

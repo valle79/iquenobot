@@ -22,7 +22,7 @@ public class WhatsAppConnectionController {
 
     @GetMapping("/status")
     @Operation(summary = "Estado de conexión de WhatsApp", description = "Obtiene el estado actual de la conexión con WhatsApp")
-    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'SUPERVISOR', 'AGENT')")
+    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'SUPERVISOR')")
     public ResponseEntity<ApiResponse<WhatsAppConnectionService.ConnectionStatusResponse>> getStatus() {
         return ResponseEntity.ok(ApiResponse.success(connectionService.getStatus()));
     }

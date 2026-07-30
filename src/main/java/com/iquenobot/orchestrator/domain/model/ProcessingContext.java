@@ -5,6 +5,8 @@ import com.iquenobot.contact.domain.entity.Contact;
 import com.iquenobot.conversation.domain.entity.Conversation;
 import com.iquenobot.conversation.domain.entity.ConversationMessage;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class ProcessingContext {
@@ -19,6 +21,7 @@ public class ProcessingContext {
     private BotConfiguration botConfiguration;
     private WorkingHours workingHours;
     private ConversationContext conversationContext;
+    private final List<Decision> secondaryDecisions = new ArrayList<>();
 
     public IncomingMessage getIncomingMessage() { return incomingMessage; }
     public void setIncomingMessage(IncomingMessage incomingMessage) { this.incomingMessage = incomingMessage; }
@@ -49,4 +52,7 @@ public class ProcessingContext {
 
     public ConversationContext getConversationContext() { return conversationContext; }
     public void setConversationContext(ConversationContext conversationContext) { this.conversationContext = conversationContext; }
+
+    public void addSecondaryDecision(Decision decision) { this.secondaryDecisions.add(decision); }
+    public List<Decision> getSecondaryDecisions() { return secondaryDecisions; }
 }

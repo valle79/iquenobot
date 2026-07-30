@@ -37,22 +37,22 @@ interface NavItem {
 }
 
 const tenantNavItems: NavItem[] = [
-  { label: 'navigation.dashboard', path: '/dashboard', icon: LayoutDashboard },
+  { label: 'navigation.dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['TENANT_ADMIN', 'SUPERVISOR'] },
   { label: 'navigation.conversations', path: '/conversations', icon: MessageCircle },
   { label: 'navigation.contacts', path: '/contacts', icon: Users },
   { label: 'navigation.leads', path: '/leads', icon: Target },
   { label: 'navigation.products', path: '/products', icon: Package },
-  { label: 'Categorías', path: '/categories', icon: Tags },
-  { label: 'navigation.users', path: '/users', icon: UserCircle },
-  { label: 'Intenciones', path: '/chatbot/intents', icon: Brain },
-  { label: 'Flujos', path: '/chatbot/flows', icon: GitBranch },
-  { label: 'navigation.analytics', path: '/analytics', icon: BarChart3 },
+  { label: 'Categorías', path: '/categories', icon: Tags, roles: ['TENANT_ADMIN', 'SUPERVISOR'] },
+  { label: 'navigation.users', path: '/users', icon: UserCircle, roles: ['TENANT_ADMIN', 'SUPERVISOR'] },
+  { label: 'Intenciones', path: '/chatbot/intents', icon: Brain, roles: ['TENANT_ADMIN', 'SUPERVISOR'] },
+  { label: 'Flujos', path: '/chatbot/flows', icon: GitBranch, roles: ['TENANT_ADMIN', 'SUPERVISOR'] },
+  { label: 'navigation.analytics', path: '/analytics', icon: BarChart3, roles: ['TENANT_ADMIN', 'SUPERVISOR'] },
   { label: 'navigation.notifications', path: '/notifications', icon: Bell },
   { label: 'Mi Perfil', path: '/profile', icon: User },
   { label: 'Permisos', path: '/permissions', icon: Shield, roles: ['TENANT_ADMIN'] },
   { label: 'Mi Empresa', path: '/company', icon: Building2, roles: ['TENANT_ADMIN'] },
-  { label: 'Canales', path: '/channels', icon: MessageSquare },
-  { label: 'navigation.settings', path: '/settings', icon: Settings },
+  { label: 'Canales', path: '/channels', icon: MessageSquare, roles: ['TENANT_ADMIN', 'SUPERVISOR'] },
+  { label: 'navigation.settings', path: '/settings', icon: Settings, roles: ['TENANT_ADMIN', 'SUPERVISOR'] },
 ]
 
 const adminNavItems: NavItem[] = [
@@ -97,7 +97,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               className="flex flex-col"
             >
               <span className="text-lg font-bold text-brand-600 dark:text-brand-400">
-                IquenoBot
+                LuKaBot
               </span>
               {isSuperAdmin ? (
                 <span className="text-xs text-gray-500 dark:text-gray-400">Super Admin</span>

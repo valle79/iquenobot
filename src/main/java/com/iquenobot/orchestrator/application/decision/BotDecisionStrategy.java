@@ -20,6 +20,15 @@ public class BotDecisionStrategy implements DecisionStrategy {
 
     private final ChatbotService chatbotService;
 
+    private record LeadRule(String title, int baseScore) {}
+
+    private static final Map<String, LeadRule> COMMERCIAL_RULES = Map.of(
+            "solicitar_precio", new LeadRule("Solicitud de cotización", 40),
+            "consulta_envio", new LeadRule("Consulta de envío", 30),
+            "forma_pago", new LeadRule("Interés en compra - forma de pago", 35),
+            "informacion_empresa", new LeadRule("Interés general en productos/servicios", 25)
+    );
+
     @Override
     public int getPriority() { return 10; }
 
@@ -81,13 +90,29 @@ public class BotDecisionStrategy implements DecisionStrategy {
                         .build();
             }
 
+            String intent = botResponse.getIntentDetected() != null
+                    ? botResponse.getIntentDetected() : "unknown";
+
+            LeadRule rule = COMMERCIAL_RULES.get(intent);
+            if (rule != null) {
+                context.addSecondaryDecision(Decision.builder()
+                        .actionType(ActionType.CREATE_LEAD)
+                        .reason("Commercial intent detected: " + intent)
+                        .parameters(Map.of(
+                                "intent", intent,
+                                "title", rule.title(),
+                                "baseScore", String.valueOf(rule.baseScore()),
+                                "messageContent", msg.getContent()
+                        ))
+                        .build());
+            }
+
             return Decision.builder()
                     .actionType(ActionType.SEND_TEXT)
                     .reason("Bot responded to message")
                     .parameters(Map.of(
                             "response", botResponse.getMessage(),
-                            "intent", botResponse.getIntentDetected() != null
-                                    ? botResponse.getIntentDetected() : "unknown",
+                            "intent", intent,
                             "flowExecuted", botResponse.getFlowExecuted() != null
                                     ? botResponse.getFlowExecuted() : ""
                     ))

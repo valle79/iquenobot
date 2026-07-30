@@ -14,6 +14,7 @@ export default function RegisterPage() {
           alt="Plataforma empresarial"
           className="absolute inset-0 h-full w-full object-cover"
         />
+
         <div className="absolute inset-0 bg-gradient-to-br from-slate-950/85 via-slate-900/75 to-slate-950/90" />
 
         <div className="relative z-10 flex h-full flex-col justify-between p-12 text-white">
@@ -23,11 +24,13 @@ export default function RegisterPage() {
 
           <div className="max-w-lg">
             <h2 className="text-4xl font-bold leading-tight tracking-tight">
-              Acceso controlado
+              Acceso gestionado
             </h2>
+
             <p className="mt-5 text-lg leading-relaxed text-slate-300">
-              La creación de empresas está restringida y solo puede ser realizada
-              por un administrador del sistema.
+              La activación de nuevas cuentas empresariales se realiza mediante
+              un proceso de configuración y validación previa para garantizar
+              una correcta implementación de la plataforma.
             </p>
           </div>
 
@@ -49,8 +52,10 @@ export default function RegisterPage() {
           </h1>
 
           <p className="mt-3 text-[15px] leading-relaxed text-slate-500 dark:text-slate-400">
-            La creación de nuevas empresas solo puede realizarse desde el panel
-            de administración por un usuario con rol <strong>SUPER_ADMIN</strong>.
+            La creación de nuevas cuentas empresariales no está disponible
+            desde esta página. Si deseas utilizar la plataforma en tu
+            organización, ponte en contacto con nuestro equipo para solicitar
+            acceso y recibir asistencia en el proceso de activación.
           </p>
 
           <div className="mt-8">
@@ -60,13 +65,13 @@ export default function RegisterPage() {
               size="lg"
             >
               <ArrowLeft className="h-4 w-4" />
-              Volver al inicio de sesión
+              Ir al inicio de sesión
             </Button>
           </div>
 
           <p className="mt-8 flex items-center justify-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
             <ShieldCheck className="h-3.5 w-3.5" />
-            Acceso restringido · Solo personal autorizado
+            Plataforma empresarial · Acceso gestionado
           </p>
         </div>
       </div>

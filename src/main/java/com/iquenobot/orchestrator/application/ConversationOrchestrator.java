@@ -67,6 +67,10 @@ public class ConversationOrchestrator {
 
             actionDispatcher.dispatch(decision, context);
 
+            for (Decision secondary : context.getSecondaryDecisions()) {
+                actionDispatcher.dispatch(secondary, context);
+            }
+
             eventPublisher.publish(new ActionExecutedEvent(
                     context.getTenantId() != null ? context.getTenantId().toString() : null,
                     context.getConversation() != null ? context.getConversation().getId().toString() : null,

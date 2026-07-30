@@ -20,7 +20,12 @@ export function AuthGuard({ children, roles }: AuthGuardProps) {
     }
 
     if (roles && user && !roles.includes(user.role)) {
-      navigate('/', { replace: true })
+      const fallback = user.role === 'AGENT' || user.role === 'BOT'
+        ? '/conversations'
+        : user.role === 'SUPER_ADMIN'
+          ? '/admin'
+          : '/dashboard'
+      navigate(fallback, { replace: true })
     }
   }, [isAuthenticated, user, roles, navigate, location])
 

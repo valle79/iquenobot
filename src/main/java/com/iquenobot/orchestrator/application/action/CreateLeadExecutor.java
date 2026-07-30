@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -39,6 +40,8 @@ public class CreateLeadExecutor implements ActionExecutor {
             ChannelType.API, LeadSource.DIRECT
     );
 
+    private static final int DEDUP_HOURS = 24;
+
     @Override
     public ActionType supportedActionType() { return ActionType.CREATE_LEAD; }
 
@@ -46,22 +49,58 @@ public class CreateLeadExecutor implements ActionExecutor {
     @Transactional
     public void execute(Decision decision, ProcessingContext context) {
         var params = decision.getParameters();
+
+        String intent = params != null ? (String) params.get("intent") : null;
+        String title = params != null ? (String) params.get("title") : null;
+        String baseScoreStr = params != null ? (String) params.get("baseScore") : null;
+        String messageContent = params != null ? (String) params.get("messageContent") : "";
+
         ChannelType channel = context.getIncomingMessage().getChannel();
-        String channelName = channel.name();
-        String title = params != null
-                ? (String) params.getOrDefault("title", "Lead from " + channelName)
-                : "Lead from " + channelName;
-        String description = params != null ? (String) params.get("description") : null;
         LeadSource source = CHANNEL_TO_SOURCE.getOrDefault(channel, LeadSource.OTHER);
+        String channelName = channel.name();
+
+        if (title == null) {
+            title = "Lead from " + channelName;
+        }
+
+        boolean exists = leadRepository.existsByTenantIdAndContactIdAndCreatedAtAfter(
+                context.getTenantId(),
+                context.getContact().getId(),
+                LocalDateTime.now().minusHours(DEDUP_HOURS)
+        );
+
+        if (exists) {
+            log.info("Skipping lead creation: recent lead exists for contact={} within {}h",
+                    context.getContact().getId(), DEDUP_HOURS);
+            return;
+        }
+
+        int baseScore = 0;
+        if (baseScoreStr != null) {
+            try { baseScore = Integer.parseInt(baseScoreStr); } catch (NumberFormatException ignored) {}
+        }
+
+        int score = calculateScore(baseScore, messageContent);
+
+        StringBuilder description = new StringBuilder();
+        if (intent != null) {
+            description.append("Intención: ").append(intent).append("\n");
+        }
+        description.append("Origen: ").append(source).append("\n");
+        description.append("Score: ").append(score).append("/100");
+        if (messageContent != null && !messageContent.isBlank()) {
+            description.append("\nMensaje: ").append(messageContent.length() > 200
+                    ? messageContent.substring(0, 200) : messageContent);
+        }
 
         Lead lead = Lead.builder()
                 .tenantId(context.getTenantId())
                 .contact(context.getContact())
                 .title(title)
-                .description(description)
+                .description(description.toString())
                 .status(LeadStatus.NEW)
                 .source(source)
-                .score(0)
+                .score(score)
                 .build();
 
         leadRepository.save(lead);
@@ -75,7 +114,25 @@ public class CreateLeadExecutor implements ActionExecutor {
                 source
         ));
 
-        log.info("Lead created: conversation={} leadTitle={} source={}",
-                context.getConversation().getId(), title, source);
+        log.info("Lead created: conversation={} title={} score={} source={}",
+                context.getConversation().getId(), title, score, source);
+    }
+
+    private int calculateScore(int baseScore, String message) {
+        if (message == null) message = "";
+
+        int bonus = 0;
+        String lower = message.toLowerCase();
+
+        if (lower.contains("urgente")) bonus += 20;
+        if (lower.contains("hoy")) bonus += 10;
+        if (lower.contains("comprar") || lower.contains("compro")) bonus += 15;
+        if (lower.contains("contratar") || lower.contains("contrato")) bonus += 15;
+        if (lower.contains("precio") || lower.contains("cuánto") || lower.contains("cuanto")) bonus += 10;
+        if (lower.contains("ahora") || lower.contains("ya")) bonus += 10;
+        if (lower.contains("cotización") || lower.contains("cotizacion") || lower.contains("presupuesto")) bonus += 15;
+        if (lower.length() > 100) bonus += 5;
+
+        return Math.min(baseScore + bonus, 100);
     }
 }

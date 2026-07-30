@@ -31,7 +31,7 @@ public class SettingController {
 
     @GetMapping
     @Operation(summary = "Obtener configuraciones", description = "Obtiene todas las configuraciones del tenant")
-    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'SUPERVISOR', 'AGENT')")
+    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'SUPERVISOR')")
     public ResponseEntity<ApiResponse<List<SettingDto>>> getAll() {
         List<SettingDto> settings = settingService.getAll();
         return ResponseEntity.ok(ApiResponse.success(settings));
@@ -39,7 +39,7 @@ public class SettingController {
 
     @GetMapping("/{category}")
     @Operation(summary = "Obtener configuraciones por categoría", description = "Obtiene las configuraciones filtradas por categoría")
-    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'SUPERVISOR', 'AGENT')")
+    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'SUPERVISOR')")
     public ResponseEntity<ApiResponse<List<SettingDto>>> getByCategory(@PathVariable String category) {
         List<SettingDto> settings = settingService.getByCategory(category);
         return ResponseEntity.ok(ApiResponse.success(settings));

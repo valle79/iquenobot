@@ -1,5 +1,15 @@
 import { memo } from 'react'
-import { Check, CheckCheck, Clock, AlertCircle, FileText, Image, Headphones, Film, Download } from 'lucide-react'
+import {
+  Check,
+  CheckCheck,
+  Clock,
+  AlertCircle,
+  FileText,
+  Image,
+  Headphones,
+  Film,
+  Download,
+} from 'lucide-react'
 import { cn } from '@/shared/utils'
 import { Avatar } from '@/shared/atoms/Avatar/Avatar'
 import { Tooltip } from '@/shared/atoms/Tooltip/Tooltip'
@@ -30,11 +40,19 @@ function MessageStatusIcon({ status }: { status: string }) {
   }
 }
 
-function AttachmentPreview({ attachment }: { attachment: ConversationMessageDto['attachments'][0] }) {
-  const Icon = attachment.type === 'IMAGE' ? Image
-    : attachment.type === 'AUDIO' || attachment.type === 'VOICE' ? Headphones
-    : attachment.type === 'VIDEO' ? Film
-    : FileText
+function AttachmentPreview({
+  attachment,
+}: {
+  attachment: ConversationMessageDto['attachments'][0]
+}) {
+  const Icon =
+    attachment.type === 'IMAGE'
+      ? Image
+      : attachment.type === 'AUDIO' || attachment.type === 'VOICE'
+        ? Headphones
+        : attachment.type === 'VIDEO'
+          ? Film
+          : FileText
 
   return (
     <a
@@ -65,7 +83,11 @@ function AttachmentPreview({ attachment }: { attachment: ConversationMessageDto[
   )
 }
 
-export const MessageBubble = memo(function MessageBubble({ message, isOwn, showAvatar }: MessageBubbleProps) {
+export const MessageBubble = memo(function MessageBubble({
+  message,
+  isOwn,
+  showAvatar,
+}: MessageBubbleProps) {
   const isText = message.type === 'TEXT'
   const isImage = message.type === 'IMAGE'
   const isDocument = message.type === 'DOCUMENT'
@@ -89,7 +111,7 @@ export const MessageBubble = memo(function MessageBubble({ message, isOwn, showA
           className={cn(
             'rounded-2xl px-4 py-2.5',
             isOwn
-              ? 'rounded-br-sm bg-brand-600 text-white'
+              ? 'bg-brand-600 rounded-br-sm text-white'
               : 'rounded-bl-sm bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100',
             message.status === 'FAILED' && 'opacity-70',
           )}
@@ -102,23 +124,43 @@ export const MessageBubble = memo(function MessageBubble({ message, isOwn, showA
             />
           )}
 
-          {isText && <p className="whitespace-pre-wrap break-words text-sm">{message.content}</p>}
+          {isText && <p className="text-sm break-words whitespace-pre-wrap">{message.content}</p>}
 
-          {isDocument && (message.attachments ?? []).map((att) => (
-            <AttachmentPreview key={att.id} attachment={att} />
-          ))}
+          {isDocument &&
+            (message.attachments ?? []).map((att) => (
+              <AttachmentPreview key={att.id} attachment={att} />
+            ))}
 
-          {(message.attachments ?? []).filter((a) => a.type !== 'IMAGE' && a.type !== 'DOCUMENT').map((att) => (
-            <AttachmentPreview key={att.id} attachment={att} />
-          ))}
+          {(message.attachments ?? [])
+            .filter((a) => a.type !== 'IMAGE' && a.type !== 'DOCUMENT')
+            .map((att) => (
+              <AttachmentPreview key={att.id} attachment={att} />
+            ))}
         </div>
 
-        <div className={cn('mt-1 flex items-center gap-1', isOwn ? 'flex-row-reverse' : 'flex-row')}>
+        <div
+          className={cn('mt-1 flex items-center gap-1', isOwn ? 'flex-row-reverse' : 'flex-row')}
+        >
           <span className="text-[10px] text-gray-400">
-            {dayjs(message.sentAt || message.createdAt).format('HH:mm')}
+            {dayjs
+              .utc(message.sentAt ?? message.createdAt)
+              .tz('America/Lima')
+              .format('HH:mm')}
           </span>
           {isOwn && (
-            <Tooltip content={message.status === 'READ' ? 'Leído' : message.status === 'DELIVERED' ? 'Entregado' : message.status === 'SENT' ? 'Enviado' : message.status === 'FAILED' ? 'Error' : 'Pendiente'}>
+            <Tooltip
+              content={
+                message.status === 'READ'
+                  ? 'Leído'
+                  : message.status === 'DELIVERED'
+                    ? 'Entregado'
+                    : message.status === 'SENT'
+                      ? 'Enviado'
+                      : message.status === 'FAILED'
+                        ? 'Error'
+                        : 'Pendiente'
+              }
+            >
               <MessageStatusIcon status={message.status} />
             </Tooltip>
           )}

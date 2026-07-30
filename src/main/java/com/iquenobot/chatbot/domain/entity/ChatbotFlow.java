@@ -60,12 +60,15 @@ public class ChatbotFlow extends SoftDeletableEntity {
     private String fallbackMessage;
 
     @Column(name = "success_count", nullable = false)
+    @lombok.Builder.Default
     private Long successCount = 0L;
 
     @Column(name = "failure_count", nullable = false)
+    @lombok.Builder.Default
     private Long failureCount = 0L;
 
     @Column(name = "execution_count", nullable = false)
+    @lombok.Builder.Default
     private Long executionCount = 0L;
 
     // Business methods

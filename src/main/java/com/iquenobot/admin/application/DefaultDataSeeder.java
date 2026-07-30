@@ -301,7 +301,8 @@ public class DefaultDataSeeder {
                         .description("Saludo inicial cuando un cliente escribe por primera vez")
                         .triggerType(ChatbotFlowTrigger.WELCOME)
                         .flowConfig("{\"message\":\"¡Hola! Soy el asistente virtual de la empresa. Estoy aquí para ayudarte. Puedes consultarme sobre horarios, precios, productos, o si prefieres, puedo comunicarte con un asesor. ¿En qué puedo servirte el día de hoy?\"}")
-                        .active(true).priority(1).build(),
+                        .active(true).priority(1)
+                        .successCount(0L).failureCount(0L).executionCount(0L).build(),
 
                 ChatbotFlow.builder()
                         .id(UUID.randomUUID()).tenantId(tenantId)
@@ -311,7 +312,8 @@ public class DefaultDataSeeder {
                         .triggerKeywords("precio, costo, cuánto vale, tarifa, cotización")
                         .flowConfig("{\"message\":\"Entiendo que deseas información sobre precios. Permíteme ayudarte con eso. ¿Podrías indicarme exactamente qué producto o servicio te interesa? Así puedo brindarte una cotización precisa y personalizada.\"}")
                         .fallbackMessage("Gracias por tu consulta. Un asesor se comunicará contigo para darte los precios actualizados.")
-                        .active(true).priority(2).build(),
+                        .active(true).priority(2)
+                        .successCount(0L).failureCount(0L).executionCount(0L).build(),
 
                 ChatbotFlow.builder()
                         .id(UUID.randomUUID()).tenantId(tenantId)
@@ -321,7 +323,8 @@ public class DefaultDataSeeder {
                         .triggerKeywords("soporte, ayuda técnica, problema técnico, falla, error, no funciona")
                         .flowConfig("{\"message\":\"Lamento que estés experimentando dificultades. Permíteme tomar nota de tu caso para que un especialista en soporte técnico te contacte a la mayor brevedad. Por favor, cuéntame brevemente cuál es el problema que estás presentando.\"}")
                         .fallbackMessage("Gracias por reportarlo. Un técnico especializado revisará tu caso y te contactará pronto.")
-                        .active(true).priority(3).build()
+                        .active(true).priority(3)
+                        .successCount(0L).failureCount(0L).executionCount(0L).build()
         );
         chatbotFlowRepository.saveAll(flows);
     }

@@ -66,12 +66,10 @@ export function IntentsFormModal({ open, intent, onClose }: Props) {
   const { createMutation, updateMutation } = useChatbotIntentMutations()
 
   const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<FormData>({
-    defaultValues: { active: true },
+    resolver: zodResolver(schema),
+    defaultValues: { intentName: '', description: '', trainingPhrases: '', responses: '', active: true },
   })
   const active = watch('active')
-    resolver: zodResolver(schema),
-    defaultValues: { active: true },
-  })
 
   useEffect(() => {
     if (intent) {

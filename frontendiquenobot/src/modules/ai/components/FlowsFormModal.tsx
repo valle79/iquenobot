@@ -118,8 +118,10 @@ export function FlowsFormModal({ open, flow, onClose }: Props) {
         </div>
 
         {triggerType === 'KEYWORD' && (
-          <Input label="Palabras clave" placeholder="ej: precio, costo, cuánto vale" {...register('triggerKeywords')} />
-          <p className="text-xs text-gray-400">Separa con comas. El bot se activará cuando el cliente escriba alguna de estas palabras.</p>
+          <div className="space-y-1.5">
+            <Input label="Palabras clave" placeholder="ej: precio, costo, cuánto vale" {...register('triggerKeywords')} />
+            <p className="text-xs text-gray-400">Separa con comas. El bot se activará cuando el cliente escriba alguna de estas palabras.</p>
+          </div>
         )}
 
         <div className="space-y-1.5">

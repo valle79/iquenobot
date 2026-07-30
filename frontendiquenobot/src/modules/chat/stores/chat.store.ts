@@ -1,6 +1,62 @@
 import { create } from 'zustand'
 import type { ConversationDto, ConversationMessageDto } from '@/types/chat'
 
+// =====================================================
+// CONSTANTS
+// =====================================================
+
+const TEMP_ID_PREFIX = 'temp_'
+
+// =====================================================
+// PURE HELPERS
+// =====================================================
+
+const getMessageTimestamp = (
+  message: ConversationMessageDto,
+): number => {
+  const date = message.sentAt ?? message.createdAt
+  if (!date) return 0
+  const timestamp = new Date(date).getTime()
+  return Number.isNaN(timestamp) ? 0 : timestamp
+}
+
+const sortMessages = (
+  messages: ConversationMessageDto[],
+): ConversationMessageDto[] =>
+  [...messages].sort((a, b) => {
+    const tsA = getMessageTimestamp(a)
+    const tsB = getMessageTimestamp(b)
+    if (tsA !== tsB) return tsA - tsB
+    const idA = a.id ?? ''
+    const idB = b.id ?? ''
+    return idA.localeCompare(idB)
+  })
+
+const getConversationTimestamp = (
+  conversation: ConversationDto,
+): number => {
+  const date =
+    conversation.lastMessageAt ??
+    conversation.updatedAt ??
+    conversation.createdAt
+  return date ? new Date(date).getTime() : 0
+}
+
+const sortConversations = (
+  conversations: ConversationDto[],
+): ConversationDto[] =>
+  [...conversations].sort(
+    (a, b) =>
+      getConversationTimestamp(b) - getConversationTimestamp(a),
+  )
+
+const isTempId = (id: string): boolean =>
+  id.startsWith(TEMP_ID_PREFIX)
+
+// =====================================================
+// STATE TYPE
+// =====================================================
+
 interface ChatState {
   conversations: ConversationDto[]
   activeConversationId: string | null
@@ -10,40 +66,55 @@ interface ChatState {
   loading: boolean
   error: string | null
 
+  // Conversations
   setConversations: (conversations: ConversationDto[]) => void
   addConversation: (conversation: ConversationDto) => void
-  updateConversation: (id: string, updates: Partial<ConversationDto>) => void
+  updateConversation: (
+    id: string,
+    updates: Partial<ConversationDto>,
+  ) => void
   removeConversation: (id: string) => void
   setActiveConversationId: (id: string | null) => void
-  setMessages: (conversationId: string, messages: ConversationMessageDto[]) => void
-  addMessage: (conversationId: string, message: ConversationMessageDto) => void
-  updateMessageStatus: (messageId: string, status: ConversationMessageDto['status']) => void
+
+  // Messages
+  setMessages: (
+    conversationId: string,
+    messages: ConversationMessageDto[],
+  ) => void
+  addMessage: (
+    conversationId: string,
+    message: ConversationMessageDto,
+  ) => void
+  replaceMessage: (
+    tempId: string,
+    conversationId: string,
+    message: ConversationMessageDto,
+  ) => void
+  updateMessageStatus: (
+    messageId: string,
+    status: ConversationMessageDto['status'],
+  ) => void
+  findTempMessage: (
+    conversationId: string,
+  ) => ConversationMessageDto | undefined
+
+  // Presence
   setOnlineUsers: (users: string[]) => void
+
+  // Typing
   addTypingUser: (conversationId: string, userId: string) => void
   removeTypingUser: (conversationId: string, userId: string) => void
+
+  // UI
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
 }
 
-// ==================== HELPERS ====================
+// =====================================================
+// STORE
+// =====================================================
 
-const getMessageDate = (message: ConversationMessageDto) =>
-  new Date(message.sentAt || message.createdAt).getTime()
-
-const sortMessages = (messages: ConversationMessageDto[]) =>
-  [...messages].sort((a, b) => getMessageDate(a) - getMessageDate(b))
-
-const getConversationDate = (conversation: ConversationDto) =>
-  new Date(
-    conversation.lastMessageAt || conversation.updatedAt || conversation.createdAt,
-  ).getTime()
-
-const sortConversations = (conversations: ConversationDto[]) =>
-  [...conversations].sort((a, b) => getConversationDate(b) - getConversationDate(a))
-
-// ==================== STORE ====================
-
-export const useChatStore = create<ChatState>((set) => ({
+export const useChatStore = create<ChatState>((set, get) => ({
   conversations: [],
   activeConversationId: null,
   messages: {},
@@ -52,7 +123,9 @@ export const useChatStore = create<ChatState>((set) => ({
   loading: false,
   error: null,
 
-  // ==================== CONVERSATIONS ====================
+  // =====================================================
+  // CONVERSATIONS
+  // =====================================================
 
   setConversations: (conversations) =>
     set({
@@ -61,130 +134,201 @@ export const useChatStore = create<ChatState>((set) => ({
 
   addConversation: (conversation) =>
     set((state) => {
-      const exists = state.conversations.find((c) => c.id === conversation.id)
-
-      if (exists) {
-        return {
-          conversations: sortConversations(
-            state.conversations.map((c) =>
-              c.id === conversation.id ? conversation : c,
-            ),
-          ),
-        }
-      }
-
+      const exists = state.conversations.some(
+        (c) => c.id === conversation.id,
+      )
+      const updatedConversations = exists
+        ? state.conversations.map((c) =>
+            c.id === conversation.id ? conversation : c,
+          )
+        : [conversation, ...state.conversations]
       return {
-        conversations: sortConversations([
-          conversation,
-          ...state.conversations,
-        ]),
+        conversations: sortConversations(updatedConversations),
       }
     }),
 
   updateConversation: (id, updates) =>
     set((state) => ({
       conversations: sortConversations(
-        state.conversations.map((c) =>
-          c.id === id ? { ...c, ...updates } : c,
+        state.conversations.map((conversation) =>
+          conversation.id === id
+            ? { ...conversation, ...updates }
+            : conversation,
         ),
       ),
     })),
 
   removeConversation: (id) =>
     set((state) => ({
-      conversations: state.conversations.filter((c) => c.id !== id),
+      conversations: state.conversations.filter(
+        (conversation) => conversation.id !== id,
+      ),
       activeConversationId:
-        state.activeConversationId === id ? null : state.activeConversationId,
+        state.activeConversationId === id
+          ? null
+          : state.activeConversationId,
     })),
 
-  setActiveConversationId: (id) => set({ activeConversationId: id }),
+  setActiveConversationId: (id) =>
+    set({ activeConversationId: id }),
 
-  // ==================== MESSAGES ====================
+  // =====================================================
+  // MESSAGES
+  // =====================================================
 
-  setMessages: (conversationId, messages) =>
-    set((state) => ({
-      messages: {
-        ...state.messages,
-        [conversationId]: sortMessages(messages),
-      },
-    })),
-
-  addMessage: (conversationId, message) =>
+  setMessages: (conversationId, incomingMessages) =>
     set((state) => {
-      const existing = state.messages[conversationId] ?? []
-
-      // evitar duplicados
-      const exists = existing.some((m) => m.id === message.id)
-
-      let updated: ConversationMessageDto[]
-
-      if (exists) {
-        updated = existing.map((m) =>
-          m.id === message.id ? { ...m, ...message } : m,
-        )
-      } else {
-        updated = [...existing, message]
-      }
-
+      const currentMessages =
+        state.messages[conversationId] ?? []
+      const merged = new Map<
+        string,
+        ConversationMessageDto
+      >()
+      // Preserve temp messages first
+      currentMessages.forEach((msg) => {
+        if (isTempId(msg.id)) {
+          merged.set(msg.id, msg)
+        }
+      })
+      // Overwrite with server messages
+      incomingMessages.forEach((msg) => {
+        merged.set(msg.id, msg)
+      })
+      // Merge non-temp current messages not in incoming
+      currentMessages.forEach((msg) => {
+        if (!isTempId(msg.id) && !merged.has(msg.id)) {
+          merged.set(msg.id, msg)
+        }
+      })
       return {
         messages: {
           ...state.messages,
-          [conversationId]: sortMessages(updated),
+          [conversationId]: sortMessages(
+            Array.from(merged.values()),
+          ),
         },
       }
     }),
 
-updateMessageStatus: (messageId, status) =>
-  set((state) => {
-    const newMessages: Record<string, ConversationMessageDto[]> = {
-      ...state.messages,
-    }
+  addMessage: (conversationId, message) =>
+    set((state) => {
+      const currentMessages =
+        state.messages[conversationId] ?? []
 
-    for (const convId of Object.keys(newMessages)) {
-      const messages = newMessages[convId] ?? []
-
-      newMessages[convId] = messages.map((m) =>
-        m.id === messageId ? { ...m, status } : m,
+      const existingIndex = currentMessages.findIndex(
+        (m) => m.id === message.id,
       )
-    }
 
-    return { messages: newMessages }
+      const updatedMessages =
+        existingIndex >= 0
+          ? currentMessages.map((m) =>
+              m.id === message.id
+                ? { ...m, ...message }
+                : m,
+            )
+          : [...currentMessages, message]
+
+      return {
+        messages: {
+          ...state.messages,
+          [conversationId]:
+            sortMessages(updatedMessages),
+        },
+      }
+    }),
+
+replaceMessage: (tempId, conversationId, message) =>
+  set((state) => {
+    const currentMessages =
+      state.messages[conversationId] ?? []
+
+    const updatedMessages = currentMessages.map((m) =>
+      m.id === tempId ? message : m,
+    )
+
+    return {
+      messages: {
+        ...state.messages,
+        [conversationId]: sortMessages(updatedMessages),
+      },
+    }
   }),
 
-  // ==================== ONLINE USERS ====================
+  findTempMessage: (conversationId) => {
+    const messages = get().messages[conversationId]
+    if (!messages) return undefined
+    return messages
+      .filter((m) => isTempId(m.id))
+      .sort(
+        (a, b) =>
+          getMessageTimestamp(b) - getMessageTimestamp(a),
+      )[0]
+  },
+
+  updateMessageStatus: (messageId, status) =>
+    set((state) => {
+      const updatedMessages: Record<
+        string,
+        ConversationMessageDto[]
+      > = {}
+
+      Object.entries(state.messages).forEach(
+        ([conversationId, messages]) => {
+          updatedMessages[conversationId] = messages.map(
+            (message) =>
+              message.id === messageId
+                ? { ...message, status }
+                : message,
+          )
+        },
+      )
+
+      return { messages: updatedMessages }
+    }),
+
+  // =====================================================
+  // ONLINE USERS
+  // =====================================================
 
   setOnlineUsers: (users) =>
     set({
       onlineUsers: new Set(users),
     }),
 
-  // ==================== TYPING ====================
+  // =====================================================
+  // TYPING
+  // =====================================================
 
   addTypingUser: (conversationId, userId) =>
     set((state) => {
-      const current = state.typingUsers[conversationId] ?? []
-
-      if (current.includes(userId)) return state
-
+      const currentUsers =
+        state.typingUsers[conversationId] ?? []
+      if (currentUsers.includes(userId)) return state
       return {
         typingUsers: {
           ...state.typingUsers,
-          [conversationId]: [...current, userId],
+          [conversationId]: [...currentUsers, userId],
         },
       }
     }),
 
   removeTypingUser: (conversationId, userId) =>
-    set((state) => ({
-      typingUsers: {
-        ...state.typingUsers,
-        [conversationId]: (state.typingUsers[conversationId] ?? []).filter(
-          (u) => u !== userId,
-        ),
-      },
-    })),
+    set((state) => {
+      const currentUsers =
+        state.typingUsers[conversationId] ?? []
+      return {
+        typingUsers: {
+          ...state.typingUsers,
+          [conversationId]: currentUsers.filter(
+            (user) => user !== userId,
+          ),
+        },
+      }
+    }),
 
-  // ==================== UI STATE ====================
+  // =====================================================
+  // UI STATE
+  // =====================================================
 
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),

@@ -36,7 +36,7 @@ public class TenantFilter implements Filter {
                 org.hibernate.Filter filter = session.enableFilter("tenantFilter");
                 filter.setParameter("tenantId", tenantId);
                 
-                log.debug("Enabled tenant filter for tenant: {}", tenantId);
+                log.trace("Enabled tenant filter for tenant: {}", tenantId);
             }
 
             chain.doFilter(request, response);

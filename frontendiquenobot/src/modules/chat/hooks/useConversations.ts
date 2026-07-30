@@ -1,24 +1,49 @@
-import { useEffect } from 'react'
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useRef } from 'react'
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
 import { conversationService } from '@/services/conversation.service'
 import { useChatStore } from '../stores/chat.store'
+import { useAuthStore } from '@/core/auth/auth.store'
 import { toast } from 'sonner'
-import type { CreateConversationRequest } from '@/types/chat'
+import type {
+  ConversationDto,
+  CreateConversationRequest,
+  SendMessageRequest,
+  ConversationMessageDto,
+} from '@/types/chat'
+import type { PagedResponse } from '@/types/api'
 
-export function useConversations(filter?: { assigned?: 'mine' | 'unassigned' }) {
+const TEMP_ID_PREFIX = 'temp_'
+
+function generateTempId(): string {
+  return `${TEMP_ID_PREFIX}${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+}
+
+export function useConversations(filter?: {
+  assigned?: 'mine' | 'unassigned'
+}) {
   const { setConversations, setLoading } = useChatStore()
 
-  const query = useInfiniteQuery({
+  const query = useInfiniteQuery<
+    PagedResponse<ConversationDto>,
+    Error
+  >({
     queryKey: ['conversations', filter],
     queryFn: async ({ pageParam = 0 }) => {
-      const params = { page: pageParam, size: 20 }
-      if (filter?.assigned === 'mine') return conversationService.getMyConversations(params)
-      if (filter?.assigned === 'unassigned') return conversationService.getUnassigned(params)
+      const params = { page: pageParam as number, size: 20 }
+      if (filter?.assigned === 'mine')
+        return conversationService.getMyConversations(params)
+      if (filter?.assigned === 'unassigned')
+        return conversationService.getUnassigned(params)
       return conversationService.getActive(params)
     },
     getNextPageParam: (lastPage) => {
       if (lastPage.last) return undefined
-      return lastPage.number + 1
+      return lastPage.page + 1
     },
     initialPageParam: 0,
   })
@@ -39,7 +64,29 @@ export function useConversation(id: string | undefined) {
     queryKey: ['conversation', id],
     queryFn: () => conversationService.getById(id!),
     enabled: !!id,
+    retry: false,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
   })
+}
+
+export function useSafeConversation(id: string | undefined) {
+  const query = useConversation(id)
+  const activeIdRef = useRef<string | undefined>(undefined)
+
+  useEffect(() => {
+    activeIdRef.current = id
+  }, [id])
+
+  const isCurrent = id === activeIdRef.current
+
+  return {
+    data: isCurrent ? query.data : undefined,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    isNotFound: query.isError && !query.isLoading && !query.data,
+    error: query.error,
+  }
 }
 
 export function useCreateConversation() {
@@ -50,72 +97,190 @@ export function useCreateConversation() {
       return conversationService.create(dto)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      queryClient.invalidateQueries({
+        queryKey: ['conversations'],
+      })
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Error al crear la conversación')
+      toast.error(
+        error.message || 'Error al crear la conversación',
+      )
     },
   })
 }
 
 export function useMessages(conversationId: string | undefined) {
-  const { setMessages, addMessage } = useChatStore()
+  const { setMessages } = useChatStore()
+  const fetchKeyRef = useRef(0)
 
-  const query = useInfiniteQuery({
+  const query = useInfiniteQuery<
+    PagedResponse<ConversationMessageDto>,
+    Error
+  >({
     queryKey: ['messages', conversationId],
     queryFn: async ({ pageParam = 0 }) => {
-      const response = await conversationService.getMessages(conversationId!, {
-        page: pageParam,
-        size: 50,
-      })
+      const response = await conversationService.getMessages(
+        conversationId!,
+        { page: pageParam as number, size: 50 },
+      )
       return response
     },
     getNextPageParam: (lastPage) => {
       if (lastPage.last) return undefined
-      return lastPage.number + 1
+      return lastPage.page + 1
     },
     initialPageParam: 0,
     enabled: !!conversationId,
+    retry: false,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
   })
 
   useEffect(() => {
-    if (query.data && conversationId) {
-      const all = query.data.pages.flatMap((p) => p.content)
-      setMessages(conversationId, all)
-    }
-  }, [query.data, conversationId, setMessages])
+    if (!conversationId || !query.data) return
+
+    const currentKey = ++fetchKeyRef.current
+    const allMessages = query.data.pages.flatMap(
+      (page) => page.content,
+    )
+
+    requestAnimationFrame(() => {
+      if (fetchKeyRef.current === currentKey) {
+        setMessages(conversationId, allMessages)
+      }
+    })
+  }, [conversationId, query.data, setMessages])
 
   return {
     fetchNextPage: query.fetchNextPage,
     hasNextPage: query.hasNextPage,
     isFetchingNextPage: query.isFetchingNextPage,
     isLoading: query.isLoading,
+    isError: query.isError,
   }
 }
 
 export function useSendMessage() {
+  const queryClient = useQueryClient()
   const addMessage = useChatStore((state) => state.addMessage)
+  const replaceMessage = useChatStore(
+    (state) => state.replaceMessage,
+  )
+  const currentUser = useAuthStore((state) => state.user)
 
   return useMutation({
-    mutationFn: async (dto: { conversationId: string; type: string; content: string }) => {
-      return conversationService.sendMessage({
-        conversationId: dto.conversationId,
-        type: dto.type as 'TEXT' | 'IMAGE' | 'DOCUMENT' | 'AUDIO',
-        content: dto.content,
-      })
+    mutationFn: async (
+      dto: SendMessageRequest,
+    ): Promise<ConversationMessageDto> => {
+      return conversationService.sendMessage(dto)
     },
-    onSuccess: (message) => {
-      addMessage(message.conversationId, message)
+    onMutate: async (dto) => {
+      const tempId = generateTempId()
+      const now = new Date().toISOString()
+
+      const optimistic: ConversationMessageDto = {
+        id: tempId,
+        conversationId: dto.conversationId,
+        userId: currentUser?.id ?? '',
+        userName: currentUser?.fullName ?? '',
+        direction: 'OUTBOUND',
+        type: dto.type,
+        status: 'PENDING',
+        content: dto.content,
+        channelMessageId: '',
+        replyToMessageId: '',
+        senderName: currentUser?.fullName ?? '',
+        senderPhone: '',
+        senderEmail: '',
+        fromBot: false,
+        botIntent: '',
+        botConfidence: 0,
+        sentAt: now,
+        deliveredAt: '',
+        readAt: '',
+        failedAt: '',
+        failureReason: '',
+        attachments: [],
+        createdAt: now,
+      }
+
+      addMessage(dto.conversationId, optimistic)
+      return { tempId }
+    },
+onSuccess: async (realMessage, dto, context) => {
+  if (context?.tempId) {
+    replaceMessage(
+      context.tempId,
+      dto.conversationId,
+      realMessage,
+    )
+  } else {
+    addMessage(dto.conversationId, realMessage)
+  }
+
+  // 🔥 FORZAR sincronización inmediata del chat abierto
+  await queryClient.invalidateQueries({
+    queryKey: ['messages', dto.conversationId],
+  })
+
+  await queryClient.invalidateQueries({
+    queryKey: ['conversation', dto.conversationId],
+  })
+},
+    onError: (error: Error, dto, context) => {
+      if (context?.tempId) {
+        const failed: ConversationMessageDto = {
+          id: context.tempId,
+          conversationId: dto.conversationId,
+          userId: currentUser?.id ?? '',
+          userName: currentUser?.fullName ?? '',
+          direction: 'OUTBOUND',
+          type: dto.type,
+          status: 'FAILED',
+          content: dto.content,
+          channelMessageId: '',
+          replyToMessageId: '',
+          senderName: currentUser?.fullName ?? '',
+          senderPhone: '',
+          senderEmail: '',
+          fromBot: false,
+          botIntent: '',
+          botConfidence: 0,
+          sentAt: new Date().toISOString(),
+          deliveredAt: '',
+          readAt: '',
+          failedAt: new Date().toISOString(),
+          failureReason: error.message,
+          attachments: [],
+          createdAt: new Date().toISOString(),
+        }
+        replaceMessage(
+          context.tempId,
+          dto.conversationId,
+          failed,
+        )
+      }
+      toast.error(
+        error.message || 'Error al enviar el mensaje',
+      )
     },
   })
 }
 
 export function useUpdateConversation() {
   const queryClient = useQueryClient()
-  const updateConversation = useChatStore((state) => state.updateConversation)
+  const updateConversation = useChatStore(
+    (state) => state.updateConversation,
+  )
 
   const { mutate: actionMutate } = useMutation({
-    mutationFn: async ({ id, action }: { id: string; action: string }) => {
+    mutationFn: async ({
+      id,
+      action,
+    }: {
+      id: string
+      action: string
+    }) => {
       switch (action) {
         case 'resolve':
           await conversationService.resolve(id)
@@ -130,8 +295,12 @@ export function useUpdateConversation() {
     },
     onSuccess: (_data, variables) => {
       updateConversation(variables.id, {})
-      queryClient.invalidateQueries({ queryKey: ['conversations'] })
-      queryClient.invalidateQueries({ queryKey: ['conversation', variables.id] })
+      queryClient.invalidateQueries({
+        queryKey: ['conversations'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['conversation', variables.id],
+      })
     },
   })
 
@@ -139,12 +308,18 @@ export function useUpdateConversation() {
     mutationFn: async (id: string) => {
       await conversationService.markAsRead(id)
     },
+    onError: () => {
+      // Silently ignore markAsRead errors (expected for deleted/expired conversations)
+    },
   })
 
   return {
-    resolve: (id: string) => actionMutate({ id, action: 'resolve' }),
-    close: (id: string) => actionMutate({ id, action: 'close' }),
-    reopen: (id: string) => actionMutate({ id, action: 'reopen' }),
+    resolve: (id: string) =>
+      actionMutate({ id, action: 'resolve' }),
+    close: (id: string) =>
+      actionMutate({ id, action: 'close' }),
+    reopen: (id: string) =>
+      actionMutate({ id, action: 'reopen' }),
     markAsRead: markAsReadMutate,
   }
 }
@@ -153,11 +328,19 @@ export function useAssignConversation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ id, userId }: { id: string; userId: string }) => {
+    mutationFn: async ({
+      id,
+      userId,
+    }: {
+      id: string
+      userId: string
+    }) => {
       await conversationService.assign(id, userId)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      queryClient.invalidateQueries({
+        queryKey: ['conversations'],
+      })
       toast.success('Conversación asignada')
     },
   })

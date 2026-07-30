@@ -17,9 +17,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.ServletWebRequest;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     private String getPath(WebRequest request) {
-        if (request instanceof org.springframework.web.context.request.ServletWebRequest swr) {
+        if (request instanceof ServletWebRequest swr) {
             return swr.getRequest().getRequestURI();
         }
         return request.getDescription(false);
@@ -38,10 +38,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(
             ResourceNotFoundException ex, WebRequest request) {
-        log.warn("Resource not found: {}", ex.getMessage());
+        log.debug("Resource not found (expected): {}", ex.getMessage());
         var error = ErrorResponse.builder()
                 .status(HttpStatus.NOT_FOUND.value())
-                .error("Not Found")
+                .error(ex.getErrorCode())
                 .message(ex.getMessage())
                 .path(getPath(request))
                 .timestamp(LocalDateTime.now())
@@ -52,10 +52,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(
             BusinessException ex, WebRequest request) {
-        log.warn("Business error: {}", ex.getMessage());
+        log.info("Business error: {}", ex.getMessage());
         var error = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error("Business Error")
+                .error("BUSINESS_ERROR")
                 .message(ex.getMessage())
                 .path(getPath(request))
                 .timestamp(LocalDateTime.now())
@@ -66,10 +66,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ErrorResponse> handleForbidden(
             ForbiddenException ex, WebRequest request) {
-        log.warn("Forbidden: {}", ex.getMessage());
+        log.info("Forbidden: {}", ex.getMessage());
         var error = ErrorResponse.builder()
                 .status(HttpStatus.FORBIDDEN.value())
-                .error("Forbidden")
+                .error("FORBIDDEN")
                 .message(ex.getMessage())
                 .path(getPath(request))
                 .timestamp(LocalDateTime.now())
@@ -80,10 +80,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorized(
             UnauthorizedException ex, WebRequest request) {
-        log.warn("Unauthorized access: {}", ex.getMessage());
+        log.info("Unauthorized access: {}", ex.getMessage());
         var error = ErrorResponse.builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .error("Unauthorized")
+                .error("UNAUTHORIZED")
                 .message(ex.getMessage())
                 .path(getPath(request))
                 .timestamp(LocalDateTime.now())
@@ -94,10 +94,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(
             AccessDeniedException ex, WebRequest request) {
-        log.warn("Access denied: {}", ex.getMessage());
+        log.info("Access denied: {}", ex.getMessage());
         var error = ErrorResponse.builder()
                 .status(HttpStatus.FORBIDDEN.value())
-                .error("Forbidden")
+                .error("ACCESS_DENIED")
                 .message("No tienes permisos para acceder a este recurso")
                 .path(getPath(request))
                 .timestamp(LocalDateTime.now())
@@ -111,7 +111,7 @@ public class GlobalExceptionHandler {
         log.warn("Bad credentials: {}", ex.getMessage());
         var error = ErrorResponse.builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .error("Unauthorized")
+                .error("INVALID_CREDENTIALS")
                 .message("Credenciales inválidas")
                 .path(getPath(request))
                 .timestamp(LocalDateTime.now())
@@ -125,7 +125,7 @@ public class GlobalExceptionHandler {
         log.warn("Account disabled: {}", ex.getMessage());
         var error = ErrorResponse.builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .error("Account Disabled")
+                .error("ACCOUNT_DISABLED")
                 .message("La cuenta está deshabilitada")
                 .path(getPath(request))
                 .timestamp(LocalDateTime.now())
@@ -139,7 +139,7 @@ public class GlobalExceptionHandler {
         log.warn("Account locked: {}", ex.getMessage());
         var error = ErrorResponse.builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .error("Account Locked")
+                .error("ACCOUNT_LOCKED")
                 .message("La cuenta está bloqueada temporalmente")
                 .path(getPath(request))
                 .timestamp(LocalDateTime.now())
@@ -153,7 +153,7 @@ public class GlobalExceptionHandler {
         log.warn("Authentication error: {}", ex.getMessage());
         var error = ErrorResponse.builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
-                .error("Authentication Failed")
+                .error("AUTHENTICATION_FAILED")
                 .message("Error de autenticación")
                 .path(getPath(request))
                 .timestamp(LocalDateTime.now())
@@ -164,8 +164,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationErrors(
             MethodArgumentNotValidException ex, WebRequest request) {
-        log.warn("Validation error: {}", ex.getMessage());
-
+        log.info("Validation error: {}", ex.getMessage());
         Map<String, String> validationErrors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -173,10 +172,9 @@ public class GlobalExceptionHandler {
                         FieldError::getField,
                         FieldError::getDefaultMessage,
                         (existing, replacement) -> existing));
-
         var error = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error("Validation Failed")
+                .error("VALIDATION_FAILED")
                 .message("Errores de validación en los datos enviados")
                 .path(getPath(request))
                 .timestamp(LocalDateTime.now())
@@ -188,18 +186,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolation(
             ConstraintViolationException ex, WebRequest request) {
-        log.warn("Constraint violation: {}", ex.getMessage());
-
+        log.info("Constraint violation: {}", ex.getMessage());
         Map<String, String> validationErrors = ex.getConstraintViolations()
                 .stream()
                 .collect(Collectors.toMap(
                         violation -> violation.getPropertyPath().toString(),
                         ConstraintViolation::getMessage,
                         (existing, replacement) -> existing));
-
         var error = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error("Constraint Violation")
+                .error("CONSTRAINT_VIOLATION")
                 .message("Errores de validación")
                 .path(getPath(request))
                 .timestamp(LocalDateTime.now())
@@ -211,10 +207,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(
             IllegalArgumentException ex, WebRequest request) {
-        log.warn("Illegal argument: {}", ex.getMessage());
+        log.info("Illegal argument: {}", ex.getMessage());
         var error = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
-                .error("Bad Request")
+                .error("BAD_REQUEST")
                 .message(ex.getMessage())
                 .path(getPath(request))
                 .timestamp(LocalDateTime.now())
@@ -228,7 +224,7 @@ public class GlobalExceptionHandler {
         log.error("Unexpected error: ", ex);
         var error = ErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error("Internal Server Error")
+                .error("INTERNAL_SERVER_ERROR")
                 .message("Ha ocurrido un error interno del servidor")
                 .path(getPath(request))
                 .timestamp(LocalDateTime.now())

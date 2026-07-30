@@ -6,20 +6,21 @@ import type { MessageStatus } from '@/types/enums'
 
 export function useChatSocket() {
   const emit = useSocketEmit()
-  const addMessage = useChatStore((state) => state.addMessage)
-  const addConversation = useChatStore((state) => state.addConversation)
-  const updateConversation = useChatStore((state) => state.updateConversation)
-  const updateMessageStatus = useChatStore((state) => state.updateMessageStatus)
-  const setOnlineUsers = useChatStore((state) => state.setOnlineUsers)
-  const addTypingUser = useChatStore((state) => state.addTypingUser)
-  const removeTypingUser = useChatStore((state) => state.removeTypingUser)
   const typingTimeouts = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
   useSocketEvent<ConversationMessageDto>('message:new', (message) => {
-    addMessage(message.conversationId, message)
-    const convs = useChatStore.getState().conversations
+    const store = useChatStore.getState()
+    const tempMessage = store.findTempMessage(message.conversationId)
+
+    if (tempMessage) {
+      store.replaceMessage(tempMessage.id, message.conversationId, message)
+    } else {
+      store.addMessage(message.conversationId, message)
+    }
+
+    const convs = store.conversations
     const conv = convs.find((c) => c.id === message.conversationId)
-    updateConversation(message.conversationId, {
+    store.updateConversation(message.conversationId, {
       lastMessage: message,
       lastMessageAt: message.sentAt,
       messageCount: (conv?.messageCount ?? 0) + 1,
@@ -27,23 +28,26 @@ export function useChatSocket() {
   })
 
   useSocketEvent<{ messageId: string; status: MessageStatus }>('message:status', (data) => {
-    updateMessageStatus(data.messageId, data.status)
+    useChatStore.getState().updateMessageStatus(data.messageId, data.status)
   })
 
   useSocketEvent<ConversationDto>('conversation:updated', (conversation) => {
-    updateConversation(conversation.id, conversation)
+    useChatStore.getState().updateConversation(conversation.id, conversation)
   })
 
   useSocketEvent<ConversationDto>('conversation:new', (conversation) => {
-    addConversation(conversation)
+    useChatStore.getState().addConversation(conversation)
   })
 
   useSocketEvent<{ userId: string; online: boolean }>('user:online', (_data) => {
-    setOnlineUsers(Array.from(useChatStore.getState().onlineUsers))
+    useChatStore.getState().setOnlineUsers(
+      Array.from(useChatStore.getState().onlineUsers),
+    )
   })
 
   useSocketEvent<{ conversationId: string; userId: string }>('agent:typing', (data) => {
-    addTypingUser(data.conversationId, data.userId)
+    const store = useChatStore.getState()
+    store.addTypingUser(data.conversationId, data.userId)
 
     const key = `${data.conversationId}:${data.userId}`
     if (typingTimeouts.current[key]) {
@@ -51,7 +55,7 @@ export function useChatSocket() {
     }
 
     typingTimeouts.current[key] = setTimeout(() => {
-      removeTypingUser(data.conversationId, data.userId)
+      store.removeTypingUser(data.conversationId, data.userId)
       delete typingTimeouts.current[key]
     }, 3000)
   })

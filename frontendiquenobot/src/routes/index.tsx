@@ -18,6 +18,8 @@ import {
   NotificationsPage,
   LeadsPage,
   LeadDetailPage,
+  QuotesPage,
+  QuoteDetailPage,
   RolesPage,
   AdminTenantsPage,
   AdminDashboardPage,
@@ -72,6 +74,22 @@ export const routes: RouteObject[] = [
       { path: 'contacts/:id', element: <RouteWrapper><ContactDetailPage /></RouteWrapper> },
       { path: 'leads', element: <RouteWrapper><LeadsPage /></RouteWrapper> },
       { path: 'leads/:id', element: <RouteWrapper><LeadDetailPage /></RouteWrapper> },
+      {
+        path: 'quotes',
+        element: (
+          <ProtectedRoute roles={['TENANT_ADMIN', 'SUPERVISOR']}>
+            <RouteWrapper><QuotesPage /></RouteWrapper>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'quotes/:id',
+        element: (
+          <ProtectedRoute roles={['TENANT_ADMIN', 'SUPERVISOR']}>
+            <RouteWrapper><QuoteDetailPage /></RouteWrapper>
+          </ProtectedRoute>
+        ),
+      },
       { path: 'products', element: <RouteWrapper><ProductsPage /></RouteWrapper> },
       { path: 'products/:id', element: <RouteWrapper><ProductDetailPage /></RouteWrapper> },
       {

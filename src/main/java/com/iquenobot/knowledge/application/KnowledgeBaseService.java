@@ -170,7 +170,8 @@ public class KnowledgeBaseService {
         return "";
     }
 
-    private List<Product> findMatchingProducts(UUID tenantId, String message) {
+    @Transactional(readOnly = true)
+    public List<Product> findMatchingProducts(UUID tenantId, String message) {
         if (message == null || message.isBlank()) {
             return List.of();
         }

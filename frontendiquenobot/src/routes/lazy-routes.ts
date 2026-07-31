@@ -14,6 +14,8 @@ export const AnalyticsPage = lazy(() => import('@/modules/analytics/pages/Analyt
 export const NotificationsPage = lazy(() => import('@/modules/notifications/pages/NotificationsPage'))
 export const LeadsPage = lazy(() => import('@/modules/leads/pages/LeadsPage'))
 export const LeadDetailPage = lazy(() => import('@/modules/leads/pages/LeadDetailPage'))
+export const QuotesPage = lazy(() => import('@/modules/quotes/pages/QuotesPage'))
+export const QuoteDetailPage = lazy(() => import('@/modules/quotes/pages/QuoteDetailPage'))
 export const RolesPage = lazy(() => import('@/modules/roles/pages/RolesPage'))
 export const AdminTenantsPage = lazy(() => import('@/modules/admin/pages/AdminTenantsPage'))
 export const ProfilePage = lazy(() => import('@/modules/profile/pages/ProfilePage'))

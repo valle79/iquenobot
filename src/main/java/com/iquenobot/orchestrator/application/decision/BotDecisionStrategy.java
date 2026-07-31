@@ -1,19 +1,31 @@
 package com.iquenobot.orchestrator.application.decision;
 
+import com.iquenobot.ai.domain.dto.AIMessageDto;
 import com.iquenobot.chatbot.application.ChatbotService;
 import com.iquenobot.chatbot.domain.dto.ChatbotResponseDto;
 import com.iquenobot.conversation.domain.entity.Conversation;
+import com.iquenobot.conversation.domain.entity.ConversationMessage;
+import com.iquenobot.conversation.domain.repository.ConversationMessageRepository;
 import com.iquenobot.conversation.domain.repository.ConversationRepository;
+import com.iquenobot.knowledge.application.KnowledgeBaseService;
 import com.iquenobot.orchestrator.domain.model.ActionType;
 import com.iquenobot.orchestrator.domain.model.BotConfiguration;
 import com.iquenobot.orchestrator.domain.model.Decision;
+import com.iquenobot.orchestrator.domain.model.IncomingMessage;
 import com.iquenobot.orchestrator.domain.model.ProcessingContext;
 import com.iquenobot.orchestrator.domain.service.DecisionStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -22,8 +34,13 @@ public class BotDecisionStrategy implements DecisionStrategy {
 
     private final ChatbotService chatbotService;
     private final ConversationRepository conversationRepository;
+    private final ConversationMessageRepository messageRepository;
+    private final KnowledgeBaseService knowledgeBaseService;
 
     private record LeadRule(String title, int baseScore) {}
+
+    /** Cantidad de mensajes recientes de la conversación que se pasan como contexto al LLM. */
+    private static final int HISTORY_LIMIT = 30;
 
     private static final Map<String, LeadRule> COMMERCIAL_RULES = Map.of(
             "solicitar_precio", new LeadRule("Solicitud de cotización", 40),
@@ -84,7 +101,8 @@ public class BotDecisionStrategy implements DecisionStrategy {
                             "systemPrompt", botConfig != null ? botConfig.getSystemPrompt() : "",
                             "fallbackMessage", botConfig != null ? botConfig.getFallbackMessage() : "",
                             "temperature", String.valueOf(botConfig != null ? botConfig.getTemperature() : 0.7),
-                            "isFirstMessage", isFirstMessage
+                            "isFirstMessage", isFirstMessage,
+                            "history", buildConversationHistory(context, msg)
                     )
             );
 
@@ -139,6 +157,24 @@ public class BotDecisionStrategy implements DecisionStrategy {
                                 "intent", intent
                         ))
                         .build();
+            }
+
+            if ("solicitar_precio".equals(intent)) {
+                List<UUID> productIds = findMatchingProductIds(context, msg);
+                if (!productIds.isEmpty()) {
+                    log.info("Quote requested for conversation {} with {} product(s); generating quote PDF",
+                            conversation.getId(), productIds.size());
+                    return Decision.builder()
+                            .actionType(ActionType.SEND_QUOTE)
+                            .reason("Customer requested a quote")
+                            .parameters(Map.of(
+                                    "productIds", productIds.stream()
+                                            .map(UUID::toString)
+                                            .collect(Collectors.joining(",")),
+                                    "messageContent", msg.getContent() != null ? msg.getContent() : ""
+                            ))
+                            .build();
+                }
             }
 
             return Decision.builder()
@@ -205,6 +241,50 @@ public class BotDecisionStrategy implements DecisionStrategy {
     private boolean hasPurchaseIntent(ProcessingContext context, String intent) {
         String content = context.getIncomingMessage().getContent();
         return content != null && ChatbotService.PURCHASE_INTENT_PATTERN.matcher(content.toLowerCase()).find();
+    }
+
+    /**
+     * Construye el historial reciente de la conversación en formato de mensajes
+     * para el LLM (user/assistant). Esto permite al bot interpretar mensajes que
+     * dependen del contexto previo, p. ej. "la opción 4" cuando antes listó
+     * productos. El mensaje que se está procesando se excluye: ChatbotService lo
+     * agrega como última entrada al generar la respuesta.
+     */
+    private List<AIMessageDto> buildConversationHistory(ProcessingContext context, IncomingMessage msg) {
+        var conversation = context.getConversation();
+        if (conversation.getId() == null) {
+            return List.of();
+        }
+        Page<ConversationMessage> page = messageRepository.findByConversationIdOrderBySentAtDesc(
+                conversation.getId(), PageRequest.of(0, HISTORY_LIMIT));
+        List<ConversationMessage> recent = new ArrayList<>(page.getContent());
+        Collections.reverse(recent);
+
+        String currentChannelMessageId = msg.getChannelMessageId();
+        List<AIMessageDto> history = new ArrayList<>();
+        for (ConversationMessage m : recent) {
+            if (currentChannelMessageId != null && currentChannelMessageId.equals(m.getChannelMessageId())) {
+                continue;
+            }
+            String content = m.getContent();
+            if (content == null || content.isBlank()) {
+                continue;
+            }
+            history.add(AIMessageDto.builder()
+                    .role(m.isInbound() ? "user" : "assistant")
+                    .content(content)
+                    .build());
+        }
+        return history;
+    }
+
+    private List<UUID> findMatchingProductIds(ProcessingContext context, IncomingMessage msg) {
+        String content = msg.getContent();
+        if (content == null || content.isBlank()) {
+            return List.of();
+        }
+        return knowledgeBaseService.findMatchingProducts(context.getTenantId(), content)
+                .stream().map(p -> p.getId()).toList();
     }
 
     private void resetFallbackCount(ProcessingContext context) {

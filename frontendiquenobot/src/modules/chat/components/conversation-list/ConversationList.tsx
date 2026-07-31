@@ -66,6 +66,7 @@ const ConversationItem = memo(function ConversationItem({
     lastMessage?.content?.trim() ||
     (lastMessage
       ? ({
+          TEXT: 'Mensaje',
           IMAGE: 'Imagen',
           AUDIO: 'Audio',
           VOICE: 'Nota de voz',
@@ -74,6 +75,9 @@ const ConversationItem = memo(function ConversationItem({
           STICKER: 'Sticker',
           LOCATION: 'Ubicación',
           CONTACT: 'Contacto',
+          TEMPLATE: 'Plantilla',
+          INTERACTIVE: 'Interactivo',
+          SYSTEM: 'Sistema',
         }[lastMessage.type] ?? 'Sin mensajes')
       : 'Sin mensajes')
 

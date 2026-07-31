@@ -3,6 +3,7 @@ package com.iquenobot.orchestrator.domain.model;
 public enum ActionType {
     SEND_TEXT,
     SEND_MEDIA,
+    SEND_QUOTE,
     SEND_IMAGE,
     SEND_VIDEO,
     SEND_AUDIO,

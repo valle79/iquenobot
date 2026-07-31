@@ -75,32 +75,21 @@ public class ChatbotService {
     /**
      * Respuesta de respaldo cuando no hay intent ni flow configurado.
      *
-     * Si existe conocimiento relevante en la KB o en el catálogo de productos,
-     * el bot responde con el LLM. De lo contrario NO responde con el LLM
-     * (evita respuestas inventadas a mensajes fuera de alcance o personales),
-     * sino que pide al cliente que detalle su consulta. La transferencia al
-     * agente humano solo se produce si el cliente la solicita explícitamente
-     * o si el orquestador agota los intentos de aclaración.
+     * Si existe conocimiento relevante en la KB, en el catálogo de productos o
+     * historial previo de la conversación, el bot responde con el LLM usando ese
+     * contexto (esto permite interpretar referencias como "la opción 4" o
+     * acuses como "Interesante" tras una respuesta del bot). De lo contrario NO
+     * responde con el LLM (evita respuestas inventadas a mensajes fuera de
+     * alcance o personales), sino que pide al cliente que detalle su consulta.
+     * La transferencia al agente humano solo se produce si el cliente la solicita
+     * explícitamente o si el orquestador agota los intentos de aclaración.
      */
     private ChatbotResponseDto handleFallback(String message, Map<String, Object> context) {
-        String kbContext = knowledgeBaseService.buildContextForQuery(message);
-        if (!kbContext.isEmpty()) {
-            return generateAIResponse(message, context, kbContext);
-        }
-
-        String fallbackMessage = context.get("fallbackMessage") != null
-                ? (String) context.get("fallbackMessage")
-                : "Gracias por escribirnos. Disculpa, no logré entender completamente tu consulta. "
-                        + "Para poder ayudarte de la mejor manera, ¿podrías indicarme con mayor detalle qué es "
-                        + "exactamente lo que deseas? Por ejemplo: el nombre del producto, el modelo o la "
-                        + "información que necesitas. Un agente humano está al tanto de tu mensaje y te "
-                        + "atenderá muy pronto. ¡Gracias por tu paciencia!";
-
         boolean requestsHuman = REQUEST_HUMAN_PATTERN.matcher(message.toLowerCase()).find();
         if (requestsHuman) {
             log.info("Customer explicitly requested a human agent; transferring");
             return ChatbotResponseDto.builder()
-                    .message(fallbackMessage)
+                    .message(resolveFallbackMessage(context))
                     .requiresHumanAgent(true)
                     .requiresClarification(false)
                     .suggestedActions(new ArrayList<>())
@@ -108,14 +97,52 @@ public class ChatbotService {
                     .build();
         }
 
+        @SuppressWarnings("unchecked")
+        List<AIMessageDto> history = (List<AIMessageDto>) context.getOrDefault("history", new ArrayList<>());
+        boolean hasConversationContext = history.stream().anyMatch(m -> "assistant".equals(m.getRole()));
+
+        String kbContext = knowledgeBaseService.buildContextForQuery(buildContextQuery(message, history));
+        if (hasConversationContext || !kbContext.isEmpty()) {
+            return generateAIResponse(message, context, kbContext);
+        }
+
         log.info("No intent, flow, KB or product context matched; asking customer to clarify");
         return ChatbotResponseDto.builder()
-                .message(fallbackMessage)
+                .message(resolveFallbackMessage(context))
                 .requiresHumanAgent(false)
                 .requiresClarification(true)
                 .suggestedActions(new ArrayList<>())
                 .entities(new HashMap<>())
                 .build();
+    }
+
+    private String resolveFallbackMessage(Map<String, Object> context) {
+        return context.get("fallbackMessage") != null
+                ? (String) context.get("fallbackMessage")
+                : "Gracias por escribirnos. Disculpa, no logré entender completamente tu consulta. "
+                        + "Para poder ayudarte de la mejor manera, ¿podrías indicarme con mayor detalle qué es "
+                        + "exactamente lo que deseas? Por ejemplo: el nombre del producto, el modelo o la "
+                        + "información que necesitas. Un agente humano está al tanto de tu mensaje y te "
+                        + "atenderá muy pronto. ¡Gracias por tu paciencia!";
+    }
+
+    /**
+     * Combina el mensaje actual con los últimos mensajes del bot para que la
+     * búsqueda en la base de conocimiento y el catálogo pueda resolver
+     * referencias (p. ej. "la opción 4" o "ese modelo") contra lo que el bot
+     * mostró antes en la conversación.
+     */
+    private String buildContextQuery(String message, List<AIMessageDto> history) {
+        StringBuilder sb = new StringBuilder(message == null ? "" : message);
+        int appended = 0;
+        for (int i = history.size() - 1; i >= 0 && appended < 2; i--) {
+            AIMessageDto m = history.get(i);
+            if ("assistant".equals(m.getRole()) && m.getContent() != null && !m.getContent().isBlank()) {
+                sb.append(' ').append(m.getContent());
+                appended++;
+            }
+        }
+        return sb.length() > 1000 ? sb.substring(0, 1000) : sb.toString();
     }
 
     @Transactional(readOnly = true)

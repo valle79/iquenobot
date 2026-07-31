@@ -20,5 +20,6 @@ public class ChatbotResponseDto {
     private List<String> suggestedActions;
     private Map<String, Object> entities;
     private boolean requiresHumanAgent;
+    private boolean requiresClarification;
     private String flowExecuted;
 }

@@ -2,6 +2,8 @@ package com.iquenobot.orchestrator.application.decision;
 
 import com.iquenobot.chatbot.application.ChatbotService;
 import com.iquenobot.chatbot.domain.dto.ChatbotResponseDto;
+import com.iquenobot.conversation.domain.entity.Conversation;
+import com.iquenobot.conversation.domain.repository.ConversationRepository;
 import com.iquenobot.orchestrator.domain.model.ActionType;
 import com.iquenobot.orchestrator.domain.model.BotConfiguration;
 import com.iquenobot.orchestrator.domain.model.Decision;
@@ -19,6 +21,7 @@ import java.util.Map;
 public class BotDecisionStrategy implements DecisionStrategy {
 
     private final ChatbotService chatbotService;
+    private final ConversationRepository conversationRepository;
 
     private record LeadRule(String title, int baseScore) {}
 
@@ -28,6 +31,9 @@ public class BotDecisionStrategy implements DecisionStrategy {
             "forma_pago", new LeadRule("Interés en compra - forma de pago", 35),
             "informacion_empresa", new LeadRule("Interés general en productos/servicios", 25)
     );
+
+    /** Número máximo de intentos de aclaración antes de pasar la conversación al agente. */
+    private static final int MAX_CLARIFICATION_ATTEMPTS = 1;
 
     @Override
     public int getPriority() { return 10; }
@@ -46,13 +52,11 @@ public class BotDecisionStrategy implements DecisionStrategy {
             return false;
         }
 
-        if (context.getConversation().isBotConversation()) {
-            return true;
+        var conversation = context.getConversation();
+        if (!conversation.isBotConversation() && conversation.getAssignedUser() != null) {
+            log.debug("Conversation {} is assigned to an agent; bot will respond anyway", conversation.getId());
         }
-        if (context.getConversation().getAssignedUser() == null) {
-            return true;
-        }
-        return false;
+        return true;
     }
 
     @Override
@@ -85,9 +89,10 @@ public class BotDecisionStrategy implements DecisionStrategy {
             );
 
             if (botResponse.isRequiresHumanAgent()) {
+                resetFallbackCount(context);
                 return Decision.builder()
                         .actionType(ActionType.TRANSFER_CONVERSATION)
-                        .reason("Bot requested human agent handoff")
+                        .reason("Customer requested human agent or bot error")
                         .requiresAgent(true)
                         .parameters(Map.of(
                                 "response", botResponse.getMessage(),
@@ -97,8 +102,16 @@ public class BotDecisionStrategy implements DecisionStrategy {
                         .build();
             }
 
+            if (botResponse.isRequiresClarification()) {
+                return handleClarification(context, botResponse);
+            }
+
+            resetFallbackCount(context);
+
             String intent = botResponse.getIntentDetected() != null
                     ? botResponse.getIntentDetected() : "unknown";
+
+            boolean purchaseIntent = hasPurchaseIntent(context, intent);
 
             LeadRule rule = COMMERCIAL_RULES.get(intent);
             if (rule != null) {
@@ -112,6 +125,20 @@ public class BotDecisionStrategy implements DecisionStrategy {
                                 "messageContent", msg.getContent()
                         ))
                         .build());
+            }
+
+            if (purchaseIntent) {
+                log.info("Purchase intent detected for conversation {}; transferring to agent for closing",
+                        conversation.getId());
+                return Decision.builder()
+                        .actionType(ActionType.TRANSFER_CONVERSATION)
+                        .reason("Customer shows purchase intent: " + intent)
+                        .requiresAgent(true)
+                        .parameters(Map.of(
+                                "response", botResponse.getMessage(),
+                                "intent", intent
+                        ))
+                        .build();
             }
 
             return Decision.builder()
@@ -132,6 +159,59 @@ public class BotDecisionStrategy implements DecisionStrategy {
                     .reason("Bot error: " + e.getMessage())
                     .requiresAgent(true)
                     .build();
+        }
+    }
+
+    /**
+     * El bot actúa como filtro de calificación: cuando no entiende al cliente,
+     * le pide con cortesía que detalle su consulta y mantiene la conversación.
+     * Solo transfiere al agente humano si el cliente vuelve a escribir algo
+     * que no se entiende (agotó los intentos de aclaración).
+     */
+    private Decision handleClarification(ProcessingContext context, ChatbotResponseDto botResponse) {
+        var conversation = context.getConversation();
+        int fallbacks = conversation.getBotFallbackCount();
+
+        if (fallbacks >= MAX_CLARIFICATION_ATTEMPTS) {
+            log.info("Conversation {} unable to understand customer after {} attempts; transferring to agent",
+                    conversation.getId(), fallbacks + 1);
+            resetFallbackCount(context);
+            return Decision.builder()
+                    .actionType(ActionType.TRANSFER_CONVERSATION)
+                    .reason("Unable to understand customer after clarification attempts")
+                    .requiresAgent(true)
+                    .parameters(Map.of(
+                            "response", botResponse.getMessage(),
+                            "intent", "unknown"
+                    ))
+                    .build();
+        }
+
+        conversation.setBotFallbackCount(fallbacks + 1);
+        conversationRepository.save(conversation);
+        log.info("Conversation {} not understood (attempt {}/{}); asking customer to clarify",
+                conversation.getId(), fallbacks + 1, MAX_CLARIFICATION_ATTEMPTS + 1);
+
+        return Decision.builder()
+                .actionType(ActionType.SEND_TEXT)
+                .reason("Bot requested clarification")
+                .parameters(Map.of(
+                        "response", botResponse.getMessage(),
+                        "intent", "unknown"
+                ))
+                .build();
+    }
+
+    private boolean hasPurchaseIntent(ProcessingContext context, String intent) {
+        String content = context.getIncomingMessage().getContent();
+        return content != null && ChatbotService.PURCHASE_INTENT_PATTERN.matcher(content.toLowerCase()).find();
+    }
+
+    private void resetFallbackCount(ProcessingContext context) {
+        var conversation = context.getConversation();
+        if (conversation.getBotFallbackCount() != 0) {
+            conversation.setBotFallbackCount(0);
+            conversationRepository.save(conversation);
         }
     }
 }

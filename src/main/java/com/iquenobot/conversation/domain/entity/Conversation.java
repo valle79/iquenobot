@@ -105,6 +105,9 @@ public class Conversation extends SoftDeletableEntity {
     @Column(name = "bot_handoff_at")
     private LocalDateTime botHandoffAt;
 
+    @Column(name = "bot_fallback_count", nullable = false)
+    private int botFallbackCount = 0;
+
     @OneToMany(mappedBy = "conversation", fetch = FetchType.LAZY)
     private Set<ConversationMessage> messages;
 

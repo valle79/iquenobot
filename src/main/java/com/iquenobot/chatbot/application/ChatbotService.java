@@ -38,6 +38,18 @@ public class ChatbotService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Random random = new Random();
 
+    private static final java.util.regex.Pattern REQUEST_HUMAN_PATTERN = java.util.regex.Pattern.compile(
+            "\\b(agente|representante|humano|asesor)\\b|hablar con (alguien|una persona|un agente|un representante)"
+                    + "|(quiero|necesito|prefiero) (hablar|que me atienda) (con|un|una)");
+
+    /** Frases que indican intención de compra inequívoca (el cliente confirma querer comprar). */
+    public static final java.util.regex.Pattern PURCHASE_INTENT_PATTERN = java.util.regex.Pattern.compile(
+            "\\b(comprar|compré|comprarlo|comprarla|comprarlos|adquirir|encargar|hacer (un|el|mi) pedido"
+                    + "|orden de compra)\\b"
+                    + "|(?<!no )(quiero (comprar|adquirir|encargar|pedir|hacer (un|el|mi) pedido"
+                    + "|uno|una|este|esta|ese|esa))"
+                    + "|(?<!no )me interesa (comprar|adquirir|hacer (un|el) pedido)");
+
     @Transactional
     public ChatbotResponseDto processMessage(String message, Map<String, Object> context) {
         UUID tenantId = getTenantId();
@@ -63,9 +75,12 @@ public class ChatbotService {
     /**
      * Respuesta de respaldo cuando no hay intent ni flow configurado.
      *
-     * Si existe conocimiento relevante en la KB, el bot responde con el LLM.
-     * De lo contrario, NO responde con el LLM (evita respuestas inventadas
-     * a mensajes fuera de alcance o personales) y transfiere al agente humano.
+     * Si existe conocimiento relevante en la KB o en el catálogo de productos,
+     * el bot responde con el LLM. De lo contrario NO responde con el LLM
+     * (evita respuestas inventadas a mensajes fuera de alcance o personales),
+     * sino que pide al cliente que detalle su consulta. La transferencia al
+     * agente humano solo se produce si el cliente la solicita explícitamente
+     * o si el orquestador agota los intentos de aclaración.
      */
     private ChatbotResponseDto handleFallback(String message, Map<String, Object> context) {
         String kbContext = knowledgeBaseService.buildContextForQuery(message);
@@ -73,14 +88,31 @@ public class ChatbotService {
             return generateAIResponse(message, context, kbContext);
         }
 
-        log.info("No intent, flow or KB context matched; transferring to human agent");
         String fallbackMessage = context.get("fallbackMessage") != null
                 ? (String) context.get("fallbackMessage")
-                : "Lo siento, voy a conectarte con un agente humano.";
+                : "Gracias por escribirnos. Disculpa, no logré entender completamente tu consulta. "
+                        + "Para poder ayudarte de la mejor manera, ¿podrías indicarme con mayor detalle qué es "
+                        + "exactamente lo que deseas? Por ejemplo: el nombre del producto, el modelo o la "
+                        + "información que necesitas. Un agente humano está al tanto de tu mensaje y te "
+                        + "atenderá muy pronto. ¡Gracias por tu paciencia!";
 
+        boolean requestsHuman = REQUEST_HUMAN_PATTERN.matcher(message.toLowerCase()).find();
+        if (requestsHuman) {
+            log.info("Customer explicitly requested a human agent; transferring");
+            return ChatbotResponseDto.builder()
+                    .message(fallbackMessage)
+                    .requiresHumanAgent(true)
+                    .requiresClarification(false)
+                    .suggestedActions(new ArrayList<>())
+                    .entities(new HashMap<>())
+                    .build();
+        }
+
+        log.info("No intent, flow, KB or product context matched; asking customer to clarify");
         return ChatbotResponseDto.builder()
                 .message(fallbackMessage)
-                .requiresHumanAgent(true)
+                .requiresHumanAgent(false)
+                .requiresClarification(true)
                 .suggestedActions(new ArrayList<>())
                 .entities(new HashMap<>())
                 .build();

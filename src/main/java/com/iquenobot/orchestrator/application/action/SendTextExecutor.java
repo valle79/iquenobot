@@ -10,6 +10,7 @@ import com.iquenobot.orchestrator.domain.service.ActionExecutor;
 import com.iquenobot.orchestrator.domain.service.ChannelMessageSender;
 import com.iquenobot.orchestrator.domain.service.EventPublisher;
 import com.iquenobot.orchestrator.interfaces.event.BotAnsweredEvent;
+import com.iquenobot.shared.application.MessageTemplateResolver;
 import com.iquenobot.shared.enums.MessageDirection;
 import com.iquenobot.shared.enums.MessageStatus;
 import com.iquenobot.shared.enums.MessageType;
@@ -33,6 +34,7 @@ public class SendTextExecutor implements ActionExecutor {
     private final ConversationRepository conversationRepository;
     private final EventPublisher eventPublisher;
     private final List<ChannelMessageSender> channelSenders;
+    private final MessageTemplateResolver templateResolver;
 
     @Override
     public ActionType supportedActionType() { return ActionType.SEND_TEXT; }
@@ -48,6 +50,8 @@ public class SendTextExecutor implements ActionExecutor {
             log.warn("SendTextExecutor called but no response text in decision parameters");
             return;
         }
+
+        responseText = templateResolver.resolve(responseText, context.getTenant(), context.getContact());
 
         String intentDetected = decision.getParameters() != null
                 ? (String) decision.getParameters().getOrDefault("intent", "")

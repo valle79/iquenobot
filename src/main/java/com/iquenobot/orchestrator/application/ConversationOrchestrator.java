@@ -16,6 +16,8 @@ import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +31,10 @@ public class ConversationOrchestrator {
     private static final String CHANNEL = "channel";
     private static final String MESSAGE_ID = "messageId";
 
+    // Serializa el procesamiento por conversación para evitar optimistic locks
+    // y respuestas desordenadas cuando llegan ráfagas de webhooks (redelivery).
+    private final ConcurrentHashMap<String, ReentrantLock> conversationLocks = new ConcurrentHashMap<>();
+
     private final MessagePipeline pipeline;
     private final DecisionEngine decisionEngine;
     private final ActionDispatcher actionDispatcher;
@@ -40,6 +46,40 @@ public class ConversationOrchestrator {
                 ? message.getChannelMessageId()
                 : UUID.randomUUID().toString();
 
+        MDC.put(CORRELATION_ID, correlationId);
+        MDC.put(CHANNEL, message.getChannel() != null ? message.getChannel().name() : "UNKNOWN");
+        MDC.put(MESSAGE_ID, correlationId);
+
+        log.info("Orchestrator processing message from channel={} source={}",
+                message.getChannel(), message.getSourceIdentifier());
+
+        // Clave de serialización: canal + identificador de la conversación remota.
+        // Si la conversación aún no existe, se usa el remitente (sourceIdentifier),
+        // lo que garantiza que los mensajes de un mismo contacto se procesen en orden.
+        String lockKey = message.getChannel() + ":" +
+                (message.getChannelConversationId() != null
+                        ? message.getChannelConversationId()
+                        : message.getSourceIdentifier());
+        ReentrantLock lock = conversationLocks.computeIfAbsent(lockKey, k -> new ReentrantLock());
+        boolean locked = lock.tryLock();
+
+        if (!locked) {
+            log.info("Message from {} already being processed, waiting in queue", lockKey);
+            lock.lock();
+        }
+
+        try {
+            return doProcessMessage(message, startTime, correlationId);
+        } finally {
+            lock.unlock();
+            if (conversationLocks.size() > 1000) {
+                conversationLocks.remove(lockKey);
+            }
+            MDC.clear();
+        }
+    }
+
+    private ProcessingResult doProcessMessage(IncomingMessage message, long startTime, String correlationId) {
         MDC.put(CORRELATION_ID, correlationId);
         MDC.put(CHANNEL, message.getChannel() != null ? message.getChannel().name() : "UNKNOWN");
         MDC.put(MESSAGE_ID, correlationId);
@@ -90,8 +130,6 @@ public class ConversationOrchestrator {
             log.error("Message processing failed after {}ms: {}",
                     elapsed, e.getMessage(), e);
             return ProcessingResult.failure("PROCESSING_ERROR", e.getMessage(), elapsed);
-        } finally {
-            MDC.clear();
         }
     }
 }

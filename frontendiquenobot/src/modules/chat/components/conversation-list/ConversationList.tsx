@@ -62,6 +62,21 @@ const ConversationItem = memo(function ConversationItem({
   const lastMessage = conversation.lastMessage
   const unread = conversation.unreadCount ?? 0
 
+  const lastMessagePreview =
+    lastMessage?.content?.trim() ||
+    (lastMessage
+      ? ({
+          IMAGE: 'Imagen',
+          AUDIO: 'Audio',
+          VOICE: 'Nota de voz',
+          VIDEO: 'Video',
+          DOCUMENT: 'Documento',
+          STICKER: 'Sticker',
+          LOCATION: 'Ubicación',
+          CONTACT: 'Contacto',
+        }[lastMessage.type] ?? 'Sin mensajes')
+      : 'Sin mensajes')
+
 // ===============================
 // DISPLAY NAME PRIORITY (WhatsApp-like)
 // ===============================
@@ -116,7 +131,7 @@ const displayName =
 
         <div className="mt-0.5 flex items-center justify-between">
           <p className="truncate text-sm text-gray-500 dark:text-gray-400">
-            {lastMessage?.content ?? 'Sin mensajes'}
+            {lastMessagePreview}
           </p>
 
           {unread > 0 && (

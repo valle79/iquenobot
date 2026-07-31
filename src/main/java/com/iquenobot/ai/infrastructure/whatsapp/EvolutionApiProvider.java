@@ -25,8 +25,7 @@ import java.util.Map;
  * Evolution API is an open-source WhatsApp REST API.
  * This implementation can be easily replaced with other providers
  * by implementing the IWhatsAppProvider interface.
- */
-@Service
+ */@Service
 @RequiredArgsConstructor
 @Slf4j
 public class EvolutionApiProvider implements IWhatsAppProvider {
@@ -92,16 +91,30 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
             
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("number", message.getTo());
-            
-            if (message.getType() == MessageType.IMAGE || 
-                message.getType() == MessageType.VIDEO || 
-                message.getType() == MessageType.AUDIO) {
-                requestBody.put("media", message.getMediaUrl());
+
+            // Evolution valida "media" como URL o base64 (class-validator isURL
+            // con require_tld=true rechaza localhost). Las URLs locales se
+            // envían como base64 para evitar el 400 "Owned media must be a url or base64".
+            if (message.getType() == MessageType.STICKER) {
+                requestBody.put("sticker", resolveMediaPayload(message.getMediaUrl()));
+            } else if (message.getType() == MessageType.AUDIO) {
+                // Evolution v2.x: /message/sendWhatsAppAudio espera el campo "audio"
+                requestBody.put("audio", resolveMediaPayload(message.getMediaUrl()));
+            } else if (message.getType() == MessageType.IMAGE) {
+                requestBody.put("mediatype", "image");
+                requestBody.put("media", resolveMediaPayload(message.getMediaUrl()));
+                if (message.getCaption() != null) {
+                    requestBody.put("caption", message.getCaption());
+                }
+            } else if (message.getType() == MessageType.VIDEO) {
+                requestBody.put("mediatype", "video");
+                requestBody.put("media", resolveMediaPayload(message.getMediaUrl()));
                 if (message.getCaption() != null) {
                     requestBody.put("caption", message.getCaption());
                 }
             } else if (message.getType() == MessageType.DOCUMENT) {
-                requestBody.put("media", message.getMediaUrl());
+                requestBody.put("mediatype", "document");
+                requestBody.put("media", resolveMediaPayload(message.getMediaUrl()));
                 requestBody.put("fileName", message.getFilename());
                 if (message.getCaption() != null) {
                     requestBody.put("caption", message.getCaption());
@@ -128,6 +141,50 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
         } catch (Exception e) {
             log.error("Error sending media message via Evolution API: {}", e.getMessage(), e);
             throw new BusinessException("Error al enviar mensaje multimedia: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Descarga el contenido multimedia de un mensaje entrante usando
+     * Evolution API v2.x: POST /chat/getBase64FromMediaMessage/{instance}
+     *
+     * El body debe contener el WebMessageInfo tal como llega en el webhook
+     * ({key, message}). Evolution usa sus credenciales de sesión para
+     * desencriptar la URL .enc de WhatsApp.
+     *
+     * @return mapa con mediaType, fileName, caption, mimetype y base64,
+     *         o null si no hay media válida.
+     */
+    public Map<String, Object> downloadMedia(String instanceId, Map<String, Object> messageInfo) {
+        try {
+            String url = String.format("%s/chat/getBase64FromMediaMessage/%s", evolutionApiUrl, instanceId);
+
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("message", messageInfo);
+
+            HttpHeaders headers = createHeaders();
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url, HttpMethod.POST, request, Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Map<String, Object> body = response.getBody();
+                Object base64 = body.get("base64");
+                if (base64 instanceof String s && !s.isBlank()) {
+                    log.info("Media downloaded from Evolution API. type={} filename={}",
+                            body.get("mediaType"), body.get("fileName"));
+                    return body;
+                }
+                log.warn("Evolution returned no base64 media content");
+                return null;
+            }
+
+            log.warn("Failed to download media via Evolution API. Status: {}", response.getStatusCode());
+            return null;
+        } catch (Exception e) {
+            log.error("Error downloading media via Evolution API: {}", e.getMessage());
+            return null;
         }
     }
 
@@ -283,7 +340,54 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
             case VIDEO -> "sendMedia";
             case AUDIO -> "sendWhatsAppAudio";
             case DOCUMENT -> "sendMedia";
+            case STICKER -> "sendSticker";
             default -> throw new BusinessException("Unsupported media type: " + type);
         };
+    }
+
+    /**
+     * Evolution API valida "media"/"audio"/"sticker" como URL o base64
+     * (class-validator isURL con require_tld=true: rechaza "localhost").
+     * Para URLs locales/privadas descargamos el archivo y lo enviamos
+     * como base64. Las URLs públicas se envían tal cual.
+     */
+    private String resolveMediaPayload(String mediaUrl) {
+        if (mediaUrl == null || mediaUrl.isBlank()) {
+            throw new BusinessException("La URL del media es requerida");
+        }
+
+        String host = null;
+        try {
+            var uri = java.net.URI.create(mediaUrl);
+            host = uri.getHost();
+        } catch (Exception ignored) {
+            // Si no es una URL válida, se asume base64
+        }
+
+        boolean isLocal = host == null
+                || host.equalsIgnoreCase("localhost")
+                || host.equals("127.0.0.1")
+                || host.equals("::1")
+                || host.startsWith("10.")
+                || host.startsWith("192.168.")
+                || host.startsWith("172.")
+                || host.equals("[::1]");
+
+        if (!isLocal) {
+            return mediaUrl;
+        }
+
+        try {
+            byte[] bytes = restTemplate.getForObject(mediaUrl, byte[].class);
+            if (bytes == null || bytes.length == 0) {
+                throw new BusinessException("No se pudo descargar el media local: " + mediaUrl);
+            }
+            log.info("Media local convertido a base64 para Evolution ({} bytes): {}", bytes.length, mediaUrl);
+            return java.util.Base64.getEncoder().encodeToString(bytes);
+        } catch (Exception e) {
+            log.warn("Error descargando media local {}: {}", mediaUrl, e.getMessage());
+            // Si no se puede descargar, se envía la URL tal cual
+            return mediaUrl;
+        }
     }
 }

@@ -56,8 +56,34 @@ public class ChatbotService {
         } else if (intent != null) {
             return executeIntent(intent, message);
         } else {
-            return generateAIResponse(message, context);
+            return handleFallback(message, context);
         }
+    }
+
+    /**
+     * Respuesta de respaldo cuando no hay intent ni flow configurado.
+     *
+     * Si existe conocimiento relevante en la KB, el bot responde con el LLM.
+     * De lo contrario, NO responde con el LLM (evita respuestas inventadas
+     * a mensajes fuera de alcance o personales) y transfiere al agente humano.
+     */
+    private ChatbotResponseDto handleFallback(String message, Map<String, Object> context) {
+        String kbContext = knowledgeBaseService.buildContextForQuery(message);
+        if (!kbContext.isEmpty()) {
+            return generateAIResponse(message, context, kbContext);
+        }
+
+        log.info("No intent, flow or KB context matched; transferring to human agent");
+        String fallbackMessage = context.get("fallbackMessage") != null
+                ? (String) context.get("fallbackMessage")
+                : "Lo siento, voy a conectarte con un agente humano.";
+
+        return ChatbotResponseDto.builder()
+                .message(fallbackMessage)
+                .requiresHumanAgent(true)
+                .suggestedActions(new ArrayList<>())
+                .entities(new HashMap<>())
+                .build();
     }
 
     @Transactional(readOnly = true)
@@ -169,15 +195,22 @@ public class ChatbotService {
 
     @Transactional
     public ChatbotResponseDto generateAIResponse(String message, Map<String, Object> context) {
+        String kbContext = context.get("kbContext") != null
+                ? (String) context.get("kbContext")
+                : knowledgeBaseService.buildContextForQuery(message);
+        return generateAIResponse(message, context, kbContext);
+    }
+
+    @Transactional
+    public ChatbotResponseDto generateAIResponse(String message, Map<String, Object> context, String kbContext) {
         log.info("Generating AI response");
-        
+
         try {
             String systemPrompt = (String) context.get("systemPrompt");
-            String kbContext = knowledgeBaseService.buildContextForQuery(message);
-            if (!kbContext.isEmpty()) {
+            if (kbContext != null && !kbContext.isEmpty()) {
                 systemPrompt = (systemPrompt != null ? systemPrompt : "") + kbContext;
             }
-            
+
             AIMessageDto aiMessage = AIMessageDto.builder()
                     .role("user")
                     .content(message)

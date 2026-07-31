@@ -94,6 +94,15 @@ function AttachmentPreview({
   )
 }
 
+function MediaPlaceholder() {
+  return (
+    <div className="flex items-center gap-2 rounded-lg bg-black/5 p-3 dark:bg-black/20">
+      <Headphones size={18} className="text-gray-400" />
+      <span className="text-sm text-gray-400">Enviando...</span>
+    </div>
+  )
+}
+
 export const MessageBubble = memo(function MessageBubble({
   message,
   isOwn,
@@ -102,6 +111,11 @@ export const MessageBubble = memo(function MessageBubble({
   const isText = message.type === 'TEXT'
   const isImage = message.type === 'IMAGE'
   const isDocument = message.type === 'DOCUMENT'
+  const isVideo = message.type === 'VIDEO'
+  const isAudio = message.type === 'AUDIO'
+  const isSticker = message.type === 'STICKER'
+
+  const firstAttachment = message.attachments?.[0]
 
   return (
     <div className={cn('flex gap-2', isOwn ? 'flex-row-reverse' : 'flex-row')}>
@@ -118,36 +132,75 @@ export const MessageBubble = memo(function MessageBubble({
           </p>
         )}
 
-        <div
-          className={cn(
-            'rounded-2xl px-4 py-2.5',
-            isOwn
-              ? 'bg-brand-600 rounded-br-sm text-white'
-              : 'rounded-bl-sm bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100',
-            message.status === 'FAILED' && 'opacity-70',
-          )}
-        >
-          {isImage && message.attachments?.[0] && (
-            <img
-              src={message.attachments[0].fileUrl}
-              alt={message.attachments[0].caption ?? ''}
-              className="mb-2 max-w-full rounded-lg"
-            />
-          )}
+        {isSticker && firstAttachment ? (
+          <img
+            src={firstAttachment.fileUrl}
+            alt={firstAttachment.caption ?? 'Sticker'}
+            className="h-28 w-28 object-contain"
+          />
+        ) : (
+          <div
+            className={cn(
+              'rounded-2xl px-4 py-2.5',
+              isOwn
+                ? 'bg-brand-600 rounded-br-sm text-white'
+                : 'rounded-bl-sm bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100',
+              message.status === 'FAILED' && 'opacity-70',
+            )}
+          >
+            {isImage &&
+              (firstAttachment ? (
+                <div className="mb-1">
+                  <img
+                    src={firstAttachment.fileUrl}
+                    alt={firstAttachment.caption ?? ''}
+                    className="max-w-full rounded-lg"
+                  />
+                  {firstAttachment.caption && (
+                    <p className="mt-2 text-sm break-words whitespace-pre-wrap">
+                      {firstAttachment.caption}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <MediaPlaceholder />
+              ))}
 
-          {isText && <p className="text-sm break-words whitespace-pre-wrap">{message.content}</p>}
+            {isText && <p className="text-sm break-words whitespace-pre-wrap">{message.content}</p>}
 
-          {isDocument &&
-            (message.attachments ?? []).map((att) => (
-              <AttachmentPreview key={att.id} attachment={att} />
-            ))}
+            {isDocument &&
+              (message.attachments?.length
+                ? message.attachments.map((att) => (
+                    <AttachmentPreview key={att.id} attachment={att} />
+                  ))
+                : <MediaPlaceholder />)}
 
-          {(message.attachments ?? [])
-            .filter((a) => a.type !== 'IMAGE' && a.type !== 'DOCUMENT')
-            .map((att) => (
-              <AttachmentPreview key={att.id} attachment={att} />
-            ))}
-        </div>
+            {isVideo &&
+              (firstAttachment ? (
+                <video
+                  src={firstAttachment.fileUrl}
+                  controls
+                  className="mb-1 max-h-72 max-w-full rounded-lg"
+                />
+              ) : (
+                <MediaPlaceholder />
+              ))}
+
+            {isAudio &&
+              (firstAttachment ? (
+                <div>
+                  <audio src={firstAttachment.fileUrl} controls className="w-56 max-w-full" />
+                  {firstAttachment.caption && (
+                    <p className="mt-1 text-sm break-words whitespace-pre-wrap">
+                      {firstAttachment.caption}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <MediaPlaceholder />
+              ))}
+          </div>
+        )}
 
         <div
           className={cn('mt-1 flex items-center gap-1', isOwn ? 'flex-row-reverse' : 'flex-row')}

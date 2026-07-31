@@ -1,9 +1,11 @@
 package com.iquenobot.orchestrator.application;
 
 import com.iquenobot.ai.domain.dto.WhatsAppWebhookDto;
+import com.iquenobot.ai.infrastructure.whatsapp.EvolutionApiProvider;
 import com.iquenobot.conversation.domain.repository.ConversationMessageRepository;
 import com.iquenobot.orchestrator.domain.model.IncomingMessage;
 import com.iquenobot.orchestrator.domain.model.ProcessingResult;
+import com.iquenobot.shared.application.FileUploadService;
 import com.iquenobot.shared.enums.ChannelType;
 import com.iquenobot.shared.enums.MessageType;
 import com.iquenobot.shared.util.PhoneNormalizer;
@@ -13,7 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.ZoneOffset;
+import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +27,8 @@ public class WhatsAppWebhookAdapter {
 
     private final ConversationOrchestrator orchestrator;
     private final ConversationMessageRepository messageRepository;
+    private final EvolutionApiProvider evolutionApiProvider;
+    private final FileUploadService fileUploadService;
 
     public ProcessingResult processWebhook(String instanceId, WhatsAppWebhookDto payload) {
 
@@ -47,6 +52,14 @@ public class WhatsAppWebhookAdapter {
         // DEDUP: evitar procesar mensajes ya recibidos
         // ---------------------------------------------------------------------
         String messageId = extractMessageId(data);
+
+        // Algunos webhooks llegan sin messageId (redelivery de Evolution).
+        // Se genera un ID determinístico a partir del contenido + timestamp
+        // para que las redelivery del mismo evento se descarten.
+        if (messageId == null || messageId.isBlank()) {
+            messageId = generateSyntheticMessageId(data);
+        }
+
         if (messageId != null && messageRepository.existsByChannelMessageId(messageId)) {
             log.info("Duplicate WhatsApp message skipped: channelMessageId={}", messageId);
             return ProcessingResult.empty();
@@ -192,6 +205,29 @@ private IncomingMessage convertToIncomingMessage(
     MessageType type = resolveMessageType(messageTypeStr);
 
     // -------------------------------------------------------------
+    // Datos multimedia (imagen, video, audio, documento, sticker)
+    // -------------------------------------------------------------
+    String mediaUrl = extractMediaUrl(data);
+    String caption = extractCaption(data);
+    String filename = extractFileName(data);
+    String mimeType = extractMimeType(data);
+    String mediaKey = extractMediaKey(data);
+    Integer durationSeconds = extractDurationSeconds(data);
+
+    // -------------------------------------------------------------
+    // Media (entrante o saliente desde el celular): descargar el
+    // contenido real de WhatsApp (las URLs .enc expiran y están
+    // encriptadas). Evolution lo descarga y desencripta usando la
+    // sesión, y lo guardamos en el storage local (FileUploadService).
+    // -------------------------------------------------------------
+    if (mediaUrl != null && !mediaUrl.isBlank() && type != MessageType.TEXT) {
+        String localMediaUrl = downloadInboundMedia(instanceId, data, filename, mimeType);
+        if (localMediaUrl != null) {
+            mediaUrl = localMediaUrl;
+        }
+    }
+
+    // -------------------------------------------------------------
     // Conversación grupal
     // -------------------------------------------------------------
     boolean isGroup = isGroupConversation(data);
@@ -234,6 +270,15 @@ private IncomingMessage convertToIncomingMessage(
 
             .type(type)
             .content(text != null ? text : "")
+
+            // Media
+            .mediaUrl(mediaUrl)
+            .caption(caption)
+            .filename(filename)
+            .mimeType(mimeType)
+            .channelMediaId(mediaKey)
+            .durationSeconds(durationSeconds)
+
             .instanceId(instanceId)
 
             // Nombre del grupo si aplica
@@ -248,6 +293,51 @@ private IncomingMessage convertToIncomingMessage(
 
             .build();
 }
+
+    /**
+     * Descarga y persiste el media de un mensaje entrante.
+     * Devuelve la URL local del archivo, o null si no se pudo descargar
+     * (en ese caso se conserva la URL remota .enc del webhook).
+     */
+    private String downloadInboundMedia(String instanceId, Map<String, Object> data,
+                                        String filename, String mimeType) {
+        try {
+            Map<String, Object> messageInfo = new HashMap<>();
+            if (data.get("key") != null) {
+                messageInfo.put("key", data.get("key"));
+            }
+            if (data.get("message") != null) {
+                messageInfo.put("message", data.get("message"));
+            }
+
+            Map<String, Object> media = evolutionApiProvider.downloadMedia(instanceId, messageInfo);
+            if (media == null) {
+                log.warn("No se pudo descargar el media entrante, se conserva la URL remota");
+                return null;
+            }
+
+            Object base64Obj = media.get("base64");
+            if (!(base64Obj instanceof String base64) || base64.isBlank()) {
+                log.warn("Media entrante sin contenido base64, se conserva la URL remota");
+                return null;
+            }
+
+            byte[] bytes = Base64.getDecoder().decode(base64);
+
+            String mediaFileName = media.get("fileName") instanceof String f && !f.isBlank()
+                    ? f : filename;
+            String mediaMimeType = media.get("mimetype") instanceof String m && !m.isBlank()
+                    ? m : mimeType;
+
+            String localUrl = fileUploadService.uploadBytes(bytes, mediaFileName, mediaMimeType);
+            log.info("Media entrante descargado y almacenado localmente: {}", localUrl);
+            return localUrl;
+        } catch (Exception e) {
+            log.warn("Error descargando media entrante, se conserva la URL remota: {}", e.getMessage());
+            return null;
+        }
+    }
+
     // -------------------------------------------------------------------------
     // CONVERSATION JID (remoteJid: grupo @g.us o individual @s.whatsapp.net)
     // -------------------------------------------------------------------------
@@ -359,7 +449,6 @@ private String normalizePhone(String value) {
 
     @SuppressWarnings("unchecked")
     private String extractMessageId(Map<String, Object> data) {
-
         if (data == null) {
             return null;
         }
@@ -370,6 +459,26 @@ private String normalizePhone(String value) {
         }
 
         return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // SYNTHETIC MESSAGE ID (para webhooks sin key.id)
+    // -------------------------------------------------------------------------
+
+    private String generateSyntheticMessageId(Map<String, Object> data) {
+        String remoteJid = extractRemoteJid(data);
+        String content = extractText(data);
+        Long timestamp = extractTimestamp(data);
+
+        String raw = (remoteJid != null ? remoteJid : "")
+                + "|" + (content != null ? content : "")
+                + "|" + (timestamp != null ? timestamp : "");
+
+        if (raw.isBlank() || raw.equals("||")) {
+            return null;
+        }
+
+        return "SYN-" + Integer.toHexString(raw.hashCode());
     }
 
     // -------------------------------------------------------------------------
@@ -451,22 +560,86 @@ private String normalizePhone(String value) {
                 }
             }
 
-            // Audio
-            if (message.get("audioMessage") instanceof Map<?, ?>) {
-                return "[AUDIO]";
-            }
-
-            // Sticker
-            if (message.get("stickerMessage") instanceof Map<?, ?>) {
-                return "[STICKER]";
-            }
-
-            // Ubicación
-            if (message.get("locationMessage") instanceof Map<?, ?>) {
-                return "[LOCATION]";
+            // Audio, sticker y otros media: sin texto propio
+            if (message.get("audioMessage") instanceof Map<?, ?>
+                    || message.get("stickerMessage") instanceof Map<?, ?>
+                    || message.get("locationMessage") instanceof Map<?, ?>
+                    || message.get("ptvMessage") instanceof Map<?, ?>) {
+                return null;
             }
         }
 
+        return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // MEDIA EXTRACTION
+    // -------------------------------------------------------------------------
+
+    private Map<?, ?> extractMediaMessage(Map<String, Object> data) {
+        if (data == null || !(data.get("message") instanceof Map<?, ?> message)) {
+            return null;
+        }
+
+        for (String key : new String[]{
+                "imageMessage", "videoMessage", "audioMessage",
+                "documentMessage", "stickerMessage", "ptvMessage"}) {
+            if (message.get(key) instanceof Map<?, ?> media) {
+                return media;
+            }
+        }
+
+        return null;
+    }
+
+    private String extractMediaUrl(Map<String, Object> data) {
+        Map<?, ?> media = extractMediaMessage(data);
+        return media != null ? asString(media.get("url")) : null;
+    }
+
+    private String extractCaption(Map<String, Object> data) {
+        Map<?, ?> media = extractMediaMessage(data);
+        return media != null ? asString(media.get("caption")) : null;
+    }
+
+    private String extractFileName(Map<String, Object> data) {
+        Map<?, ?> media = extractMediaMessage(data);
+        return media != null ? asString(media.get("fileName")) : null;
+    }
+
+    private String extractMimeType(Map<String, Object> data) {
+        Map<?, ?> media = extractMediaMessage(data);
+        if (media == null) {
+            return null;
+        }
+        String mime = asString(media.get("mimetype"));
+        if (mime == null) {
+            mime = asString(media.get("mimeType"));
+        }
+        return mime;
+    }
+
+    private String extractMediaKey(Map<String, Object> data) {
+        Map<?, ?> media = extractMediaMessage(data);
+        return media != null ? asString(media.get("mediaKey")) : null;
+    }
+
+    private Integer extractDurationSeconds(Map<String, Object> data) {
+        Map<?, ?> media = extractMediaMessage(data);
+        if (media == null) {
+            return null;
+        }
+        Object seconds = media.get("seconds");
+        if (seconds instanceof Number n) {
+            return n.intValue();
+        }
+        return null;
+    }
+
+    private String asString(Object value) {
+        if (value instanceof String s && !s.isBlank()) {
+            return s.trim();
+        }
         return null;
     }
 

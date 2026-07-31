@@ -19,6 +19,8 @@ public class IncomingMessage {
     private final String caption;
     private final String filename;
     private final String mimeType;
+    private final String channelMediaId;
+    private final Integer durationSeconds;
     private final LocalDateTime timestamp;
     private final String tenantId;
     private final String instanceId;
@@ -38,6 +40,8 @@ public class IncomingMessage {
         this.caption = builder.caption;
         this.filename = builder.filename;
         this.mimeType = builder.mimeType;
+        this.channelMediaId = builder.channelMediaId;
+        this.durationSeconds = builder.durationSeconds;
         this.timestamp = builder.timestamp;
         this.tenantId = builder.tenantId;
         this.instanceId = builder.instanceId;
@@ -58,6 +62,8 @@ public class IncomingMessage {
     public String getCaption() { return caption; }
     public String getFilename() { return filename; }
     public String getMimeType() { return mimeType; }
+    public String getChannelMediaId() { return channelMediaId; }
+    public Integer getDurationSeconds() { return durationSeconds; }
     public LocalDateTime getTimestamp() { return timestamp; }
     public String getTenantId() { return tenantId; }
     public String getInstanceId() { return instanceId; }
@@ -81,6 +87,8 @@ public class IncomingMessage {
         private String caption;
         private String filename;
         private String mimeType;
+        private String channelMediaId;
+        private Integer durationSeconds;
         private LocalDateTime timestamp;
         private String tenantId;
         private String instanceId;
@@ -99,6 +107,8 @@ public class IncomingMessage {
         public Builder caption(String caption) { this.caption = caption; return this; }
         public Builder filename(String filename) { this.filename = filename; return this; }
         public Builder mimeType(String mimeType) { this.mimeType = mimeType; return this; }
+        public Builder channelMediaId(String channelMediaId) { this.channelMediaId = channelMediaId; return this; }
+        public Builder durationSeconds(Integer durationSeconds) { this.durationSeconds = durationSeconds; return this; }
         public Builder timestamp(LocalDateTime timestamp) { this.timestamp = timestamp; return this; }
         public Builder tenantId(String tenantId) { this.tenantId = tenantId; return this; }
         public Builder instanceId(String instanceId) { this.instanceId = instanceId; return this; }

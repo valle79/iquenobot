@@ -64,14 +64,21 @@ public class BotDecisionStrategy implements DecisionStrategy {
             var conversation = context.getConversation();
             boolean isFirstMessage = conversation.getMessageCount() == 0;
 
+            // Para mensajes multimedia sin texto (audio, sticker, foto sin caption),
+            // se pasa el tipo como contexto al chatbot para que no reciba texto vacío.
+            String content = msg.getContent() != null && !msg.getContent().isBlank()
+                    ? msg.getContent()
+                    : "[" + msg.getType() + "]";
+
             ChatbotResponseDto botResponse = chatbotService.processMessage(
-                    msg.getContent(),
+                    content,
                     Map.of(
                             "conversationId", conversation.getId().toString(),
                             "tenantId", context.getTenantId().toString(),
                             "contactId", context.getContact().getId().toString(),
                             "channel", msg.getChannel().name(),
                             "systemPrompt", botConfig != null ? botConfig.getSystemPrompt() : "",
+                            "fallbackMessage", botConfig != null ? botConfig.getFallbackMessage() : "",
                             "temperature", String.valueOf(botConfig != null ? botConfig.getTemperature() : 0.7),
                             "isFirstMessage", isFirstMessage
                     )

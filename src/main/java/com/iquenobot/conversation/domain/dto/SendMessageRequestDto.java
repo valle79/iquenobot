@@ -1,7 +1,6 @@
 package com.iquenobot.conversation.domain.dto;
 
 import com.iquenobot.shared.enums.MessageType;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -23,11 +22,11 @@ public class SendMessageRequestDto {
     @NotNull(message = "El tipo de mensaje es obligatorio")
     private MessageType type;
 
-    @NotBlank(message = "El contenido es obligatorio")
     @Size(max = 4096, message = "El contenido no puede exceder 4096 caracteres")
     private String content;
 
     private String replyToMessageId;
 
+    @Size(max = 10, message = "No se pueden adjuntar más de 10 archivos")
     private String[] attachmentUrls;
 }

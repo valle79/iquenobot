@@ -61,6 +61,67 @@ public class FileUploadService {
         return storeFile(file, "attachments");
     }
 
+    /**
+     * Persiste bytes crudos de un media (p.ej. descargado de WhatsApp).
+     * Subdirectorio según el tipo mime.
+     */
+    public String uploadBytes(byte[] data, String originalFilename, String mimeType) {
+        if (data == null || data.length == 0) {
+            throw new BusinessException("No hay contenido para almacenar");
+        }
+        if (data.length > MAX_FILE_SIZE) {
+            throw new BusinessException("El archivo excede el tamaño máximo permitido de " + (MAX_FILE_SIZE / (1024 * 1024)) + "MB");
+        }
+
+        String subdirectory = resolveSubdirectory(mimeType);
+        String extension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+        if (extension.isBlank() && mimeType != null) {
+            extension = extensionForMimeType(mimeType);
+        }
+
+        String filename = UUID.randomUUID().toString() + extension;
+        Path targetPath = this.uploadDir.resolve(subdirectory).resolve(filename);
+
+        try {
+            Files.createDirectories(targetPath.getParent());
+            Files.write(targetPath, data);
+            log.info("File stored from bytes: {} (original: {}, mime: {})", filename, originalFilename, mimeType);
+
+            return baseUrl + "/uploads/" + subdirectory + "/" + filename;
+        } catch (IOException e) {
+            throw new BusinessException("Could not store file: " + originalFilename);
+        }
+    }
+
+    private String resolveSubdirectory(String mimeType) {
+        if (mimeType != null && mimeType.startsWith("image/")) {
+            return "images";
+        }
+        return "attachments";
+    }
+
+    private String extensionForMimeType(String mimeType) {
+        return switch (mimeType.toLowerCase()) {
+            case "image/jpeg" -> ".jpg";
+            case "image/png" -> ".png";
+            case "image/webp" -> ".webp";
+            case "image/gif" -> ".gif";
+            case "image/svg+xml" -> ".svg";
+            case "video/mp4" -> ".mp4";
+            case "video/webm" -> ".webm";
+            case "audio/ogg" -> ".ogg";
+            case "audio/mpeg", "audio/mp3" -> ".mp3";
+            case "audio/wav" -> ".wav";
+            case "audio/mp4", "audio/x-m4a" -> ".m4a";
+            case "application/pdf" -> ".pdf";
+            case "text/plain" -> ".txt";
+            default -> "";
+        };
+    }
+
     public void deleteFile(String fileUrl) {
         if (fileUrl == null || fileUrl.isBlank()) return;
 

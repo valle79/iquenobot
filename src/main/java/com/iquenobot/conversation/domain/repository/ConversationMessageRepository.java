@@ -25,6 +25,16 @@ public interface ConversationMessageRepository extends JpaRepository<Conversatio
 
     Optional<ConversationMessage> findByChannelMessageIdAndTenantId(String channelMessageId, UUID tenantId);
 
+    @Query("SELECT DISTINCT m FROM ConversationMessage m LEFT JOIN FETCH m.attachments " +
+           "WHERE m.channelMessageId = :channelMessageId AND m.tenantId = :tenantId")
+    Optional<ConversationMessage> findByChannelMessageIdAndTenantIdWithAttachments(
+            @Param("channelMessageId") String channelMessageId, @Param("tenantId") UUID tenantId);
+
+    @Query("SELECT DISTINCT m FROM ConversationMessage m LEFT JOIN FETCH m.attachments " +
+           "WHERE m.id = :id AND m.tenantId = :tenantId")
+    Optional<ConversationMessage> findByIdAndTenantIdWithAttachments(
+            @Param("id") UUID id, @Param("tenantId") UUID tenantId);
+
     Page<ConversationMessage> findByConversationIdOrderBySentAtDesc(UUID conversationId, Pageable pageable);
 
     List<ConversationMessage> findByConversationIdOrderBySentAtAsc(UUID conversationId);

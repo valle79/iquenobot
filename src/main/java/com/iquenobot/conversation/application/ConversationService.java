@@ -13,8 +13,10 @@ import com.iquenobot.conversation.domain.dto.CreateConversationRequestDto;
 import com.iquenobot.conversation.domain.dto.SendMessageRequestDto;
 import com.iquenobot.conversation.domain.entity.Conversation;
 import com.iquenobot.conversation.domain.entity.ConversationMessage;
+import com.iquenobot.conversation.domain.entity.MessageAttachment;
 import com.iquenobot.conversation.domain.repository.ConversationMessageRepository;
 import com.iquenobot.conversation.domain.repository.ConversationRepository;
+import com.iquenobot.conversation.domain.repository.MessageAttachmentRepository;
 import com.iquenobot.conversation.interfaces.mapper.ConversationMapper;
 import com.iquenobot.orchestrator.interfaces.event.MessageSentEvent;
 import com.iquenobot.setting.domain.repository.SettingRepository;
@@ -23,6 +25,7 @@ import com.iquenobot.shared.domain.util.TenantContext;
 import com.iquenobot.shared.enums.ChannelType;
 import com.iquenobot.shared.enums.ConversationPriority;
 import com.iquenobot.shared.enums.ConversationStatus;
+import com.iquenobot.shared.enums.AttachmentType;
 import com.iquenobot.shared.enums.MessageDirection;
 import com.iquenobot.shared.enums.MessageStatus;
 import com.iquenobot.shared.enums.MessageType;
@@ -51,6 +54,7 @@ public class ConversationService {
 
     private final ConversationRepository conversationRepository;
     private final ConversationMessageRepository messageRepository;
+    private final MessageAttachmentRepository attachmentRepository;
     private final ContactRepository contactRepository;
     private final UserRepository userRepository;
     private final ConversationMapper conversationMapper;
@@ -213,6 +217,18 @@ public class ConversationService {
         UUID tenantId = getTenantId();
         UUID userId = getCurrentUserId();
 
+        boolean isText = request.getType() == MessageType.TEXT;
+        String[] attachmentUrls = request.getAttachmentUrls() != null
+                ? request.getAttachmentUrls()
+                : new String[0];
+
+        if (isText && (request.getContent() == null || request.getContent().isBlank())) {
+            throw new BusinessException("El contenido es obligatorio para mensajes de texto");
+        }
+        if (!isText && attachmentUrls.length == 0) {
+            throw new BusinessException("Debe adjuntar al menos un archivo multimedia");
+        }
+
         // Get conversation
         Conversation conversation = conversationRepository
                 .findByIdAndTenantIdAndDeletedFalse(request.getConversationId(), tenantId)
@@ -231,7 +247,7 @@ public class ConversationService {
                 .direction(MessageDirection.OUTBOUND)
                 .type(request.getType())
                 .status(MessageStatus.SENT)
-                .content(request.getContent())
+                .content(isText ? request.getContent() : request.getContent())
                 .replyToMessageId(request.getReplyToMessageId())
                 .senderName(user.getFullName())
                 .senderEmail(user.getEmail())
@@ -241,6 +257,22 @@ public class ConversationService {
                 .build();
 
         message = messageRepository.save(message);
+
+        // Persist attachments
+        if (!isText) {
+            AttachmentType attachmentType = resolveAttachmentType(request.getType());
+            for (String url : attachmentUrls) {
+                if (url == null || url.isBlank()) continue;
+                MessageAttachment attachment = MessageAttachment.builder()
+                        .id(UUID.randomUUID())
+                        .tenantId(tenantId)
+                        .message(message)
+                        .type(attachmentType)
+                        .fileUrl(url.trim())
+                        .build();
+                attachmentRepository.save(attachment);
+            }
+        }
 
         // Update conversation (atomic, avoids optimistic locking)
         var now = LocalDateTime.now(ZoneOffset.UTC);
@@ -258,12 +290,26 @@ public class ConversationService {
             try {
                 String instanceId = getWhatsAppInstanceId(tenantId);
                 if (instanceId != null) {
-                    WhatsAppMessageDto waMsg = WhatsAppMessageDto.builder()
-                            .to(conversation.getContact().getPhone())
-                            .type(MessageType.TEXT)
-                            .text(request.getContent())
-                            .build();
-                    String channelMessageId = whatsAppProvider.sendMessage(instanceId, waMsg);
+                    String channelMessageId;
+                    if (isText) {
+                        WhatsAppMessageDto waMsg = WhatsAppMessageDto.builder()
+                                .to(conversation.getContact().getPhone())
+                                .type(MessageType.TEXT)
+                                .text(request.getContent())
+                                .build();
+                        channelMessageId = whatsAppProvider.sendMessage(instanceId, waMsg);
+                    } else {
+                        String mediaUrl = attachmentUrls[0].trim();
+                        WhatsAppMessageDto waMsg = WhatsAppMessageDto.builder()
+                                .to(conversation.getContact().getPhone())
+                                .type(request.getType())
+                                .mediaUrl(mediaUrl)
+                                .caption(request.getContent() != null && !request.getContent().isBlank()
+                                        ? request.getContent()
+                                        : null)
+                                .build();
+                        channelMessageId = whatsAppProvider.sendMediaMessage(instanceId, waMsg);
+                    }
                     if (channelMessageId != null) {
                         message.setChannelMessageId(channelMessageId);
                         messageRepository.save(message);
@@ -290,6 +336,21 @@ public class ConversationService {
                  message.getId(), conversation.getId(), userId);
 
         return conversationMapper.toMessageDto(message);
+    }
+
+    private AttachmentType resolveAttachmentType(MessageType type) {
+        if (type == null) {
+            return AttachmentType.DOCUMENT;
+        }
+        return switch (type) {
+            case IMAGE -> AttachmentType.IMAGE;
+            case VIDEO -> AttachmentType.VIDEO;
+            case AUDIO -> AttachmentType.AUDIO;
+            case STICKER -> AttachmentType.STICKER;
+            case LOCATION -> AttachmentType.LOCATION;
+            case CONTACT -> AttachmentType.CONTACT;
+            default -> AttachmentType.DOCUMENT;
+        };
     }
 
     private String getWhatsAppInstanceId(UUID tenantId) {

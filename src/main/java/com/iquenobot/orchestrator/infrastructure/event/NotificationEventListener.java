@@ -2,6 +2,7 @@ package com.iquenobot.orchestrator.infrastructure.event;
 
 import com.iquenobot.conversation.domain.entity.Conversation;
 import com.iquenobot.conversation.domain.entity.ConversationMessage;
+import com.iquenobot.conversation.domain.entity.MessageAttachment;
 import com.iquenobot.conversation.domain.repository.ConversationMessageRepository;
 import com.iquenobot.conversation.domain.repository.ConversationRepository;
 import com.iquenobot.notification.application.NotificationService;
@@ -20,9 +21,12 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
@@ -44,7 +48,10 @@ public class NotificationEventListener {
 
             Optional<ConversationMessage> persisted = Optional.empty();
             if (event.getMessageId() != null) {
-                persisted = messageRepository.findByChannelMessageIdAndTenantId(event.getMessageId(), tenantId);
+                // Fetch con attachments eager para evitar LazyInitializationException
+                // fuera de la transacción (el listener es @Async).
+                persisted = messageRepository.findByChannelMessageIdAndTenantIdWithAttachments(
+                        event.getMessageId(), tenantId);
             }
 
             Map<String, Object> payload = new LinkedHashMap<>();
@@ -59,6 +66,7 @@ public class NotificationEventListener {
                 payload.put("status", msg.getStatus() != null ? msg.getStatus().name() : "SENT");
                 payload.put("fromBot", msg.isFromBot());
                 payload.put("senderName", msg.getSenderName());
+                payload.put("attachments", buildAttachmentsPayload(msg.getAttachments()));
             } else {
                 payload.put("id", UUID.randomUUID().toString());
                 payload.put("conversationId", event.getConversationId());
@@ -69,6 +77,7 @@ public class NotificationEventListener {
                 payload.put("status", "SENT");
                 payload.put("fromBot", false);
                 payload.put("senderName", event.getMessage() != null ? event.getMessage().getSourceName() : "");
+                payload.put("attachments", List.of());
             }
 
             webSocketHandler.sendToTenant(tenantId, Map.of("type", "message:new", "payload", payload));
@@ -237,6 +246,21 @@ public class NotificationEventListener {
             payload.put("fromBot", false);
             payload.put("senderName", event.getSenderName());
 
+            // Adjuntar los archivos del mensaje (imagen, audio, etc.)
+            if (event.getMessageId() != null) {
+                try {
+                    messageRepository.findByIdAndTenantIdWithAttachments(
+                                    UUID.fromString(event.getMessageId()), tenantId)
+                            .ifPresent(m -> payload.put("attachments",
+                                    buildAttachmentsPayload(m.getAttachments())));
+                } catch (Exception ex) {
+                    log.warn("Error cargando attachments del mensaje enviado: {}", ex.getMessage());
+                }
+            }
+            if (!payload.containsKey("attachments")) {
+                payload.put("attachments", List.of());
+            }
+
             webSocketHandler.sendToTenant(tenantId, Map.of("type", "message:new", "payload", payload));
 
             updateConversationLastMessage(UUID.fromString(event.getConversationId()), payload);
@@ -282,5 +306,29 @@ public class NotificationEventListener {
         } catch (Exception e) {
             log.warn("Error updating conversation via WebSocket: {}", e.getMessage());
         }
+    }
+
+    private List<Map<String, Object>> buildAttachmentsPayload(Set<MessageAttachment> attachments) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        if (attachments == null) {
+            return result;
+        }
+        for (MessageAttachment att : attachments) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("id", att.getId() != null ? att.getId().toString() : null);
+            map.put("type", att.getType() != null ? att.getType().name() : null);
+            map.put("fileName", att.getFileName());
+            map.put("fileUrl", att.getFileUrl());
+            map.put("fileSize", att.getFileSize());
+            map.put("formattedFileSize", att.getFormattedFileSize());
+            map.put("mimeType", att.getMimeType());
+            map.put("thumbnailUrl", att.getThumbnailUrl());
+            map.put("durationSeconds", att.getDurationSeconds());
+            map.put("width", att.getWidth());
+            map.put("height", att.getHeight());
+            map.put("caption", att.getCaption());
+            result.add(map);
+        }
+        return result;
     }
 }

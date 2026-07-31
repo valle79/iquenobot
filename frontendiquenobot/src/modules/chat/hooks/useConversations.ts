@@ -14,6 +14,7 @@ import type {
   CreateConversationRequest,
   SendMessageRequest,
   ConversationMessageDto,
+  MessageAttachmentDto,
 } from '@/types/chat'
 import type { PagedResponse } from '@/types/api'
 
@@ -21,6 +22,35 @@ const TEMP_ID_PREFIX = 'temp_'
 
 function generateTempId(): string {
   return `${TEMP_ID_PREFIX}${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+}
+
+function buildOptimisticAttachments(
+  tempId: string,
+  dto: SendMessageRequest,
+): MessageAttachmentDto[] {
+  return (dto.attachmentUrls ?? []).map((url, i) => ({
+    id: `${tempId}_att_${i}`,
+    type:
+      dto.type === 'IMAGE'
+        ? 'IMAGE'
+        : dto.type === 'AUDIO'
+          ? 'AUDIO'
+          : dto.type === 'VIDEO'
+            ? 'VIDEO'
+            : dto.type === 'STICKER'
+              ? 'STICKER'
+              : 'DOCUMENT',
+    fileName: url.split('/').pop() ?? '',
+    fileUrl: url,
+    fileSize: 0,
+    formattedFileSize: '',
+    mimeType: '',
+    thumbnailUrl: '',
+    durationSeconds: null,
+    width: null,
+    height: null,
+    caption: '',
+  }))
 }
 
 export function useConversations(filter?: {
@@ -199,7 +229,7 @@ export function useSendMessage() {
         readAt: '',
         failedAt: '',
         failureReason: '',
-        attachments: [],
+        attachments: buildOptimisticAttachments(tempId, dto),
         createdAt: now,
       }
 
@@ -244,7 +274,7 @@ onSuccess: (realMessage, dto, context) => {
           readAt: '',
           failedAt: new Date().toISOString(),
           failureReason: error.message,
-          attachments: [],
+          attachments: buildOptimisticAttachments(context.tempId, dto),
           createdAt: new Date().toISOString(),
         }
         replaceMessage(

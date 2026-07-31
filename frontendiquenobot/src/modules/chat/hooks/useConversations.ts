@@ -161,7 +161,6 @@ export function useMessages(conversationId: string | undefined) {
 }
 
 export function useSendMessage() {
-  const queryClient = useQueryClient()
   const addMessage = useChatStore((state) => state.addMessage)
   const replaceMessage = useChatStore(
     (state) => state.replaceMessage,
@@ -207,7 +206,7 @@ export function useSendMessage() {
       addMessage(dto.conversationId, optimistic)
       return { tempId }
     },
-onSuccess: async (realMessage, dto, context) => {
+onSuccess: (realMessage, dto, context) => {
   if (context?.tempId) {
     replaceMessage(
       context.tempId,
@@ -218,14 +217,8 @@ onSuccess: async (realMessage, dto, context) => {
     addMessage(dto.conversationId, realMessage)
   }
 
-  // 🔥 FORZAR sincronización inmediata del chat abierto
-  await queryClient.invalidateQueries({
-    queryKey: ['messages', dto.conversationId],
-  })
-
-  await queryClient.invalidateQueries({
-    queryKey: ['conversation', dto.conversationId],
-  })
+  // No invalidar queries — el socket message:new actualiza la conversación
+  // y evita el refetch completo que causa saltos de posición
 },
     onError: (error: Error, dto, context) => {
       if (context?.tempId) {

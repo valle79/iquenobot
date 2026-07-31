@@ -18,6 +18,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -61,7 +63,7 @@ public class NotificationEventListener {
                 payload.put("id", UUID.randomUUID().toString());
                 payload.put("conversationId", event.getConversationId());
                 payload.put("content", event.getMessage() != null ? event.getMessage().getContent() : "");
-                payload.put("sentAt", java.time.LocalDateTime.now().toString());
+                payload.put("sentAt", LocalDateTime.now(ZoneOffset.UTC).toString());
                 payload.put("direction", "INBOUND");
                 payload.put("type", "TEXT");
                 payload.put("status", "SENT");
@@ -184,7 +186,7 @@ public class NotificationEventListener {
                 payload.put("id", UUID.randomUUID().toString());
                 payload.put("conversationId", event.getConversationId());
                 payload.put("content", event.getResponsePreview());
-                payload.put("sentAt", java.time.LocalDateTime.now().toString());
+                payload.put("sentAt", LocalDateTime.now(ZoneOffset.UTC).toString());
                 payload.put("direction", "OUTBOUND");
                 payload.put("type", "TEXT");
                 payload.put("status", "SENT");
@@ -228,7 +230,7 @@ public class NotificationEventListener {
             payload.put("id", event.getMessageId());
             payload.put("conversationId", event.getConversationId());
             payload.put("content", event.getContent());
-            payload.put("sentAt", java.time.LocalDateTime.now().toString());
+            payload.put("sentAt", LocalDateTime.now(ZoneOffset.UTC).toString());
             payload.put("direction", event.getDirection());
             payload.put("type", event.getType());
             payload.put("status", "SENT");

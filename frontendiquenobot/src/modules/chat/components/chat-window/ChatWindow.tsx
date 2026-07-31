@@ -18,6 +18,7 @@ import { ConversationContextPanel } from '@/modules/chat/components/chat-window/
 
 import { useAuthStore } from '@/core/auth/auth.store'
 import { Skeleton } from '@/shared/atoms/Skeleton/Skeleton'
+import { dayjs } from '@/config/dayjs'
 import type { ConversationMessageDto } from '@/types/chat'
 
 // =====================================================
@@ -31,7 +32,9 @@ const getMessageTimestamp = (message: {
   createdAt?: string | null
 }): number => {
   const date = message.sentAt ?? message.createdAt
-  return date ? new Date(date).getTime() : 0
+  if (!date) return 0
+  const value = dayjs.utc(date).valueOf()
+  return Number.isNaN(value) ? 0 : value
 }
 
 // =====================================================

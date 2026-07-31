@@ -156,29 +156,29 @@ private Contact createContact(UUID tenantId, IncomingMessage message) {
 private String sanitizeContactName(String sourceName, String sourceId) {
 
     if (sourceName == null || sourceName.isBlank()) {
-        return "Contacto sin nombre";
+        return sourceId;
     }
 
     String name = sourceName.trim();
 
-    // ❌ IDs numéricos largos (grupos, LID, JID, etc.)
+    // IDs numéricos largos (grupos, LID, JID, etc.) → usar teléfono
     if (name.matches("^\\\\d{10,}$")) {
-        return "Contacto sin nombre";
+        return sourceId;
     }
 
-    // ❌ JIDs de WhatsApp
+    // JIDs de WhatsApp
     if (name.contains("@g.us") || name.contains("@s.whatsapp.net")) {
-        return "Contacto sin nombre";
+        return sourceId;
     }
 
-    // ❌ Solo emojis o símbolos raros
+    // Solo emojis o símbolos raros
     if (name.matches("^[\\\\p{So}\\\\p{Cntrl}\\\\s]+$")) {
-        return "Contacto sin nombre";
+        return sourceId;
     }
 
-    // ❌ Igual al número telefónico
+    // Igual al número telefónico
     if (name.equals(sourceId)) {
-        return "Contacto sin nombre";
+        return sourceId;
     }
 
     return name;

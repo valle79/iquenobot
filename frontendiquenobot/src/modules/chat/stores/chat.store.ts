@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { dayjs } from '@/config/dayjs'
 import type { ConversationDto, ConversationMessageDto } from '@/types/chat'
 
 // =====================================================
@@ -16,8 +17,8 @@ const getMessageTimestamp = (
 ): number => {
   const date = message.sentAt ?? message.createdAt
   if (!date) return 0
-  const timestamp = new Date(date).getTime()
-  return Number.isNaN(timestamp) ? 0 : timestamp
+  const value = dayjs.utc(date).valueOf()
+  return Number.isNaN(value) ? 0 : value
 }
 
 const sortMessages = (

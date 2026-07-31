@@ -16,6 +16,17 @@ import { Tooltip } from '@/shared/atoms/Tooltip/Tooltip'
 import { dayjs } from '@/config/dayjs'
 import type { ConversationMessageDto } from '@/types/chat'
 
+const DEFAULT_TIMEZONE = 'America/Lima'
+
+const formatMessageTime = (
+  message: ConversationMessageDto,
+  timezone = DEFAULT_TIMEZONE,
+): string => {
+  const date = message.sentAt ?? message.createdAt
+  if (!date) return ''
+  return dayjs.utc(date).tz(timezone).format('HH:mm')
+}
+
 interface MessageBubbleProps {
   message: ConversationMessageDto
   isOwn: boolean
@@ -142,10 +153,7 @@ export const MessageBubble = memo(function MessageBubble({
           className={cn('mt-1 flex items-center gap-1', isOwn ? 'flex-row-reverse' : 'flex-row')}
         >
           <span className="text-[10px] text-gray-400">
-            {dayjs
-              .utc(message.sentAt ?? message.createdAt)
-              .tz('America/Lima')
-              .format('HH:mm')}
+            {formatMessageTime(message)}
           </span>
           {isOwn && (
             <Tooltip

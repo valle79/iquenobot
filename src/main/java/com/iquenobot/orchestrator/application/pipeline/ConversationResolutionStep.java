@@ -93,7 +93,8 @@ public class ConversationResolutionStep implements PipelineStep, MessagePipeline
                 context.getTenantId().toString(),
                 conversation.getId().toString(),
                 contact.getId().toString(),
-                message.getChannel().name()
+                message.getChannel().name(),
+                contact.getFullName()
         ));
 
         log.info("New conversation created: id={} contact={} channel={}",

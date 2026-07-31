@@ -309,7 +309,7 @@ public class WhatsAppWebhookService {
             return null;
         }
 
-        Object pushName = payload.getData().get("pushName");
+        Object pushName = ((Map<String, Object>) payload.getData()).get("pushName");
 
         return pushName instanceof String ? (String) pushName : null;
     }

@@ -13,6 +13,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @MappedSuperclass
@@ -48,7 +49,7 @@ public abstract class BaseEntity {
 
     @PrePersist
     protected void prePersist() {
-        var now = LocalDateTime.now();
+        var now = LocalDateTime.now(ZoneOffset.UTC);
         if (this.id == null) {
             this.id = UUID.randomUUID();
         }
@@ -61,6 +62,6 @@ public abstract class BaseEntity {
 
     @PreUpdate
     protected void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now(ZoneOffset.UTC);
     }
 }

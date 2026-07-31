@@ -24,6 +24,7 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.ParamDef;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Set;
 
 @Entity
@@ -132,14 +133,14 @@ public class ConversationMessage extends BaseEntity {
     public void markDelivered() {
         if (this.status == MessageStatus.SENT) {
             this.status = MessageStatus.DELIVERED;
-            this.deliveredAt = LocalDateTime.now();
+            this.deliveredAt = LocalDateTime.now(ZoneOffset.UTC);
         }
     }
 
     public void markRead() {
         if (this.status == MessageStatus.DELIVERED || this.status == MessageStatus.SENT) {
             this.status = MessageStatus.READ;
-            this.readAt = LocalDateTime.now();
+            this.readAt = LocalDateTime.now(ZoneOffset.UTC);
             if (this.deliveredAt == null) {
                 this.deliveredAt = this.readAt;
             }
@@ -148,7 +149,7 @@ public class ConversationMessage extends BaseEntity {
 
     public void markFailed(String reason) {
         this.status = MessageStatus.FAILED;
-        this.failedAt = LocalDateTime.now();
+        this.failedAt = LocalDateTime.now(ZoneOffset.UTC);
         this.failureReason = reason;
     }
 

@@ -24,6 +24,7 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.ParamDef;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Set;
 
 @Entity
@@ -136,7 +137,7 @@ public class Conversation extends SoftDeletableEntity {
 
     public void markResolved() {
         this.status = ConversationStatus.RESOLVED;
-        this.resolvedAt = LocalDateTime.now();
+        this.resolvedAt = LocalDateTime.now(ZoneOffset.UTC);
         if (this.responseTimeSeconds == null && this.firstResponseAt != null) {
             this.responseTimeSeconds = java.time.Duration.between(
                 this.getCreatedAt(), this.firstResponseAt).toSeconds();
@@ -147,7 +148,7 @@ public class Conversation extends SoftDeletableEntity {
 
     public void markClosed() {
         this.status = ConversationStatus.CLOSED;
-        this.closedAt = LocalDateTime.now();
+        this.closedAt = LocalDateTime.now(ZoneOffset.UTC);
         if (this.resolvedAt == null) {
             markResolved();
         }
@@ -163,7 +164,7 @@ public class Conversation extends SoftDeletableEntity {
 
     public void incrementMessageCount() {
         this.messageCount++;
-        this.lastMessageAt = LocalDateTime.now();
+        this.lastMessageAt = LocalDateTime.now(ZoneOffset.UTC);
     }
 
     public void incrementUnreadCount() {
@@ -176,7 +177,7 @@ public class Conversation extends SoftDeletableEntity {
 
     public void recordFirstResponse() {
         if (this.firstResponseAt == null) {
-            this.firstResponseAt = LocalDateTime.now();
+            this.firstResponseAt = LocalDateTime.now(ZoneOffset.UTC);
             this.responseTimeSeconds = java.time.Duration.between(
                 this.getCreatedAt(), this.firstResponseAt).toSeconds();
         }
@@ -184,7 +185,7 @@ public class Conversation extends SoftDeletableEntity {
 
     public void handoffFromBot() {
         this.botConversation = false;
-        this.botHandoffAt = LocalDateTime.now();
+        this.botHandoffAt = LocalDateTime.now(ZoneOffset.UTC);
         this.status = ConversationStatus.OPEN;
     }
 
@@ -197,7 +198,7 @@ public class Conversation extends SoftDeletableEntity {
             return false;
         }
         
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         LocalDateTime threshold = now.minusHours(switch (priority) {
             case URGENT -> 1;
             case HIGH -> 4;

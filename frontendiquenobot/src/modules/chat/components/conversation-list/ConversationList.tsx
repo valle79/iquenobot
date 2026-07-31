@@ -62,15 +62,15 @@ const ConversationItem = memo(function ConversationItem({
   const lastMessage = conversation.lastMessage
   const unread = conversation.unreadCount ?? 0
 
-  // ===============================
-  // NULL SAFE CONTACT
-  // ===============================
-  const displayName =
-    conversation?.subject?.trim() ||
-    contact?.displayName?.trim() ||
-    contact?.fullName?.trim() ||
-    contact?.phone ||
-    'Contacto sin nombre'
+// ===============================
+// DISPLAY NAME PRIORITY (WhatsApp-like)
+// ===============================
+const displayName =
+  contact?.displayName?.trim() ||
+  contact?.fullName?.trim() ||
+  conversation?.subject?.trim() ||
+  contact?.phone ||
+  'Contacto sin nombre'
 
   const avatarName = displayName
   const avatarUrl = contact?.avatarUrl
@@ -201,12 +201,13 @@ export function ConversationList() {
     return conversations.filter((c) => {
       const contact = c.contact
 
-      const name = (
-        contact?.displayName ||
-        contact?.fullName ||
-        contact?.phone ||
-        ''
-      ).toLowerCase()
+const name = (
+  contact?.displayName?.trim() ||
+  contact?.fullName?.trim() ||
+  c.subject?.trim() ||
+  contact?.phone ||
+  ''
+).toLowerCase()
 
       const email = contact?.email?.toLowerCase() ?? ''
       const phone = contact?.phone ?? ''

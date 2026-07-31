@@ -85,24 +85,17 @@ public class NotificationEventListener {
             UUID tenantId = UUID.fromString(event.getTenantId());
             UUID conversationId = UUID.fromString(event.getConversationId());
 
-            Optional<Conversation> convOpt = conversationRepository.findByIdAndTenantIdAndDeletedFalse(conversationId, tenantId);
-
             Map<String, Object> payload = new LinkedHashMap<>();
-            convOpt.ifPresentOrElse(conv -> {
-                payload.put("id", conv.getId().toString());
-                payload.put("channel", conv.getChannel() != null ? conv.getChannel().name() : "UNKNOWN");
-                payload.put("status", conv.getStatus() != null ? conv.getStatus().name() : "OPEN");
-                payload.put("priority", conv.getPriority() != null ? conv.getPriority().name() : "MEDIUM");
-                payload.put("messageCount", conv.getMessageCount());
-                payload.put("unreadCount", conv.getUnreadCount());
-                payload.put("lastMessageAt", conv.getLastMessageAt() != null ? conv.getLastMessageAt().toString() : null);
-                payload.put("createdAt", conv.getCreatedAt() != null ? conv.getCreatedAt().toString() : null);
-                payload.put("botConversation", conv.isBotConversation());
-            }, () -> {
-                payload.put("id", event.getConversationId());
-                payload.put("channel", event.getChannel());
-                payload.put("status", "OPEN");
-            });
+            payload.put("id", conversationId.toString());
+
+            // Usar datos del evento en lugar de consultar DB (evita race condition con @Transactional)
+            String contactName = event.getContactName();
+            if (contactName != null && !contactName.isBlank()) {
+                Map<String, Object> contactData = new LinkedHashMap<>();
+                contactData.put("fullName", contactName);
+                contactData.put("displayName", contactName);
+                payload.put("contact", contactData);
+            }
 
             webSocketHandler.sendToTenant(tenantId, Map.of("type", "conversation:new", "payload", payload));
 

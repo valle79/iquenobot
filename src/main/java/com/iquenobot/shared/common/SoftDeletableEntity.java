@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @MappedSuperclass
@@ -30,7 +31,7 @@ public abstract class SoftDeletableEntity extends BaseEntity {
 
     public void softDelete(UUID userId) {
         this.deleted = true;
-        this.deletedAt = LocalDateTime.now();
+        this.deletedAt = LocalDateTime.now(ZoneOffset.UTC);
         this.deletedBy = userId;
     }
 

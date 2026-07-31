@@ -40,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -176,7 +177,7 @@ public class ConversationService {
                 .priority(request.getPriority() != null ? request.getPriority() : ConversationPriority.MEDIUM)
                 .subject(request.getSubject())
                 .channelConversationId(request.getChannelConversationId())
-                .lastMessageAt(LocalDateTime.now())
+                .lastMessageAt(LocalDateTime.now(ZoneOffset.UTC))
                 .messageCount(0)
                 .unreadCount(0)
                 .tags(request.getTags())
@@ -236,13 +237,13 @@ public class ConversationService {
                 .senderEmail(user.getEmail())
                 .senderType(SenderType.AGENT)
                 .fromBot(false)
-                .sentAt(LocalDateTime.now())
+                .sentAt(LocalDateTime.now(ZoneOffset.UTC))
                 .build();
 
         message = messageRepository.save(message);
 
         // Update conversation (atomic, avoids optimistic locking)
-        var now = LocalDateTime.now();
+        var now = LocalDateTime.now(ZoneOffset.UTC);
         conversationRepository.incrementOutgoingMessageMetrics(conversation.getId(), tenantId, now);
         var responseTimeSeconds = conversation.getCreatedAt() != null
                 ? Duration.between(conversation.getCreatedAt(), now).toSeconds()
@@ -384,10 +385,10 @@ public class ConversationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Conversación no encontrada"));
 
         int markedCount = messageRepository.markConversationMessagesAsRead(
-                conversationId, LocalDateTime.now());
+                conversationId, LocalDateTime.now(ZoneOffset.UTC));
 
         int updatedRows = conversationRepository.resetUnreadCount(
-                conversationId, tenantId, LocalDateTime.now());
+                conversationId, tenantId, LocalDateTime.now(ZoneOffset.UTC));
 
         log.info("Marked {} messages as read in conversation {} for tenant {} (conversation rows updated={})",
                 markedCount, conversationId, tenantId, updatedRows);
@@ -424,7 +425,7 @@ public class ConversationService {
                             .status(ConversationStatus.OPEN)
                             .priority(ConversationPriority.MEDIUM)
                             .channelConversationId(channelConversationId)
-                            .lastMessageAt(LocalDateTime.now())
+                            .lastMessageAt(LocalDateTime.now(ZoneOffset.UTC))
                             .messageCount(0)
                             .unreadCount(0)
                             .botConversation(false)
@@ -446,7 +447,7 @@ public class ConversationService {
                 .senderName(conversation.getContact().getFullName())
                 .senderPhone(conversation.getContact().getPhone())
                 .fromBot(false)
-                .sentAt(LocalDateTime.now())
+                .sentAt(LocalDateTime.now(ZoneOffset.UTC))
                 .build();
 
         message = messageRepository.save(message);

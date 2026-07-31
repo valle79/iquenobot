@@ -143,7 +143,7 @@ export default function ContactDetailPage() {
             {[
               { icon: Calendar, label: 'Creado', value: dayjs(contact.createdAt).format('DD/MM/YYYY HH:mm') },
               { icon: Calendar, label: 'Actualizado', value: dayjs(contact.updatedAt).format('DD/MM/YYYY HH:mm') },
-              { icon: MessageCircle, label: 'Último contacto', value: contact.lastContactedAt ? dayjs(contact.lastContactedAt).fromNow() : 'Nunca' },
+              { icon: MessageCircle, label: 'Último contacto', value: contact.lastContactedAt ? dayjs.utc(contact.lastContactedAt).fromNow() : 'Nunca' },
               { icon: MessageCircle, label: 'Mensajes', value: String(contact.messageCount ?? 0) },
             ].map(({ icon: Icon, label, value }) => (
               <div key={label} className="flex items-center gap-3">

@@ -58022,3 +58022,1100 @@ org.springframework.web.client.HttpClientErrorException$BadRequest: 400 Bad Requ
 2026-07-30 20:24:49 [tomcat-handler-86] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
 2026-07-30 20:24:50 [tomcat-handler-87] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
 2026-07-30 20:24:51 [tomcat-handler-87] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0 for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:24:54 [tomcat-handler-89] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:24:58 [tomcat-handler-90] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:24:58 [tomcat-handler-91] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:24:58 [tomcat-handler-91] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c (1 subscribers)
+2026-07-30 20:24:58 [tomcat-handler-92] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:24:58 [tomcat-handler-93] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:24:59 [tomcat-handler-94] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c
+2026-07-30 20:24:59 [tomcat-handler-95] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c
+2026-07-30 20:24:59 [tomcat-handler-96] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation aa95501c-755e-48a8-92ce-ab7b20086f65 (1 subscribers)
+2026-07-30 20:24:59 [tomcat-handler-97] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:24:59 [tomcat-handler-98] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:24:59 [tomcat-handler-99] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:24:59 [tomcat-handler-99] INFO  c.i.c.a.ConversationService - Marked 4 messages as read in conversation aa95501c-755e-48a8-92ce-ab7b20086f65 for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:25:00 [tomcat-handler-100] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:25:00 [tomcat-handler-100] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:25:00 [tomcat-handler-100] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c (1 subscribers)
+2026-07-30 20:25:00 [tomcat-handler-101] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:25:01 [tomcat-handler-102] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c
+2026-07-30 20:25:01 [tomcat-handler-103] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c
+2026-07-30 20:25:01 [tomcat-handler-104] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0 (1 subscribers)
+2026-07-30 20:25:01 [tomcat-handler-101] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:25:06 [tomcat-handler-105] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-30 20:25:06 [tomcat-handler-105] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-30 20:25:06 [tomcat-handler-105] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-30 20:25:06 [tomcat-handler-105] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, contextInfo, messageType, messageTimestamp, instanceId, source]
+2026-07-30 20:25:06 [tomcat-handler-105] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-30 20:25:06 [tomcat-handler-105] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51945756189@s.whatsapp.net, remoteJidAlt=51945756189@s.whatsapp.net, fromMe=true, id=A54869D1D4CEEB20A2081C0FAE10D87C, participant=, addressingMode=lid}, pushName=LuisDev, status=SERVER_ACK, message={conversation=....}, contextInfo={mentionedJid=[], groupMentions=[], statusAttributions=[], expiration=0, ephemeralSettingTimestamp={low=1711468945, high=0, unsigned=false}, disappearingMode={initiator=0, trigger=1, initiatedByMe=false}}, messageType=conversation, messageTimestamp=1785461106, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-30 20:25:06 [tomcat-handler-105] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51945756189 | type=conversation | msgId=A54869D1D4CEEB20A2081C0FAE10D87C
+2026-07-30 20:25:06 [tomcat-handler-105] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: OUTBOUND
+2026-07-30 20:25:06 [tomcat-handler-105] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51945756189 direction=OUTBOUND type=TEXT content=....
+2026-07-30 20:25:06 [tomcat-handler-105] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51945756189
+2026-07-30 20:25:06 [tomcat-handler-105] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-30 20:25:06 [tomcat-handler-105] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51945756189
+2026-07-30 20:25:06 [tomcat-handler-105] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-30 20:25:07 [tomcat-handler-105] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-30 20:25:07 [tomcat-handler-105] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 352ms
+2026-07-30 20:25:07 [tomcat-handler-105] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-30 20:25:07 [tomcat-handler-105] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51945756189]
+2026-07-30 20:25:07 [tomcat-handler-105] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51945756189]
+2026-07-30 20:25:07 [tomcat-handler-105] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-30 20:25:07 [tomcat-handler-105] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-30 20:25:07 [tomcat-handler-105] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51945756189 found=true
+2026-07-30 20:25:07 [tomcat-handler-105] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=215c3bd5-f063-492a-b6db-07444e3e1b68 name=Charli  phone=+51945756189 normalized=+51945756189
+2026-07-30 20:25:07 [tomcat-handler-105] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=215c3bd5-f063-492a-b6db-07444e3e1b68 name=Charli 
+2026-07-30 20:25:07 [tomcat-handler-105] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 317ms
+2026-07-30 20:25:07 [tomcat-handler-105] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=4e6c0631-a5d3-4ac0-8257-691526c0c6c0 status=IN_PROGRESS channel=WHATSAPP
+2026-07-30 20:25:07 [tomcat-handler-105] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 408ms
+2026-07-30 20:25:08 [tomcat-handler-105] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-30 20:25:08 [tomcat-handler-105] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 378ms
+2026-07-30 20:25:08 [tomcat-handler-105] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-30 20:25:08 [tomcat-handler-105] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 152ms
+2026-07-30 20:25:08 [tomcat-handler-105] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=0 consecutiveBotResponses=0 firstMessage=true
+2026-07-30 20:25:08 [tomcat-handler-105] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 168ms
+2026-07-30 20:25:08 [tomcat-handler-105] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=3434296a-e086-4c2a-90af-8767c59276e5 conversation=4e6c0631-a5d3-4ac0-8257-691526c0c6c0 type=TEXT
+2026-07-30 20:25:09 [tomcat-handler-105] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 526ms
+2026-07-30 20:25:09 [tomcat-handler-105] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=215c3bd5-f063-492a-b6db-07444e3e1b68 conversation=4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:25:09 [tomcat-handler-105] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 322ms
+2026-07-30 20:25:09 [tomcat-handler-105] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=4e6c0631-a5d3-4ac0-8257-691526c0c6c0|contactId=215c3bd5-f063-492a-b6db-07444e3e1b68|messageId=A54869D1D4CEEB20A2081C0FAE10D87C|channel=WHATSAPP|type=TEXT
+2026-07-30 20:25:09 [tomcat-handler-105] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 0ms
+2026-07-30 20:25:09 [tomcat-handler-105] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2630ms
+2026-07-30 20:25:09 [tomcat-handler-105] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:25:09 [orchestrator-event-5] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=4e6c0631-a5d3-4ac0-8257-691526c0c6c0 channel=WHATSAPP
+2026-07-30 20:25:09 [tomcat-handler-105] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-30 20:25:09 [orchestrator-event-4] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=A54869D1D4CEEB20A2081C0FAE10D87C
+2026-07-30 20:25:09 [tomcat-handler-105] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-30 20:25:09 [tomcat-handler-105] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-30 20:25:09 [tomcat-handler-105] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-30 20:25:09 [tomcat-handler-105] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0: No automated action configured for this message
+2026-07-30 20:25:09 [tomcat-handler-105] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:25:09 [orchestrator-event-2] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=4e6c0631-a5d3-4ac0-8257-691526c0c6c0 action=NO_ACTION time=2630ms
+2026-07-30 20:25:09 [orchestrator-event-2] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2630ms
+2026-07-30 20:25:09 [tomcat-handler-105] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2630ms. decision=NO_ACTION
+2026-07-30 20:25:09 [orchestrator-event-1] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2630ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:25:09 [orchestrator-event-5] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-30 20:25:09 [tomcat-handler-105] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-30 20:25:14 [tomcat-handler-107] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:25:14 [tomcat-handler-107] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:25:14 [tomcat-handler-108] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation aa95501c-755e-48a8-92ce-ab7b20086f65 (1 subscribers)
+2026-07-30 20:25:14 [tomcat-handler-109] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:25:15 [tomcat-handler-109] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation aa95501c-755e-48a8-92ce-ab7b20086f65 for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:25:15 [tomcat-handler-110] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:25:15 [tomcat-handler-111] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:25:15 [tomcat-handler-112] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c (1 subscribers)
+2026-07-30 20:25:15 [tomcat-handler-113] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:25:16 [tomcat-handler-113] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:25:16 [tomcat-handler-114] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c
+2026-07-30 20:25:16 [tomcat-handler-115] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c
+2026-07-30 20:25:16 [tomcat-handler-116] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0 (1 subscribers)
+2026-07-30 20:25:16 [tomcat-handler-117] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:25:17 [tomcat-handler-117] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0 for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:27:52 [tomcat-handler-118] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:27:53 [tomcat-handler-119] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:27:53 [tomcat-handler-120] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:27:53 [tomcat-handler-121] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0 (1 subscribers)
+2026-07-30 20:27:53 [tomcat-handler-123] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:27:53 [tomcat-handler-122] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:27:53 [tomcat-handler-124] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:27:54 [tomcat-handler-124] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0 for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:28:02 [tomcat-handler-125] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:28:03 [tomcat-handler-126] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:28:03 [tomcat-handler-127] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0 (1 subscribers)
+2026-07-30 20:28:03 [tomcat-handler-128] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:28:03 [tomcat-handler-129] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0 (1 subscribers)
+2026-07-30 20:28:03 [tomcat-handler-130] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:04 [tomcat-handler-130] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0 for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:28:25 [tomcat-handler-131] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-30 20:28:25 [tomcat-handler-131] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-30 20:28:25 [tomcat-handler-131] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-30 20:28:25 [tomcat-handler-131] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, messageType, messageTimestamp, instanceId, source]
+2026-07-30 20:28:25 [tomcat-handler-131] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-30 20:28:25 [tomcat-handler-131] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51960069146@s.whatsapp.net, remoteJidAlt=51960069146@s.whatsapp.net, fromMe=false, id=ACA300CC9C8A82928CD943CCA187D7DA, participant=, addressingMode=lid}, pushName=Maicol Martín Bazán Guzmá, status=DELIVERY_ACK, message={conversation=Jajaja si amigo, messageContextInfo={threadId=[], deviceListMetadata={senderKeyIndexes=[], recipientKeyIndexes=[], recipientKeyHash={0=247, 1=105, 2=235, 3=253, 4=176, 5=169, 6=148, 7=75, 8=193, 9=195}, recipientTimestamp={low=1785358695, high=0, unsigned=true}}, deviceListMetadataVersion=2, messageSecret={0=212, 1=8, 2=216, 3=73, 4=45, 5=154, 6=76, 7=70, 8=105, 9=129, 10=207, 11=122, 12=42, 13=76, 14=88, 15=141, 16=252, 17=241, 18=139, 19=64, 20=23, 21=186, 22=122, 23=17, 24=88, 25=7, 26=51, 27=114, 28=155, 29=241, 30=94, 31=57}}}, messageType=conversation, messageTimestamp=1785461304, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-30 20:28:25 [tomcat-handler-131] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51960069146 | type=conversation | msgId=ACA300CC9C8A82928CD943CCA187D7DA
+2026-07-30 20:28:25 [tomcat-handler-131] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: INBOUND
+2026-07-30 20:28:25 [tomcat-handler-131] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51960069146 direction=INBOUND type=TEXT content=Jajaja si amigo
+2026-07-30 20:28:25 [tomcat-handler-131] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51960069146
+2026-07-30 20:28:25 [tomcat-handler-131] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-30 20:28:25 [tomcat-handler-131] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51960069146
+2026-07-30 20:28:25 [tomcat-handler-131] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-30 20:28:25 [tomcat-handler-131] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-30 20:28:25 [tomcat-handler-131] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 315ms
+2026-07-30 20:28:25 [tomcat-handler-131] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-30 20:28:25 [tomcat-handler-131] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51960069146]
+2026-07-30 20:28:25 [tomcat-handler-131] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51960069146]
+2026-07-30 20:28:25 [tomcat-handler-131] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-30 20:28:25 [tomcat-handler-131] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-30 20:28:25 [tomcat-handler-131] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51960069146 found=true
+2026-07-30 20:28:25 [tomcat-handler-131] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=7c7152a3-7511-43e4-929e-89ba5c236109 name=Maicol Bazan  phone=+51960069146 normalized=+51960069146
+2026-07-30 20:28:25 [tomcat-handler-131] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=7c7152a3-7511-43e4-929e-89ba5c236109 name=Maicol Bazan 
+2026-07-30 20:28:26 [tomcat-handler-131] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 303ms
+2026-07-30 20:28:26 [tomcat-handler-131] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=aa95501c-755e-48a8-92ce-ab7b20086f65 status=IN_PROGRESS channel=WHATSAPP
+2026-07-30 20:28:26 [tomcat-handler-131] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 297ms
+2026-07-30 20:28:26 [tomcat-handler-131] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-30 20:28:26 [tomcat-handler-131] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 295ms
+2026-07-30 20:28:26 [tomcat-handler-131] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-30 20:28:26 [tomcat-handler-131] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 151ms
+2026-07-30 20:28:26 [tomcat-handler-131] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=17 consecutiveBotResponses=0 firstMessage=false
+2026-07-30 20:28:26 [tomcat-handler-131] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 147ms
+2026-07-30 20:28:27 [tomcat-handler-131] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=3ac99ca3-0f51-44e3-8550-f7f04c33feff conversation=aa95501c-755e-48a8-92ce-ab7b20086f65 type=TEXT
+2026-07-30 20:28:27 [tomcat-handler-131] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 440ms
+2026-07-30 20:28:27 [tomcat-handler-131] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=7c7152a3-7511-43e4-929e-89ba5c236109 conversation=aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:28:27 [tomcat-handler-131] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 295ms
+2026-07-30 20:28:27 [tomcat-handler-131] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=aa95501c-755e-48a8-92ce-ab7b20086f65|contactId=7c7152a3-7511-43e4-929e-89ba5c236109|messageId=ACA300CC9C8A82928CD943CCA187D7DA|channel=WHATSAPP|type=TEXT
+2026-07-30 20:28:27 [tomcat-handler-131] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 0ms
+2026-07-30 20:28:27 [tomcat-handler-131] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2246ms
+2026-07-30 20:28:27 [tomcat-handler-131] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:28:27 [tomcat-handler-131] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-30 20:28:27 [orchestrator-event-2] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=ACA300CC9C8A82928CD943CCA187D7DA
+2026-07-30 20:28:27 [orchestrator-event-4] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=aa95501c-755e-48a8-92ce-ab7b20086f65 channel=WHATSAPP
+2026-07-30 20:28:27 [tomcat-handler-131] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-30 20:28:27 [tomcat-handler-131] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-30 20:28:27 [tomcat-handler-131] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-30 20:28:27 [tomcat-handler-131] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation aa95501c-755e-48a8-92ce-ab7b20086f65: No automated action configured for this message
+2026-07-30 20:28:27 [tomcat-handler-131] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:28:27 [orchestrator-event-5] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=aa95501c-755e-48a8-92ce-ab7b20086f65 action=NO_ACTION time=2247ms
+2026-07-30 20:28:27 [tomcat-handler-131] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2247ms. decision=NO_ACTION
+2026-07-30 20:28:27 [orchestrator-event-5] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2247ms
+2026-07-30 20:28:27 [orchestrator-event-3] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2247ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:27 [orchestrator-event-2] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-30 20:28:27 [tomcat-handler-131] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-30 20:28:30 [tomcat-handler-132] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-30 20:28:30 [tomcat-handler-132] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-30 20:28:30 [tomcat-handler-132] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-30 20:28:30 [tomcat-handler-132] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, messageType, messageTimestamp, instanceId, source]
+2026-07-30 20:28:30 [tomcat-handler-132] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-30 20:28:30 [tomcat-handler-132] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51960069146@s.whatsapp.net, remoteJidAlt=51960069146@s.whatsapp.net, fromMe=false, id=ACFD2416C883BC8ADF5DF8277C151DA1, participant=, addressingMode=lid}, pushName=Maicol Martín Bazán Guzmá, status=DELIVERY_ACK, message={conversation=Ya no quiero más, messageContextInfo={threadId=[], deviceListMetadata={senderKeyIndexes=[], recipientKeyIndexes=[], recipientKeyHash={0=247, 1=105, 2=235, 3=253, 4=176, 5=169, 6=148, 7=75, 8=193, 9=195}, recipientTimestamp={low=1785358695, high=0, unsigned=true}}, deviceListMetadataVersion=2, messageSecret={0=248, 1=221, 2=191, 3=49, 4=84, 5=19, 6=213, 7=179, 8=241, 9=48, 10=29, 11=16, 12=77, 13=233, 14=240, 15=192, 16=29, 17=154, 18=15, 19=250, 20=245, 21=80, 22=154, 23=63, 24=54, 25=176, 26=37, 27=105, 28=181, 29=223, 30=223, 31=126}}}, messageType=conversation, messageTimestamp=1785461310, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-30 20:28:31 [tomcat-handler-132] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51960069146 | type=conversation | msgId=ACFD2416C883BC8ADF5DF8277C151DA1
+2026-07-30 20:28:31 [tomcat-handler-132] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: INBOUND
+2026-07-30 20:28:31 [tomcat-handler-132] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51960069146 direction=INBOUND type=TEXT content=Ya no quiero más
+2026-07-30 20:28:31 [tomcat-handler-132] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51960069146
+2026-07-30 20:28:31 [tomcat-handler-132] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-30 20:28:31 [tomcat-handler-132] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51960069146
+2026-07-30 20:28:31 [tomcat-handler-132] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-30 20:28:31 [tomcat-handler-132] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-30 20:28:31 [tomcat-handler-132] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 309ms
+2026-07-30 20:28:31 [tomcat-handler-132] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-30 20:28:31 [tomcat-handler-132] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51960069146]
+2026-07-30 20:28:31 [tomcat-handler-132] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51960069146]
+2026-07-30 20:28:31 [tomcat-handler-132] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-30 20:28:31 [tomcat-handler-132] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-30 20:28:31 [tomcat-handler-132] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51960069146 found=true
+2026-07-30 20:28:31 [tomcat-handler-132] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=7c7152a3-7511-43e4-929e-89ba5c236109 name=Maicol Bazan  phone=+51960069146 normalized=+51960069146
+2026-07-30 20:28:31 [tomcat-handler-132] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=7c7152a3-7511-43e4-929e-89ba5c236109 name=Maicol Bazan 
+2026-07-30 20:28:31 [tomcat-handler-132] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 290ms
+2026-07-30 20:28:31 [tomcat-handler-132] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=aa95501c-755e-48a8-92ce-ab7b20086f65 status=IN_PROGRESS channel=WHATSAPP
+2026-07-30 20:28:31 [tomcat-handler-132] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 325ms
+2026-07-30 20:28:32 [tomcat-handler-132] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-30 20:28:32 [tomcat-handler-132] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 312ms
+2026-07-30 20:28:32 [tomcat-handler-132] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-30 20:28:32 [tomcat-handler-132] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 333ms
+2026-07-30 20:28:32 [tomcat-handler-132] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=18 consecutiveBotResponses=0 firstMessage=false
+2026-07-30 20:28:32 [tomcat-handler-132] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 309ms
+2026-07-30 20:28:33 [tomcat-handler-132] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=03142844-314f-457e-977a-e1cab3b6e004 conversation=aa95501c-755e-48a8-92ce-ab7b20086f65 type=TEXT
+2026-07-30 20:28:33 [tomcat-handler-132] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 441ms
+2026-07-30 20:28:33 [tomcat-handler-132] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=7c7152a3-7511-43e4-929e-89ba5c236109 conversation=aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:28:33 [tomcat-handler-132] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 286ms
+2026-07-30 20:28:33 [tomcat-handler-132] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=aa95501c-755e-48a8-92ce-ab7b20086f65|contactId=7c7152a3-7511-43e4-929e-89ba5c236109|messageId=ACFD2416C883BC8ADF5DF8277C151DA1|channel=WHATSAPP|type=TEXT
+2026-07-30 20:28:33 [tomcat-handler-132] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 1ms
+2026-07-30 20:28:33 [tomcat-handler-132] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2611ms
+2026-07-30 20:28:33 [tomcat-handler-132] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:28:33 [orchestrator-event-4] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=aa95501c-755e-48a8-92ce-ab7b20086f65 channel=WHATSAPP
+2026-07-30 20:28:33 [orchestrator-event-5] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=ACFD2416C883BC8ADF5DF8277C151DA1
+2026-07-30 20:28:33 [tomcat-handler-132] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-30 20:28:33 [tomcat-handler-132] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-30 20:28:33 [tomcat-handler-132] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-30 20:28:33 [tomcat-handler-132] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-30 20:28:33 [tomcat-handler-132] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation aa95501c-755e-48a8-92ce-ab7b20086f65: No automated action configured for this message
+2026-07-30 20:28:33 [tomcat-handler-132] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:28:33 [tomcat-handler-132] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2615ms. decision=NO_ACTION
+2026-07-30 20:28:33 [orchestrator-event-2] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=aa95501c-755e-48a8-92ce-ab7b20086f65 action=NO_ACTION time=2612ms
+2026-07-30 20:28:33 [orchestrator-event-1] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2612ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:33 [orchestrator-event-4] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-30 20:28:33 [tomcat-handler-132] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-30 20:28:33 [orchestrator-event-2] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2612ms
+2026-07-30 20:28:36 [tomcat-handler-133] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:28:36 [tomcat-handler-134] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:28:36 [tomcat-handler-135] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c (1 subscribers)
+2026-07-30 20:28:36 [tomcat-handler-137] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:36 [tomcat-handler-136] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:36 [tomcat-handler-138] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:37 [tomcat-handler-139] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c
+2026-07-30 20:28:37 [tomcat-handler-140] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c
+2026-07-30 20:28:37 [tomcat-handler-141] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation aa95501c-755e-48a8-92ce-ab7b20086f65 (1 subscribers)
+2026-07-30 20:28:37 [tomcat-handler-142] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:37 [tomcat-handler-143] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:37 [tomcat-handler-138] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:28:38 [tomcat-handler-144] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:28:38 [tomcat-handler-144] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:28:38 [tomcat-handler-144] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0 (1 subscribers)
+2026-07-30 20:28:38 [tomcat-handler-146] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:38 [tomcat-handler-145] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:38 [tomcat-handler-147] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:38 [tomcat-handler-147] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0 for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:28:39 [tomcat-handler-149] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-30 20:28:39 [tomcat-handler-149] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-30 20:28:39 [tomcat-handler-149] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-30 20:28:39 [tomcat-handler-149] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, messageType, messageTimestamp, instanceId, source]
+2026-07-30 20:28:39 [tomcat-handler-149] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-30 20:28:39 [tomcat-handler-149] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51960069146@s.whatsapp.net, remoteJidAlt=51960069146@s.whatsapp.net, fromMe=false, id=AC69FF0310E264B2FFB75490E8AAD802, participant=, addressingMode=lid}, pushName=Maicol Martín Bazán Guzmá, status=DELIVERY_ACK, message={conversation=Hasta fin de semana, messageContextInfo={threadId=[], deviceListMetadata={senderKeyIndexes=[], recipientKeyIndexes=[], recipientKeyHash={0=247, 1=105, 2=235, 3=253, 4=176, 5=169, 6=148, 7=75, 8=193, 9=195}, recipientTimestamp={low=1785358695, high=0, unsigned=true}}, deviceListMetadataVersion=2, messageSecret={0=151, 1=103, 2=147, 3=233, 4=27, 5=180, 6=16, 7=115, 8=22, 9=255, 10=157, 11=143, 12=164, 13=173, 14=98, 15=253, 16=132, 17=136, 18=62, 19=243, 20=192, 21=14, 22=65, 23=49, 24=93, 25=65, 26=19, 27=208, 28=47, 29=49, 30=93, 31=32}}}, messageType=conversation, messageTimestamp=1785461318, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-30 20:28:39 [tomcat-handler-149] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51960069146 | type=conversation | msgId=AC69FF0310E264B2FFB75490E8AAD802
+2026-07-30 20:28:39 [tomcat-handler-149] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: INBOUND
+2026-07-30 20:28:39 [tomcat-handler-149] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51960069146 direction=INBOUND type=TEXT content=Hasta fin de semana
+2026-07-30 20:28:39 [tomcat-handler-149] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51960069146
+2026-07-30 20:28:39 [tomcat-handler-149] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-30 20:28:39 [tomcat-handler-149] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51960069146
+2026-07-30 20:28:39 [tomcat-handler-149] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 1ms
+2026-07-30 20:28:39 [tomcat-handler-149] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-30 20:28:39 [tomcat-handler-149] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 281ms
+2026-07-30 20:28:39 [tomcat-handler-149] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-30 20:28:39 [tomcat-handler-149] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51960069146]
+2026-07-30 20:28:39 [tomcat-handler-149] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51960069146]
+2026-07-30 20:28:39 [tomcat-handler-149] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-30 20:28:39 [tomcat-handler-149] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-30 20:28:39 [tomcat-handler-149] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51960069146 found=true
+2026-07-30 20:28:39 [tomcat-handler-149] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=7c7152a3-7511-43e4-929e-89ba5c236109 name=Maicol Bazan  phone=+51960069146 normalized=+51960069146
+2026-07-30 20:28:39 [tomcat-handler-149] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=7c7152a3-7511-43e4-929e-89ba5c236109 name=Maicol Bazan 
+2026-07-30 20:28:39 [tomcat-handler-149] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 295ms
+2026-07-30 20:28:39 [tomcat-handler-149] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=aa95501c-755e-48a8-92ce-ab7b20086f65 status=IN_PROGRESS channel=WHATSAPP
+2026-07-30 20:28:40 [tomcat-handler-149] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 292ms
+2026-07-30 20:28:40 [tomcat-handler-149] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-30 20:28:40 [tomcat-handler-149] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 293ms
+2026-07-30 20:28:40 [tomcat-handler-149] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-30 20:28:40 [tomcat-handler-149] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 286ms
+2026-07-30 20:28:41 [tomcat-handler-149] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=19 consecutiveBotResponses=0 firstMessage=false
+2026-07-30 20:28:41 [tomcat-handler-149] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 290ms
+2026-07-30 20:28:41 [tomcat-handler-149] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=415f8cda-6faf-41ae-8407-0f831a77caff conversation=aa95501c-755e-48a8-92ce-ab7b20086f65 type=TEXT
+2026-07-30 20:28:41 [tomcat-handler-149] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 435ms
+2026-07-30 20:28:41 [tomcat-handler-149] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=7c7152a3-7511-43e4-929e-89ba5c236109 conversation=aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:28:41 [tomcat-handler-149] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 287ms
+2026-07-30 20:28:41 [tomcat-handler-149] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=aa95501c-755e-48a8-92ce-ab7b20086f65|contactId=7c7152a3-7511-43e4-929e-89ba5c236109|messageId=AC69FF0310E264B2FFB75490E8AAD802|channel=WHATSAPP|type=TEXT
+2026-07-30 20:28:41 [tomcat-handler-149] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 1ms
+2026-07-30 20:28:41 [tomcat-handler-149] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2474ms
+2026-07-30 20:28:41 [tomcat-handler-149] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:28:41 [orchestrator-event-5] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=aa95501c-755e-48a8-92ce-ab7b20086f65 channel=WHATSAPP
+2026-07-30 20:28:41 [tomcat-handler-149] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-30 20:28:41 [orchestrator-event-1] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=AC69FF0310E264B2FFB75490E8AAD802
+2026-07-30 20:28:41 [tomcat-handler-149] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-30 20:28:41 [tomcat-handler-149] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-30 20:28:41 [tomcat-handler-149] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-30 20:28:41 [tomcat-handler-149] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation aa95501c-755e-48a8-92ce-ab7b20086f65: No automated action configured for this message
+2026-07-30 20:28:41 [tomcat-handler-149] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:28:41 [orchestrator-event-2] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=aa95501c-755e-48a8-92ce-ab7b20086f65 action=NO_ACTION time=2480ms
+2026-07-30 20:28:41 [orchestrator-event-3] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2480ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:41 [orchestrator-event-5] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-30 20:28:41 [tomcat-handler-149] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2480ms. decision=NO_ACTION
+2026-07-30 20:28:41 [orchestrator-event-2] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2480ms
+2026-07-30 20:28:41 [tomcat-handler-149] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-30 20:28:41 [tomcat-handler-150] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:43 [tomcat-handler-150] INFO  c.i.a.i.w.EvolutionApiProvider - Sending text message via Evolution API to: +51945756189
+2026-07-30 20:28:44 [tomcat-handler-150] INFO  c.i.a.i.w.EvolutionApiProvider - Message sent successfully. ID: 3EB0006332208A658A129E
+2026-07-30 20:28:44 [tomcat-handler-150] INFO  c.i.c.a.ConversationService - WhatsApp message sent via Evolution API, channelId: 3EB0006332208A658A129E
+2026-07-30 20:28:44 [tomcat-handler-150] INFO  c.i.c.a.ConversationService - Message sent: c55b3feb-43c4-4505-aba8-fdd79f7e2a35 in conversation: 4e6c0631-a5d3-4ac0-8257-691526c0c6c0 by user: 935532dc-b311-4071-851e-71e87089679a
+2026-07-30 20:28:50 [tomcat-handler-152] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:28:50 [tomcat-handler-153] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:28:50 [tomcat-handler-154] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation aa95501c-755e-48a8-92ce-ab7b20086f65 (1 subscribers)
+2026-07-30 20:28:50 [tomcat-handler-155] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:50 [tomcat-handler-155] INFO  c.i.c.a.ConversationService - Marked 3 messages as read in conversation aa95501c-755e-48a8-92ce-ab7b20086f65 for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:28:52 [tomcat-handler-156] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:28:52 [tomcat-handler-157] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:28:52 [tomcat-handler-158] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c (1 subscribers)
+2026-07-30 20:28:52 [tomcat-handler-159] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:52 [tomcat-handler-159] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:28:54 [tomcat-handler-160] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c
+2026-07-30 20:28:54 [tomcat-handler-160] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c
+2026-07-30 20:28:54 [tomcat-handler-161] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation aa95501c-755e-48a8-92ce-ab7b20086f65 (1 subscribers)
+2026-07-30 20:28:54 [tomcat-handler-162] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:55 [tomcat-handler-162] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation aa95501c-755e-48a8-92ce-ab7b20086f65 for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:28:55 [tomcat-handler-163] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:28:55 [tomcat-handler-164] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation aa95501c-755e-48a8-92ce-ab7b20086f65
+2026-07-30 20:28:55 [tomcat-handler-165] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0 (1 subscribers)
+2026-07-30 20:28:55 [tomcat-handler-166] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:56 [tomcat-handler-166] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0 for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:28:57 [tomcat-handler-167] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:28:57 [tomcat-handler-168] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 4e6c0631-a5d3-4ac0-8257-691526c0c6c0
+2026-07-30 20:28:57 [tomcat-handler-169] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c (1 subscribers)
+2026-07-30 20:28:57 [tomcat-handler-170] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:28:57 [tomcat-handler-170] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:29:01 [tomcat-handler-171] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:29:02 [tomcat-handler-171] INFO  c.i.a.i.w.EvolutionApiProvider - Sending text message via Evolution API to: 900177625
+2026-07-30 20:29:03 [tomcat-handler-171] ERROR c.i.a.i.w.EvolutionApiProvider - Error sending message via Evolution API: 400 Bad Request on POST request for "http://localhost:8080/message/sendText/mi-whatsapp": "{"status":400,"error":"Bad Request","response":{"message":[{"jid":"900177625@s.whatsapp.net","exists":false,"number":"900177625"}]}}"
+org.springframework.web.client.HttpClientErrorException$BadRequest: 400 Bad Request on POST request for "http://localhost:8080/message/sendText/mi-whatsapp": "{"status":400,"error":"Bad Request","response":{"message":[{"jid":"900177625@s.whatsapp.net","exists":false,"number":"900177625"}]}}"
+	at org.springframework.web.client.HttpClientErrorException.create(HttpClientErrorException.java:103)
+	at org.springframework.web.client.DefaultResponseErrorHandler.handleError(DefaultResponseErrorHandler.java:186)
+	at org.springframework.web.client.DefaultResponseErrorHandler.handleError(DefaultResponseErrorHandler.java:147)
+	at org.springframework.web.client.RestTemplate.handleResponse(RestTemplate.java:953)
+	at org.springframework.web.client.RestTemplate.doExecute(RestTemplate.java:902)
+	at org.springframework.web.client.RestTemplate.execute(RestTemplate.java:801)
+	at org.springframework.web.client.RestTemplate.exchange(RestTemplate.java:683)
+	at com.iquenobot.ai.infrastructure.whatsapp.EvolutionApiProvider.sendMessage(EvolutionApiProvider.java:65)
+	at com.iquenobot.conversation.application.ConversationService.sendMessage(ConversationService.java:266)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:380)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:727)
+	at com.iquenobot.conversation.application.ConversationService$$SpringCGLIB$$0.sendMessage(<generated>)
+	at com.iquenobot.conversation.interfaces.controller.ConversationController.sendMessage(ConversationController.java:119)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:359)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163)
+	at org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor.proceed(AuthorizationManagerBeforeMethodInterceptor.java:268)
+	at org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor.attemptAuthorization(AuthorizationManagerBeforeMethodInterceptor.java:263)
+	at org.springframework.security.authorization.method.AuthorizationManagerBeforeMethodInterceptor.invoke(AuthorizationManagerBeforeMethodInterceptor.java:196)
+	at org.springframework.security.config.annotation.method.configuration.DeferringMethodInterceptor.invoke(DeferringMethodInterceptor.java:44)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:727)
+	at com.iquenobot.conversation.interfaces.controller.ConversationController$$SpringCGLIB$$0.sendMessage(<generated>)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:258)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:191)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at com.iquenobot.shared.security.TenantFilter.doFilter(TenantFilter.java:42)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231)
+	at org.springframework.security.web.ObservationFilterChainDecorator$FilterObservation$SimpleFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:479)
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:340)
+	at org.springframework.security.web.ObservationFilterChainDecorator.lambda$wrapSecured$0(ObservationFilterChainDecorator.java:82)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:128)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:101)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at com.iquenobot.shared.security.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:86)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$0(ObservationFilterChainDecorator.java:323)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:224)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:243)
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113)
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74)
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:238)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:362)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:278)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1743)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at java.base/java.lang.VirtualThread.run(VirtualThread.java:329)
+2026-07-30 20:29:03 [tomcat-handler-171] WARN  c.i.c.a.ConversationService - Failed to send WhatsApp message via Evolution API: Error al enviar mensaje por WhatsApp: 400 Bad Request on POST request for "http://localhost:8080/message/sendText/mi-whatsapp": "{"status":400,"error":"Bad Request","response":{"message":[{"jid":"900177625@s.whatsapp.net","exists":false,"number":"900177625"}]}}"
+2026-07-30 20:29:03 [tomcat-handler-171] INFO  c.i.c.a.ConversationService - Message sent: a5ef81b7-7168-413b-b077-0a8dcc57ed96 in conversation: 84e04914-8d4d-4ca3-87b0-98c1a55df41c by user: 935532dc-b311-4071-851e-71e87089679a
+2026-07-30 20:29:07 [tomcat-handler-172] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c
+2026-07-30 20:29:07 [tomcat-handler-173] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 84e04914-8d4d-4ca3-87b0-98c1a55df41c
+2026-07-30 20:29:07 [tomcat-handler-174] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation aa95501c-755e-48a8-92ce-ab7b20086f65 (1 subscribers)
+2026-07-30 20:29:07 [tomcat-handler-175] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:29:07 [tomcat-handler-175] INFO  c.i.c.a.ConversationService - Marked 0 messages as read in conversation aa95501c-755e-48a8-92ce-ab7b20086f65 for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:29:14 [tomcat-handler-176] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:29:15 [tomcat-handler-176] INFO  c.i.a.i.w.EvolutionApiProvider - Sending text message via Evolution API to: +51960069146
+2026-07-30 20:29:17 [tomcat-handler-176] INFO  c.i.a.i.w.EvolutionApiProvider - Message sent successfully. ID: 3EB0E9CBD6077096911B2A
+2026-07-30 20:29:17 [tomcat-handler-176] INFO  c.i.c.a.ConversationService - WhatsApp message sent via Evolution API, channelId: 3EB0E9CBD6077096911B2A
+2026-07-30 20:29:17 [tomcat-handler-176] INFO  c.i.c.a.ConversationService - Message sent: 0f588cf3-4fef-4a8e-bb25-abb72d50eb79 in conversation: aa95501c-755e-48a8-92ce-ab7b20086f65 by user: 935532dc-b311-4071-851e-71e87089679a
+2026-07-30 20:29:25 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-07-30 20:29:25 [Thread-5] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-30 20:29:25 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-07-30 20:29:25 [Thread-5] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-30 20:29:25 [Thread-5] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-07-30 20:29:26 [Thread-5] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-07-30 20:29:26 [Thread-5] DEBUG c.i.s.w.NotificationWebSocketHandler - WebSocket transport error: user=935532dc-b311-4071-851e-71e87089679a error=java.nio.channels.ClosedChannelException
+2026-07-30 20:29:26 [Thread-5] DEBUG c.i.s.w.NotificationWebSocketHandler - WebSocket disconnected: user=935532dc-b311-4071-851e-71e87089679a status=CloseStatus[code=1001, reason=The web application is stopping]
+2026-07-30 20:29:26 [restartedMain] INFO  com.iquenobot.IquenobotApplication - Starting IquenobotApplication using Java 21.0.11 with PID 26280 (C:\Users\luisv\Downloads\iquenobot\target\classes started by luisv in C:\Users\luisv\Downloads\iquenobot)
+2026-07-30 20:29:26 [restartedMain] DEBUG com.iquenobot.IquenobotApplication - Running with Spring Boot v3.4.4, Spring v6.2.5
+2026-07-30 20:29:26 [restartedMain] INFO  com.iquenobot.IquenobotApplication - The following 1 profile is active: "dev"
+2026-07-30 20:29:27 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-30 20:29:28 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 554 ms. Found 18 JPA repository interfaces.
+2026-07-30 20:29:28 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8085 (http)
+2026-07-30 20:29:28 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-07-30 20:29:28 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.39]
+2026-07-30 20:29:29 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-07-30 20:29:29 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2280 ms
+2026-07-30 20:29:29 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+2026-07-30 20:29:30 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection org.postgresql.jdbc.PgConnection@7fea0fe
+2026-07-30 20:29:30 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+2026-07-30 20:29:30 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:postgresql://ep-delicate-bird-axk10rcp-pooler.c-4.us-east-2.aws.neon.tech:5432/neondb?sslmode=require (PostgreSQL 18.4)
+2026-07-30 20:29:32 [restartedMain] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 17.
+2026-07-30 20:29:32 [restartedMain] INFO  o.f.core.internal.command.DbValidate - Successfully validated 26 migrations (execution time 00:00.689s)
+2026-07-30 20:29:35 [restartedMain] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 026
+2026-07-30 20:29:35 [restartedMain] INFO  o.f.core.internal.command.DbMigrate - Schema "public" is up to date. No migration necessary.
+2026-07-30 20:29:36 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-30 20:29:36 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-07-30 20:29:36 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-30 20:29:36 [restartedMain] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-07-30 20:29:36 [restartedMain] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-2)']
+	Database driver: undefined/unknown
+	Database version: 18.4
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-30 20:29:37 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-30 20:29:38 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-30 20:29:38 [restartedMain] DEBUG c.i.s.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-07-30 20:29:40 [restartedMain] INFO  c.i.o.a.decision.DecisionEngineImpl - DecisionEngine initialized with 3 strategies
+2026-07-30 20:29:40 [restartedMain] INFO  c.i.o.a.action.ActionDispatcher - ActionDispatcher initialized with 14 executors
+2026-07-30 20:29:42 [restartedMain] INFO  c.i.s.application.FileUploadService - File upload directory created at: C:\Users\luisv\Downloads\iquenobot\uploads
+2026-07-30 20:29:42 [restartedMain] INFO  c.i.o.i.config.AsyncConfig - Orchestrator event executor initialized: core=5 max=20 queue=500
+2026-07-30 20:29:43 [restartedMain] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: bd0c5feb-ddc8-42a3-876a-57ee682ce2cd
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-07-30 20:29:43 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoints beneath base path '/actuator'
+2026-07-30 20:29:44 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-07-30 20:29:44 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8085 (http) with context path '/'
+2026-07-30 20:29:44 [restartedMain] INFO  com.iquenobot.IquenobotApplication - Started IquenobotApplication in 17.781 seconds (process running for 1036.996)
+2026-07-30 20:29:44 [restartedMain] INFO  c.i.shared.config.DataInitializer - Plans already seeded, skipping
+2026-07-30 20:29:45 [restartedMain] INFO  c.i.shared.config.DataInitializer - SUPER_ADMIN already exists, skipping initialization
+2026-07-30 20:29:45 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-07-30 20:29:45 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-07-30 20:29:45 [Thread-17] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-30 20:29:46 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-07-30 20:29:46 [Thread-17] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-30 20:29:46 [Thread-17] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
+2026-07-30 20:29:46 [Thread-17] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
+2026-07-30 20:29:46 [restartedMain] INFO  com.iquenobot.IquenobotApplication - Starting IquenobotApplication using Java 21.0.11 with PID 26280 (C:\Users\luisv\Downloads\iquenobot\target\classes started by luisv in C:\Users\luisv\Downloads\iquenobot)
+2026-07-30 20:29:46 [restartedMain] DEBUG com.iquenobot.IquenobotApplication - Running with Spring Boot v3.4.4, Spring v6.2.5
+2026-07-30 20:29:46 [restartedMain] INFO  com.iquenobot.IquenobotApplication - The following 1 profile is active: "dev"
+2026-07-30 20:29:47 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-30 20:29:47 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 189 ms. Found 18 JPA repository interfaces.
+2026-07-30 20:29:48 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8085 (http)
+2026-07-30 20:29:48 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-07-30 20:29:48 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.39]
+2026-07-30 20:29:48 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-07-30 20:29:48 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1216 ms
+2026-07-30 20:29:48 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Starting...
+2026-07-30 20:29:49 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-3 - Added connection org.postgresql.jdbc.PgConnection@19b7a8aa
+2026-07-30 20:29:49 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Start completed.
+2026-07-30 20:29:49 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:postgresql://ep-delicate-bird-axk10rcp-pooler.c-4.us-east-2.aws.neon.tech:5432/neondb?sslmode=require (PostgreSQL 18.4)
+2026-07-30 20:29:51 [restartedMain] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 17.
+2026-07-30 20:29:51 [restartedMain] INFO  o.f.core.internal.command.DbValidate - Successfully validated 26 migrations (execution time 00:00.637s)
+2026-07-30 20:29:53 [restartedMain] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 026
+2026-07-30 20:29:54 [restartedMain] INFO  o.f.core.internal.command.DbMigrate - Schema "public" is up to date. No migration necessary.
+2026-07-30 20:29:55 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-30 20:29:55 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-07-30 20:29:55 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-30 20:29:55 [restartedMain] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-07-30 20:29:55 [restartedMain] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-3)']
+	Database driver: undefined/unknown
+	Database version: 18.4
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-30 20:29:56 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-30 20:29:57 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-30 20:29:57 [restartedMain] DEBUG c.i.s.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-07-30 20:29:57 [restartedMain] INFO  c.i.o.a.decision.DecisionEngineImpl - DecisionEngine initialized with 3 strategies
+2026-07-30 20:29:57 [restartedMain] INFO  c.i.o.a.action.ActionDispatcher - ActionDispatcher initialized with 14 executors
+2026-07-30 20:29:59 [restartedMain] INFO  c.i.s.application.FileUploadService - File upload directory created at: C:\Users\luisv\Downloads\iquenobot\uploads
+2026-07-30 20:30:00 [restartedMain] INFO  c.i.o.i.config.AsyncConfig - Orchestrator event executor initialized: core=5 max=20 queue=500
+2026-07-30 20:30:00 [restartedMain] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: cf3db90d-d2fa-4fad-a252-efcf1fd62b7c
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-07-30 20:30:00 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoints beneath base path '/actuator'
+2026-07-30 20:30:01 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-07-30 20:30:01 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8085 (http) with context path '/'
+2026-07-30 20:30:01 [restartedMain] INFO  com.iquenobot.IquenobotApplication - Started IquenobotApplication in 14.774 seconds (process running for 1054.265)
+2026-07-30 20:30:02 [restartedMain] INFO  c.i.shared.config.DataInitializer - Plans already seeded, skipping
+2026-07-30 20:30:03 [restartedMain] INFO  c.i.shared.config.DataInitializer - SUPER_ADMIN already exists, skipping initialization
+2026-07-30 20:30:03 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-07-30 20:30:03 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-07-30 20:30:03 [Thread-21] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-30 20:30:03 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-07-30 20:30:03 [Thread-21] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-30 20:30:03 [Thread-21] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown initiated...
+2026-07-30 20:30:04 [Thread-21] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown completed.
+2026-07-30 20:30:04 [restartedMain] INFO  com.iquenobot.IquenobotApplication - Starting IquenobotApplication using Java 21.0.11 with PID 26280 (C:\Users\luisv\Downloads\iquenobot\target\classes started by luisv in C:\Users\luisv\Downloads\iquenobot)
+2026-07-30 20:30:04 [restartedMain] DEBUG com.iquenobot.IquenobotApplication - Running with Spring Boot v3.4.4, Spring v6.2.5
+2026-07-30 20:30:04 [restartedMain] INFO  com.iquenobot.IquenobotApplication - The following 1 profile is active: "dev"
+2026-07-30 20:30:05 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-30 20:30:05 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 167 ms. Found 18 JPA repository interfaces.
+2026-07-30 20:30:05 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8085 (http)
+2026-07-30 20:30:05 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-07-30 20:30:05 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.39]
+2026-07-30 20:30:05 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-07-30 20:30:05 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1324 ms
+2026-07-30 20:30:05 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Starting...
+2026-07-30 20:30:07 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@3977ed7e
+2026-07-30 20:30:07 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Start completed.
+2026-07-30 20:30:08 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:postgresql://ep-delicate-bird-axk10rcp-pooler.c-4.us-east-2.aws.neon.tech:5432/neondb?sslmode=require (PostgreSQL 18.4)
+2026-07-30 20:30:09 [restartedMain] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 17.
+2026-07-30 20:30:10 [restartedMain] INFO  o.f.core.internal.command.DbValidate - Successfully validated 26 migrations (execution time 00:00.609s)
+2026-07-30 20:30:12 [restartedMain] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 026
+2026-07-30 20:30:12 [restartedMain] INFO  o.f.core.internal.command.DbMigrate - Schema "public" is up to date. No migration necessary.
+2026-07-30 20:30:13 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-30 20:30:13 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-07-30 20:30:13 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-30 20:30:13 [restartedMain] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-07-30 20:30:14 [restartedMain] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-4)']
+	Database driver: undefined/unknown
+	Database version: 18.4
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-30 20:30:14 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-30 20:30:15 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-30 20:30:15 [restartedMain] DEBUG c.i.s.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-07-30 20:30:16 [restartedMain] INFO  c.i.o.a.decision.DecisionEngineImpl - DecisionEngine initialized with 3 strategies
+2026-07-30 20:30:16 [restartedMain] INFO  c.i.o.a.action.ActionDispatcher - ActionDispatcher initialized with 14 executors
+2026-07-30 20:30:18 [restartedMain] INFO  c.i.s.application.FileUploadService - File upload directory created at: C:\Users\luisv\Downloads\iquenobot\uploads
+2026-07-30 20:30:18 [restartedMain] INFO  c.i.o.i.config.AsyncConfig - Orchestrator event executor initialized: core=5 max=20 queue=500
+2026-07-30 20:30:18 [restartedMain] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: d62fe21a-894d-4fcc-a36d-7fedfd47a14b
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-07-30 20:30:19 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoints beneath base path '/actuator'
+2026-07-30 20:30:19 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-07-30 20:30:19 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8085 (http) with context path '/'
+2026-07-30 20:30:20 [restartedMain] INFO  com.iquenobot.IquenobotApplication - Started IquenobotApplication in 15.646 seconds (process running for 1072.562)
+2026-07-30 20:30:20 [restartedMain] INFO  c.i.shared.config.DataInitializer - Plans already seeded, skipping
+2026-07-30 20:30:21 [restartedMain] INFO  c.i.shared.config.DataInitializer - SUPER_ADMIN already exists, skipping initialization
+2026-07-30 20:30:21 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-07-30 20:30:21 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-07-30 20:30:21 [Thread-25] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-30 20:30:21 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-07-30 20:30:21 [Thread-25] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-30 20:30:21 [Thread-25] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Shutdown initiated...
+2026-07-30 20:30:22 [Thread-25] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Shutdown completed.
+2026-07-30 20:30:22 [restartedMain] INFO  com.iquenobot.IquenobotApplication - Starting IquenobotApplication using Java 21.0.11 with PID 26280 (C:\Users\luisv\Downloads\iquenobot\target\classes started by luisv in C:\Users\luisv\Downloads\iquenobot)
+2026-07-30 20:30:22 [restartedMain] DEBUG com.iquenobot.IquenobotApplication - Running with Spring Boot v3.4.4, Spring v6.2.5
+2026-07-30 20:30:22 [restartedMain] INFO  com.iquenobot.IquenobotApplication - The following 1 profile is active: "dev"
+2026-07-30 20:30:23 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-30 20:30:23 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 228 ms. Found 18 JPA repository interfaces.
+2026-07-30 20:30:24 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8085 (http)
+2026-07-30 20:30:24 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-07-30 20:30:24 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.39]
+2026-07-30 20:30:24 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-07-30 20:30:24 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1852 ms
+2026-07-30 20:30:25 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Starting...
+2026-07-30 20:30:26 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-5 - Added connection org.postgresql.jdbc.PgConnection@94bcaf
+2026-07-30 20:30:26 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Start completed.
+2026-07-30 20:30:26 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:postgresql://ep-delicate-bird-axk10rcp-pooler.c-4.us-east-2.aws.neon.tech:5432/neondb?sslmode=require (PostgreSQL 18.4)
+2026-07-30 20:30:28 [restartedMain] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 17.
+2026-07-30 20:30:28 [restartedMain] INFO  o.f.core.internal.command.DbValidate - Successfully validated 26 migrations (execution time 00:00.649s)
+2026-07-30 20:30:31 [restartedMain] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 026
+2026-07-30 20:30:31 [restartedMain] INFO  o.f.core.internal.command.DbMigrate - Schema "public" is up to date. No migration necessary.
+2026-07-30 20:30:32 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-30 20:30:32 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-07-30 20:30:32 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-30 20:30:32 [restartedMain] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-07-30 20:30:32 [restartedMain] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-5)']
+	Database driver: undefined/unknown
+	Database version: 18.4
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-30 20:30:33 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-30 20:30:34 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-30 20:30:34 [restartedMain] DEBUG c.i.s.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-07-30 20:30:35 [restartedMain] INFO  c.i.o.a.decision.DecisionEngineImpl - DecisionEngine initialized with 3 strategies
+2026-07-30 20:30:35 [restartedMain] INFO  c.i.o.a.action.ActionDispatcher - ActionDispatcher initialized with 14 executors
+2026-07-30 20:30:37 [restartedMain] INFO  c.i.s.application.FileUploadService - File upload directory created at: C:\Users\luisv\Downloads\iquenobot\uploads
+2026-07-30 20:30:37 [restartedMain] INFO  c.i.o.i.config.AsyncConfig - Orchestrator event executor initialized: core=5 max=20 queue=500
+2026-07-30 20:30:37 [restartedMain] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: e357640a-90fe-4ae6-a63d-ffc3b5f7817d
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-07-30 20:30:38 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoints beneath base path '/actuator'
+2026-07-30 20:30:39 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-07-30 20:30:39 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8085 (http) with context path '/'
+2026-07-30 20:30:39 [restartedMain] INFO  com.iquenobot.IquenobotApplication - Started IquenobotApplication in 16.619 seconds (process running for 1091.955)
+2026-07-30 20:30:39 [restartedMain] INFO  c.i.shared.config.DataInitializer - Plans already seeded, skipping
+2026-07-30 20:30:40 [restartedMain] INFO  c.i.shared.config.DataInitializer - SUPER_ADMIN already exists, skipping initialization
+2026-07-30 20:30:40 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-07-30 20:30:40 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2026-07-30 20:30:40 [Thread-29] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-30 20:30:40 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-07-30 20:30:41 [Thread-29] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-30 20:30:41 [Thread-29] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Shutdown initiated...
+2026-07-30 20:30:41 [Thread-29] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Shutdown completed.
+2026-07-30 20:30:42 [restartedMain] INFO  com.iquenobot.IquenobotApplication - Starting IquenobotApplication using Java 21.0.11 with PID 26280 (C:\Users\luisv\Downloads\iquenobot\target\classes started by luisv in C:\Users\luisv\Downloads\iquenobot)
+2026-07-30 20:30:42 [restartedMain] DEBUG com.iquenobot.IquenobotApplication - Running with Spring Boot v3.4.4, Spring v6.2.5
+2026-07-30 20:30:42 [restartedMain] INFO  com.iquenobot.IquenobotApplication - The following 1 profile is active: "dev"
+2026-07-30 20:30:42 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-30 20:30:43 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 226 ms. Found 18 JPA repository interfaces.
+2026-07-30 20:30:43 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8085 (http)
+2026-07-30 20:30:43 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-07-30 20:30:43 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.39]
+2026-07-30 20:30:43 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-07-30 20:30:43 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1761 ms
+2026-07-30 20:30:44 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Starting...
+2026-07-30 20:30:45 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-6 - Added connection org.postgresql.jdbc.PgConnection@761bf2d4
+2026-07-30 20:30:45 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Start completed.
+2026-07-30 20:30:45 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:postgresql://ep-delicate-bird-axk10rcp-pooler.c-4.us-east-2.aws.neon.tech:5432/neondb?sslmode=require (PostgreSQL 18.4)
+2026-07-30 20:30:47 [restartedMain] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 17.
+2026-07-30 20:30:48 [restartedMain] INFO  o.f.core.internal.command.DbValidate - Successfully validated 26 migrations (execution time 00:00.687s)
+2026-07-30 20:30:50 [restartedMain] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 026
+2026-07-30 20:30:50 [restartedMain] INFO  o.f.core.internal.command.DbMigrate - Schema "public" is up to date. No migration necessary.
+2026-07-30 20:30:51 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-30 20:30:51 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-07-30 20:30:51 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-30 20:30:51 [restartedMain] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-07-30 20:30:52 [restartedMain] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-6)']
+	Database driver: undefined/unknown
+	Database version: 18.4
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-30 20:30:52 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-30 20:30:53 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-30 20:30:53 [restartedMain] DEBUG c.i.s.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-07-30 20:30:55 [restartedMain] INFO  c.i.o.a.decision.DecisionEngineImpl - DecisionEngine initialized with 3 strategies
+2026-07-30 20:30:56 [restartedMain] INFO  c.i.o.a.action.ActionDispatcher - ActionDispatcher initialized with 14 executors
+2026-07-30 20:30:58 [restartedMain] INFO  c.i.s.application.FileUploadService - File upload directory created at: C:\Users\luisv\Downloads\iquenobot\uploads
+2026-07-30 20:30:58 [restartedMain] INFO  c.i.o.i.config.AsyncConfig - Orchestrator event executor initialized: core=5 max=20 queue=500
+2026-07-30 20:30:58 [restartedMain] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 493e2dc2-52ad-4582-8db1-af41deed19a3
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-07-30 20:30:59 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoints beneath base path '/actuator'
+2026-07-30 20:31:01 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-07-30 20:31:01 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8085 (http) with context path '/'
+2026-07-30 20:31:01 [restartedMain] INFO  com.iquenobot.IquenobotApplication - Started IquenobotApplication in 19.164 seconds (process running for 1113.741)
+2026-07-30 20:31:01 [tomcat-handler-0] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-30 20:31:01 [tomcat-handler-0] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-07-30 20:31:01 [tomcat-handler-0] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 17 ms
+2026-07-30 20:31:01 [tomcat-handler-0] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:31:01 [restartedMain] INFO  c.i.shared.config.DataInitializer - Plans already seeded, skipping
+2026-07-30 20:31:02 [tomcat-handler-1] DEBUG c.i.s.w.NotificationWebSocketHandler - WebSocket connected: user=935532dc-b311-4071-851e-71e87089679a tenant=d563b428-b1a9-4bf3-af62-a175e92e8e18 sessions=1
+2026-07-30 20:31:02 [restartedMain] INFO  c.i.shared.config.DataInitializer - SUPER_ADMIN already exists, skipping initialization
+2026-07-30 20:31:02 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-07-30 20:31:02 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 5 class path changes (0 additions, 0 deletions, 5 modifications)
+2026-07-30 20:31:02 [Thread-33] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-30 20:31:02 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-07-30 20:31:02 [Thread-33] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-30 20:31:02 [Thread-33] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Shutdown initiated...
+2026-07-30 20:31:03 [Thread-33] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Shutdown completed.
+2026-07-30 20:31:03 [Thread-33] DEBUG c.i.s.w.NotificationWebSocketHandler - WebSocket transport error: user=935532dc-b311-4071-851e-71e87089679a error=java.nio.channels.ClosedChannelException
+2026-07-30 20:31:03 [Thread-33] DEBUG c.i.s.w.NotificationWebSocketHandler - WebSocket disconnected: user=935532dc-b311-4071-851e-71e87089679a status=CloseStatus[code=1001, reason=The web application is stopping]
+2026-07-30 20:31:04 [restartedMain] INFO  com.iquenobot.IquenobotApplication - Starting IquenobotApplication using Java 21.0.11 with PID 26280 (C:\Users\luisv\Downloads\iquenobot\target\classes started by luisv in C:\Users\luisv\Downloads\iquenobot)
+2026-07-30 20:31:04 [restartedMain] DEBUG com.iquenobot.IquenobotApplication - Running with Spring Boot v3.4.4, Spring v6.2.5
+2026-07-30 20:31:04 [restartedMain] INFO  com.iquenobot.IquenobotApplication - The following 1 profile is active: "dev"
+2026-07-30 20:31:05 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-30 20:31:06 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 405 ms. Found 18 JPA repository interfaces.
+2026-07-30 20:31:06 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8085 (http)
+2026-07-30 20:31:06 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-07-30 20:31:06 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.39]
+2026-07-30 20:31:06 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-07-30 20:31:06 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2871 ms
+2026-07-30 20:31:07 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Starting...
+2026-07-30 20:31:08 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-7 - Added connection org.postgresql.jdbc.PgConnection@6f35dc28
+2026-07-30 20:31:08 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Start completed.
+2026-07-30 20:31:09 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:postgresql://ep-delicate-bird-axk10rcp-pooler.c-4.us-east-2.aws.neon.tech:5432/neondb?sslmode=require (PostgreSQL 18.4)
+2026-07-30 20:31:10 [restartedMain] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 17.
+2026-07-30 20:31:11 [restartedMain] INFO  o.f.core.internal.command.DbValidate - Successfully validated 26 migrations (execution time 00:00.992s)
+2026-07-30 20:31:13 [restartedMain] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 026
+2026-07-30 20:31:13 [restartedMain] INFO  o.f.core.internal.command.DbMigrate - Schema "public" is up to date. No migration necessary.
+2026-07-30 20:31:14 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-30 20:31:14 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-07-30 20:31:14 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-30 20:31:15 [restartedMain] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-07-30 20:31:15 [restartedMain] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-7)']
+	Database driver: undefined/unknown
+	Database version: 18.4
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-30 20:31:16 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-30 20:31:17 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-30 20:31:17 [restartedMain] DEBUG c.i.s.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-07-30 20:31:18 [restartedMain] INFO  c.i.o.a.decision.DecisionEngineImpl - DecisionEngine initialized with 3 strategies
+2026-07-30 20:31:19 [restartedMain] INFO  c.i.o.a.action.ActionDispatcher - ActionDispatcher initialized with 14 executors
+2026-07-30 20:31:21 [restartedMain] INFO  c.i.s.application.FileUploadService - File upload directory created at: C:\Users\luisv\Downloads\iquenobot\uploads
+2026-07-30 20:31:21 [restartedMain] INFO  c.i.o.i.config.AsyncConfig - Orchestrator event executor initialized: core=5 max=20 queue=500
+2026-07-30 20:31:21 [restartedMain] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 8f4ede3e-14e4-4c46-9501-c333ab035c86
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-07-30 20:31:22 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoints beneath base path '/actuator'
+2026-07-30 20:31:23 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-07-30 20:31:23 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8085 (http) with context path '/'
+2026-07-30 20:31:23 [restartedMain] INFO  com.iquenobot.IquenobotApplication - Started IquenobotApplication in 19.364 seconds (process running for 1135.957)
+2026-07-30 20:31:23 [restartedMain] INFO  c.i.shared.config.DataInitializer - Plans already seeded, skipping
+2026-07-30 20:31:24 [restartedMain] INFO  c.i.shared.config.DataInitializer - SUPER_ADMIN already exists, skipping initialization
+2026-07-30 20:31:24 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-07-30 20:31:25 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 5 class path changes (0 additions, 0 deletions, 5 modifications)
+2026-07-30 20:31:25 [Thread-38] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-07-30 20:31:25 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-07-30 20:31:25 [Thread-38] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-07-30 20:31:25 [Thread-38] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Shutdown initiated...
+2026-07-30 20:31:26 [Thread-38] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Shutdown completed.
+2026-07-30 20:31:26 [restartedMain] INFO  com.iquenobot.IquenobotApplication - Starting IquenobotApplication using Java 21.0.11 with PID 26280 (C:\Users\luisv\Downloads\iquenobot\target\classes started by luisv in C:\Users\luisv\Downloads\iquenobot)
+2026-07-30 20:31:26 [restartedMain] DEBUG com.iquenobot.IquenobotApplication - Running with Spring Boot v3.4.4, Spring v6.2.5
+2026-07-30 20:31:26 [restartedMain] INFO  com.iquenobot.IquenobotApplication - The following 1 profile is active: "dev"
+2026-07-30 20:31:27 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-30 20:31:27 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 218 ms. Found 18 JPA repository interfaces.
+2026-07-30 20:31:28 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8085 (http)
+2026-07-30 20:31:28 [restartedMain] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-07-30 20:31:28 [restartedMain] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.39]
+2026-07-30 20:31:28 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-07-30 20:31:28 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1973 ms
+2026-07-30 20:31:28 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-8 - Starting...
+2026-07-30 20:31:30 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-8 - Added connection org.postgresql.jdbc.PgConnection@54a2a739
+2026-07-30 20:31:30 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-8 - Start completed.
+2026-07-30 20:31:30 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:postgresql://ep-delicate-bird-axk10rcp-pooler.c-4.us-east-2.aws.neon.tech:5432/neondb?sslmode=require (PostgreSQL 18.4)
+2026-07-30 20:31:31 [restartedMain] WARN  o.f.c.i.database.base.Database - Flyway upgrade recommended: PostgreSQL 18.4 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 17.
+2026-07-30 20:31:32 [restartedMain] INFO  o.f.core.internal.command.DbValidate - Successfully validated 26 migrations (execution time 00:00.687s)
+2026-07-30 20:31:34 [restartedMain] INFO  o.f.core.internal.command.DbMigrate - Current version of schema "public": 026
+2026-07-30 20:31:34 [restartedMain] INFO  o.f.core.internal.command.DbMigrate - Schema "public" is up to date. No migration necessary.
+2026-07-30 20:31:35 [restartedMain] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-30 20:31:35 [restartedMain] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-07-30 20:31:35 [restartedMain] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-30 20:31:35 [restartedMain] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-07-30 20:31:36 [restartedMain] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-8)']
+	Database driver: undefined/unknown
+	Database version: 18.4
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-30 20:31:36 [restartedMain] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-30 20:31:37 [restartedMain] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-30 20:31:37 [restartedMain] DEBUG c.i.s.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-07-30 20:31:38 [restartedMain] INFO  c.i.o.a.decision.DecisionEngineImpl - DecisionEngine initialized with 3 strategies
+2026-07-30 20:31:39 [restartedMain] INFO  c.i.o.a.action.ActionDispatcher - ActionDispatcher initialized with 14 executors
+2026-07-30 20:31:41 [restartedMain] INFO  c.i.s.application.FileUploadService - File upload directory created at: C:\Users\luisv\Downloads\iquenobot\uploads
+2026-07-30 20:31:41 [restartedMain] INFO  c.i.o.i.config.AsyncConfig - Orchestrator event executor initialized: core=5 max=20 queue=500
+2026-07-30 20:31:41 [restartedMain] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 3167bb12-5df2-4c2f-badf-46767add1c4c
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-07-30 20:31:42 [restartedMain] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 3 endpoints beneath base path '/actuator'
+2026-07-30 20:31:44 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2026-07-30 20:31:44 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8085 (http) with context path '/'
+2026-07-30 20:31:44 [restartedMain] INFO  com.iquenobot.IquenobotApplication - Started IquenobotApplication in 18.259 seconds (process running for 1156.982)
+2026-07-30 20:31:44 [restartedMain] INFO  c.i.shared.config.DataInitializer - Plans already seeded, skipping
+2026-07-30 20:31:44 [tomcat-handler-0] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-30 20:31:44 [tomcat-handler-0] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-07-30 20:31:44 [tomcat-handler-0] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 20 ms
+2026-07-30 20:31:45 [tomcat-handler-0] INFO  c.i.auth.application.AuthService - Attempting login for email: supervisor@miempresa.com
+2026-07-30 20:31:45 [restartedMain] INFO  c.i.shared.config.DataInitializer - SUPER_ADMIN already exists, skipping initialization
+2026-07-30 20:31:45 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2026-07-30 20:31:47 [tomcat-handler-0] INFO  c.i.auth.application.AuthService - Login successful for user: supervisor@miempresa.com in tenant: midemo
+2026-07-30 20:31:48 [tomcat-handler-1] DEBUG c.i.s.w.NotificationWebSocketHandler - WebSocket connected: user=935532dc-b311-4071-851e-71e87089679a tenant=d563b428-b1a9-4bf3-af62-a175e92e8e18 sessions=1
+2026-07-30 20:31:48 [tomcat-handler-2] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:31:51 [tomcat-handler-3] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:32:48 [tomcat-handler-4] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-30 20:32:48 [tomcat-handler-4] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-30 20:32:48 [tomcat-handler-4] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-30 20:32:48 [tomcat-handler-4] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, messageType, messageTimestamp, instanceId, source]
+2026-07-30 20:32:48 [tomcat-handler-4] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-30 20:32:48 [tomcat-handler-4] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51913039084@s.whatsapp.net, remoteJidAlt=51913039084@s.whatsapp.net, fromMe=true, id=A5D8BFF4C9E285602CE58C772A18C314, participant=, addressingMode=lid}, pushName=LuisDev, status=SERVER_ACK, message={conversation=Oli}, messageType=conversation, messageTimestamp=1785461568, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=android}
+2026-07-30 20:32:48 [tomcat-handler-4] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51913039084 | type=conversation | msgId=A5D8BFF4C9E285602CE58C772A18C314
+2026-07-30 20:32:48 [tomcat-handler-4] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: OUTBOUND
+2026-07-30 20:32:48 [tomcat-handler-4] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51913039084 direction=OUTBOUND type=TEXT content=Oli
+2026-07-30 20:32:48 [tomcat-handler-4] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51913039084
+2026-07-30 20:32:48 [tomcat-handler-4] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-30 20:32:48 [tomcat-handler-4] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51913039084
+2026-07-30 20:32:48 [tomcat-handler-4] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-30 20:32:49 [tomcat-handler-4] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-30 20:32:49 [tomcat-handler-4] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 298ms
+2026-07-30 20:32:49 [tomcat-handler-4] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-30 20:32:49 [tomcat-handler-4] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51913039084]
+2026-07-30 20:32:49 [tomcat-handler-4] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51913039084]
+2026-07-30 20:32:49 [tomcat-handler-4] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-30 20:32:49 [tomcat-handler-4] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-30 20:32:49 [tomcat-handler-4] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51913039084 found=true
+2026-07-30 20:32:49 [tomcat-handler-4] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=74329e69-04bf-497e-a729-8e5850793135 name=Contacto sin nombre phone=+51913039084 normalized=+51913039084
+2026-07-30 20:32:49 [tomcat-handler-4] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=74329e69-04bf-497e-a729-8e5850793135 name=Contacto sin nombre
+2026-07-30 20:32:49 [tomcat-handler-4] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 301ms
+2026-07-30 20:32:49 [tomcat-handler-4] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=CONVERSATION_CREATED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041
+2026-07-30 20:32:49 [orchestrator-event-1] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Conversation created - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041 channel=WHATSAPP
+2026-07-30 20:32:49 [orchestrator-event-2] INFO  c.i.o.i.event.AuditEventListener - Audit: Conversation created - conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041 channel=WHATSAPP tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:32:49 [tomcat-handler-4] INFO  c.i.o.a.p.ConversationResolutionStep - New conversation created: id=7babdd64-a6be-454f-8fca-0bb9969fa041 contact=74329e69-04bf-497e-a729-8e5850793135 channel=WHATSAPP
+2026-07-30 20:32:49 [tomcat-handler-4] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=7babdd64-a6be-454f-8fca-0bb9969fa041 status=OPEN channel=WHATSAPP
+2026-07-30 20:32:50 [tomcat-handler-4] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 762ms
+2026-07-30 20:32:50 [tomcat-handler-4] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-30 20:32:50 [tomcat-handler-4] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 308ms
+2026-07-30 20:32:50 [tomcat-handler-4] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-30 20:32:50 [tomcat-handler-4] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 183ms
+2026-07-30 20:32:50 [tomcat-handler-4] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=0 consecutiveBotResponses=0 firstMessage=true
+2026-07-30 20:32:50 [tomcat-handler-4] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 163ms
+2026-07-30 20:32:51 [tomcat-handler-4] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=fe915ca8-748c-4981-a35a-45c6e54a13ec conversation=7babdd64-a6be-454f-8fca-0bb9969fa041 type=TEXT
+2026-07-30 20:32:51 [tomcat-handler-5] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-30 20:32:51 [tomcat-handler-5] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-30 20:32:51 [tomcat-handler-5] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-30 20:32:51 [tomcat-handler-5] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, messageType, messageTimestamp, instanceId, source]
+2026-07-30 20:32:51 [tomcat-handler-5] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-30 20:32:51 [tomcat-handler-5] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51913039084@s.whatsapp.net, remoteJidAlt=51913039084@s.whatsapp.net, fromMe=false, id=21FFAC453F0938DE61, participant=, addressingMode=lid}, pushName=null, status=DELIVERY_ACK, message={conversation=¡Hola! 😄  
+Este número solo lo usaremos para enviarte mensajes informativos. Si tienes alguna consulta sobre tu servicio Claro, puedes contactarnos en: https://www.claro.com.pe/contactanos/ 
+
+¡Estaremos encantados de ayudarte! 😊, messageContextInfo={threadId=[], deviceListMetadata={senderKeyIndexes=[], recipientKeyIndexes=[], recipientKeyHash={0=247, 1=105, 2=235, 3=253, 4=176, 5=169, 6=148, 7=75, 8=193, 9=195}, recipientTimestamp={low=1785358695, high=0, unsigned=true}}, deviceListMetadataVersion=2}}, messageType=conversation, messageTimestamp=1785461571, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=desktop}
+2026-07-30 20:32:51 [tomcat-handler-4] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 441ms
+2026-07-30 20:32:51 [tomcat-handler-4] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=74329e69-04bf-497e-a729-8e5850793135 conversation=7babdd64-a6be-454f-8fca-0bb9969fa041
+2026-07-30 20:32:51 [tomcat-handler-5] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51913039084 | type=conversation | msgId=21FFAC453F0938DE61
+2026-07-30 20:32:51 [tomcat-handler-5] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: INBOUND
+2026-07-30 20:32:51 [tomcat-handler-5] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51913039084 direction=INBOUND type=TEXT content=¡Hola! 😄  
+Este número solo lo usaremos para enviarte mensajes informativos. Si tienes alguna consulta sobre tu servicio Claro, puedes contactarnos en: https://www.claro.com.pe/contactanos/ 
+
+¡Estaremos encantados de ayudarte! 😊
+2026-07-30 20:32:51 [tomcat-handler-5] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51913039084
+2026-07-30 20:32:51 [tomcat-handler-5] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-30 20:32:51 [tomcat-handler-5] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51913039084
+2026-07-30 20:32:51 [tomcat-handler-5] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-30 20:32:51 [tomcat-handler-4] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 289ms
+2026-07-30 20:32:51 [tomcat-handler-4] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041|contactId=74329e69-04bf-497e-a729-8e5850793135|messageId=A5D8BFF4C9E285602CE58C772A18C314|channel=WHATSAPP|type=TEXT
+2026-07-30 20:32:51 [tomcat-handler-4] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 1ms
+2026-07-30 20:32:51 [tomcat-handler-4] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2750ms
+2026-07-30 20:32:51 [tomcat-handler-4] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041
+2026-07-30 20:32:51 [tomcat-handler-4] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-30 20:32:51 [orchestrator-event-4] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041 channel=WHATSAPP
+2026-07-30 20:32:51 [tomcat-handler-4] DEBUG c.i.o.a.d.AgentAssignmentStrategy - No agent assigned and conversation is OPEN, assigning agent
+2026-07-30 20:32:51 [orchestrator-event-5] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=A5D8BFF4C9E285602CE58C772A18C314
+2026-07-30 20:32:51 [tomcat-handler-4] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AgentAssignmentStrategy decided: action=ASSIGN_AGENT reason=Conversation requires human agent
+2026-07-30 20:32:51 [tomcat-handler-4] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: ASSIGN_AGENT to executor: AssignAgentExecutor$$SpringCGLIB$$0
+2026-07-30 20:32:51 [tomcat-handler-5] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-30 20:32:51 [tomcat-handler-5] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 288ms
+2026-07-30 20:32:51 [tomcat-handler-5] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-30 20:32:51 [tomcat-handler-5] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51913039084]
+2026-07-30 20:32:51 [tomcat-handler-5] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51913039084]
+2026-07-30 20:32:51 [tomcat-handler-5] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-30 20:32:51 [tomcat-handler-5] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-30 20:32:52 [tomcat-handler-5] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51913039084 found=true
+2026-07-30 20:32:52 [tomcat-handler-5] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=74329e69-04bf-497e-a729-8e5850793135 name=Contacto sin nombre phone=+51913039084 normalized=+51913039084
+2026-07-30 20:32:52 [tomcat-handler-5] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=74329e69-04bf-497e-a729-8e5850793135 name=Contacto sin nombre
+2026-07-30 20:32:52 [tomcat-handler-5] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 280ms
+2026-07-30 20:32:52 [tomcat-handler-5] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=7babdd64-a6be-454f-8fca-0bb9969fa041 status=OPEN channel=WHATSAPP
+2026-07-30 20:32:52 [tomcat-handler-5] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 317ms
+2026-07-30 20:32:52 [tomcat-handler-5] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-30 20:32:52 [tomcat-handler-5] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 173ms
+2026-07-30 20:32:53 [tomcat-handler-5] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-30 20:32:53 [tomcat-handler-5] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 301ms
+2026-07-30 20:32:53 [tomcat-handler-5] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=1 consecutiveBotResponses=0 firstMessage=true
+2026-07-30 20:32:53 [tomcat-handler-5] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 157ms
+2026-07-30 20:32:53 [tomcat-handler-4] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=AGENT_ASSIGNED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041
+2026-07-30 20:32:53 [orchestrator-event-2] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Agent assigned - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041 agentId=935532dc-b311-4071-851e-71e87089679a
+2026-07-30 20:32:53 [orchestrator-event-3] INFO  c.i.o.i.event.AuditEventListener - Audit: Agent assigned - conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041 agentId=935532dc-b311-4071-851e-71e87089679a tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:32:53 [tomcat-handler-5] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=e32c8dbe-0071-4b8a-98f9-b37c34b77670 conversation=7babdd64-a6be-454f-8fca-0bb9969fa041 type=TEXT
+2026-07-30 20:32:53 [tomcat-handler-6] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK WHATSAPP RECIBIDO ===
+2026-07-30 20:32:53 [tomcat-handler-6] INFO  c.i.a.i.c.WhatsAppWebhookController - Instance: mi-whatsapp Event: messages.upsert
+2026-07-30 20:32:53 [tomcat-handler-6] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - event: messages.upsert, instanceId: null, from: null, messageId: null, type: null, text: null
+2026-07-30 20:32:53 [tomcat-handler-6] INFO  c.i.a.i.c.WhatsAppWebhookController - Payload - data present: SI, data keys: [key, pushName, status, message, messageType, messageTimestamp, instanceId, source]
+2026-07-30 20:32:53 [tomcat-handler-6] INFO  c.i.o.a.WhatsAppWebhookAdapter - Processing Evolution webhook for instance=mi-whatsapp
+2026-07-30 20:32:53 [tomcat-handler-6] DEBUG c.i.o.a.WhatsAppWebhookAdapter - Evolution webhook data={key={remoteJid=51913039084@s.whatsapp.net, remoteJidAlt=51913039084@s.whatsapp.net, fromMe=false, id=9D4F1D7E02F9EF1697, participant=, addressingMode=lid}, pushName=null, status=DELIVERY_ACK, message={conversation=Fue un gusto atenderte, gracias por tu tiempo ¡Hasta pronto!😀, messageContextInfo={threadId=[], deviceListMetadata={senderKeyIndexes=[], recipientKeyIndexes=[], recipientKeyHash={0=247, 1=105, 2=235, 3=253, 4=176, 5=169, 6=148, 7=75, 8=193, 9=195}, recipientTimestamp={low=1785358695, high=0, unsigned=true}}, deviceListMetadataVersion=2}}, messageType=conversation, messageTimestamp=1785461573, instanceId=50ca41c7-d60d-4ffa-bfc6-4328c6a10ad8, source=desktop}
+2026-07-30 20:32:53 [tomcat-handler-5] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 536ms
+2026-07-30 20:32:53 [orchestrator-event-4] INFO  c.i.n.a.NotificationService - Notification created: c02944b8-042d-4d0f-a884-e6abfffb8fde for user: 935532dc-b311-4071-851e-71e87089679a
+2026-07-30 20:32:53 [tomcat-handler-5] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=74329e69-04bf-497e-a729-8e5850793135 conversation=7babdd64-a6be-454f-8fca-0bb9969fa041
+2026-07-30 20:32:53 [tomcat-handler-4] INFO  c.i.o.a.action.AssignAgentExecutor - Conversation 7babdd64-a6be-454f-8fca-0bb9969fa041 assigned to agent 935532dc-b311-4071-851e-71e87089679a (least busy, 1 active conversations)
+2026-07-30 20:32:53 [tomcat-handler-6] INFO  c.i.o.a.WhatsAppWebhookAdapter - New WhatsApp message from +51913039084 | type=conversation | msgId=9D4F1D7E02F9EF1697
+2026-07-30 20:32:53 [tomcat-handler-6] INFO  c.i.o.a.WhatsAppWebhookAdapter - WhatsApp direction: INBOUND
+2026-07-30 20:32:53 [tomcat-handler-6] INFO  c.i.o.a.WhatsAppWebhookAdapter - Incoming WhatsApp message processed: from=+51913039084 direction=INBOUND type=TEXT content=Fue un gusto atenderte, gracias por tu tiempo ¡Hasta pronto!😀
+2026-07-30 20:32:53 [tomcat-handler-6] INFO  c.i.o.a.ConversationOrchestrator - Orchestrator processing message from channel=WHATSAPP source=+51913039084
+2026-07-30 20:32:53 [tomcat-handler-6] INFO  c.i.o.a.pipeline.MessagePipeline - Starting message pipeline with 10 steps for channel: WHATSAPP
+2026-07-30 20:32:53 [tomcat-handler-6] DEBUG c.i.o.a.pipeline.ValidationStep - Validation passed for message from channel=WHATSAPP source=+51913039084
+2026-07-30 20:32:53 [tomcat-handler-6] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ValidationStep completed in 0ms
+2026-07-30 20:32:53 [tomcat-handler-5] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 276ms
+2026-07-30 20:32:53 [tomcat-handler-4] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041
+2026-07-30 20:32:53 [tomcat-handler-5] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041|contactId=74329e69-04bf-497e-a729-8e5850793135|messageId=21FFAC453F0938DE61|channel=WHATSAPP|type=TEXT
+2026-07-30 20:32:53 [tomcat-handler-5] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 1ms
+2026-07-30 20:32:53 [tomcat-handler-5] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2334ms
+2026-07-30 20:32:53 [orchestrator-event-5] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041 action=ASSIGN_AGENT time=5019ms
+2026-07-30 20:32:53 [orchestrator-event-1] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=ASSIGN_AGENT processingTime=5019ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:32:53 [tomcat-handler-4] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 5025ms. decision=ASSIGN_AGENT
+2026-07-30 20:32:53 [orchestrator-event-5] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=ASSIGN_AGENT time=5019ms
+2026-07-30 20:32:53 [tomcat-handler-5] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041
+2026-07-30 20:32:53 [orchestrator-event-3] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=ASSIGN_AGENT
+2026-07-30 20:32:53 [orchestrator-event-2] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041 channel=WHATSAPP
+2026-07-30 20:32:53 [tomcat-handler-5] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-30 20:32:53 [orchestrator-event-1] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=21FFAC453F0938DE61
+2026-07-30 20:32:53 [tomcat-handler-4] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-30 20:32:53 [tomcat-handler-5] INFO  c.i.c.application.ChatbotService - Processing chatbot message for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:32:54 [tomcat-handler-6] DEBUG c.i.o.a.p.TenantResolutionStep - Tenant resolved: id=d563b428-b1a9-4bf3-af62-a175e92e8e18 subdomain=midemo
+2026-07-30 20:32:54 [tomcat-handler-6] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step TenantResolutionStep completed in 299ms
+2026-07-30 20:32:54 [tomcat-handler-6] WARN  c.i.o.a.p.ContactResolutionStep - === CONTACT SEARCH DEBUG ===
+2026-07-30 20:32:54 [tomcat-handler-6] WARN  c.i.o.a.p.ContactResolutionStep - Original source: [+51913039084]
+2026-07-30 20:32:54 [tomcat-handler-6] WARN  c.i.o.a.p.ContactResolutionStep - Normalized source: [+51913039084]
+2026-07-30 20:32:54 [tomcat-handler-6] WARN  c.i.o.a.p.ContactResolutionStep - Tenant: [d563b428-b1a9-4bf3-af62-a175e92e8e18]
+2026-07-30 20:32:54 [tomcat-handler-6] WARN  c.i.o.a.p.ContactResolutionStep - Channel: [WHATSAPP]
+2026-07-30 20:32:54 [tomcat-handler-6] WARN  c.i.o.a.p.ContactResolutionStep - Search normalized_phone=+51913039084 found=true
+2026-07-30 20:32:54 [tomcat-handler-6] WARN  c.i.o.a.p.ContactResolutionStep - FOUND by normalized_phone - id=74329e69-04bf-497e-a729-8e5850793135 name=Contacto sin nombre phone=+51913039084 normalized=+51913039084
+2026-07-30 20:32:54 [tomcat-handler-6] DEBUG c.i.o.a.p.ContactResolutionStep - Contact resolved: id=74329e69-04bf-497e-a729-8e5850793135 name=Contacto sin nombre
+2026-07-30 20:32:54 [tomcat-handler-7] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a left conversation 7babdd64-a6be-454f-8fca-0bb9969fa041
+2026-07-30 20:32:54 [tomcat-handler-8] DEBUG c.i.s.w.NotificationWebSocketHandler - User 935532dc-b311-4071-851e-71e87089679a joined conversation 7babdd64-a6be-454f-8fca-0bb9969fa041 (1 subscribers)
+2026-07-30 20:32:54 [tomcat-handler-10] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:32:54 [tomcat-handler-9] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:32:54 [tomcat-handler-6] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ContactResolutionStep$$SpringCGLIB$$0 completed in 300ms
+2026-07-30 20:32:54 [tomcat-handler-5] INFO  c.i.c.application.ChatbotService - Executing intent: consultar_contacto
+2026-07-30 20:32:54 [tomcat-handler-6] DEBUG c.i.o.a.p.ConversationResolutionStep - Conversation resolved: id=7babdd64-a6be-454f-8fca-0bb9969fa041 status=IN_PROGRESS channel=WHATSAPP
+2026-07-30 20:32:54 [tomcat-handler-6] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationResolutionStep$$SpringCGLIB$$0 completed in 300ms
+2026-07-30 20:32:54 [tomcat-handler-5] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy BotDecisionStrategy decided: action=SEND_TEXT reason=Bot responded to message
+2026-07-30 20:32:54 [tomcat-handler-5] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: SEND_TEXT to executor: SendTextExecutor$$SpringCGLIB$$0
+2026-07-30 20:32:54 [tomcat-handler-5] INFO  c.i.a.i.w.EvolutionApiProvider - Sending text message via Evolution API to: +51913039084
+2026-07-30 20:32:55 [tomcat-handler-6] DEBUG c.i.o.a.p.BotConfigurationResolutionStep - Bot configuration resolved: enabled=true aiProvider=GROQ
+2026-07-30 20:32:55 [tomcat-handler-6] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step BotConfigurationResolutionStep completed in 292ms
+2026-07-30 20:32:55 [tomcat-handler-6] DEBUG c.i.o.a.p.WorkingHoursResolutionStep - Working hours resolved: enabled=true isOpen=true
+2026-07-30 20:32:55 [tomcat-handler-6] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step WorkingHoursResolutionStep completed in 149ms
+2026-07-30 20:32:55 [tomcat-handler-11] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 935532dc-b311-4071-851e-71e87089679a for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:32:55 [tomcat-handler-6] DEBUG c.i.o.a.p.ConversationContextResolutionStep - Conversation context resolved: totalMessages=0 consecutiveBotResponses=0 firstMessage=true
+2026-07-30 20:32:55 [tomcat-handler-6] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step ConversationContextResolutionStep completed in 176ms
+2026-07-30 20:32:55 [tomcat-handler-6] DEBUG c.i.o.a.p.MessagePersistenceStep - Message persisted: id=c7d0d0bd-0585-4ec3-877c-d84c55c4b867 conversation=7babdd64-a6be-454f-8fca-0bb9969fa041 type=TEXT
+2026-07-30 20:32:55 [tomcat-handler-6] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MessagePersistenceStep$$SpringCGLIB$$0 completed in 452ms
+2026-07-30 20:32:55 [tomcat-handler-11] INFO  c.i.c.a.ConversationService - Marked 1 messages as read in conversation 7babdd64-a6be-454f-8fca-0bb9969fa041 for tenant d563b428-b1a9-4bf3-af62-a175e92e8e18 (conversation rows updated=1)
+2026-07-30 20:32:56 [tomcat-handler-6] DEBUG c.i.o.a.pipeline.MetricsUpdateStep - Metrics updated: contact=74329e69-04bf-497e-a729-8e5850793135 conversation=7babdd64-a6be-454f-8fca-0bb9969fa041
+2026-07-30 20:32:56 [tomcat-handler-6] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step MetricsUpdateStep$$SpringCGLIB$$0 completed in 308ms
+2026-07-30 20:32:56 [tomcat-handler-6] INFO  c.i.o.application.pipeline.AuditStep - AUDIT|tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18|conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041|contactId=74329e69-04bf-497e-a729-8e5850793135|messageId=9D4F1D7E02F9EF1697|channel=WHATSAPP|type=TEXT
+2026-07-30 20:32:56 [tomcat-handler-6] DEBUG c.i.o.a.pipeline.MessagePipeline - Pipeline step AuditStep completed in 0ms
+2026-07-30 20:32:56 [tomcat-handler-6] INFO  c.i.o.a.pipeline.MessagePipeline - Message pipeline completed in 2290ms
+2026-07-30 20:32:56 [tomcat-handler-6] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=MESSAGE_RECEIVED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041
+2026-07-30 20:32:56 [orchestrator-event-3] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Message received - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041 channel=WHATSAPP
+2026-07-30 20:32:56 [tomcat-handler-6] DEBUG c.i.o.a.decision.DecisionEngineImpl - Running decision engine with 3 strategies
+2026-07-30 20:32:56 [orchestrator-event-2] DEBUG c.i.o.i.event.AuditEventListener - Persisting audit log for message received: messageId=9D4F1D7E02F9EF1697
+2026-07-30 20:32:56 [tomcat-handler-6] DEBUG c.i.o.a.d.AutoResponseStrategy - No specific strategy handled the message, defaulting to NO_ACTION
+2026-07-30 20:32:56 [tomcat-handler-6] DEBUG c.i.o.a.decision.DecisionEngineImpl - Strategy AutoResponseStrategy decided: action=NO_ACTION reason=No automated action configured for this message
+2026-07-30 20:32:56 [tomcat-handler-6] DEBUG c.i.o.a.action.ActionDispatcher - Dispatching action: NO_ACTION to executor: NoopActionExecutor
+2026-07-30 20:32:56 [tomcat-handler-6] DEBUG c.i.o.a.action.NoopActionExecutor - No action needed for conversation 7babdd64-a6be-454f-8fca-0bb9969fa041: No automated action configured for this message
+2026-07-30 20:32:56 [tomcat-handler-6] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041
+2026-07-30 20:32:56 [orchestrator-event-4] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041 action=NO_ACTION time=2290ms
+2026-07-30 20:32:56 [tomcat-handler-6] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 2290ms. decision=NO_ACTION
+2026-07-30 20:32:56 [orchestrator-event-5] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=NO_ACTION processingTime=2290ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:32:56 [orchestrator-event-3] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=NO_ACTION
+2026-07-30 20:32:56 [orchestrator-event-4] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=NO_ACTION time=2290ms
+2026-07-30 20:32:56 [tomcat-handler-6] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-30 20:32:56 [tomcat-handler-5] INFO  c.i.a.i.w.EvolutionApiProvider - Message sent successfully. ID: 3EB04305E86F665AA06A82
+2026-07-30 20:32:56 [tomcat-handler-5] INFO  c.i.o.a.action.SendTextExecutor - Text message sent via WHATSAPP: conversation=7babdd64-a6be-454f-8fca-0bb9969fa041 recipient=+51913039084
+2026-07-30 20:32:56 [tomcat-handler-5] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=BOT_ANSWERED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041
+2026-07-30 20:32:56 [orchestrator-event-2] INFO  c.i.o.i.event.AnalyticsEventListener - Analytics: Bot answered - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041 usingAI=false
+2026-07-30 20:32:56 [orchestrator-event-5] INFO  c.i.o.i.event.AuditEventListener - Audit: Bot answered - conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041 usingAI=false tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:32:56 [tomcat-handler-5] INFO  c.i.o.a.action.SendTextExecutor - Bot text response processed: conversation=7babdd64-a6be-454f-8fca-0bb9969fa041 intent=consultar_contacto delivered=true
+2026-07-30 20:32:57 [tomcat-handler-5] DEBUG c.i.o.i.event.SpringEventPublisher - Publishing event: type=ACTION_EXECUTED tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041
+2026-07-30 20:32:57 [tomcat-handler-5] INFO  c.i.o.a.ConversationOrchestrator - Message processed successfully in 5386ms. decision=SEND_TEXT
+2026-07-30 20:32:57 [orchestrator-event-4] DEBUG c.i.o.i.event.AnalyticsEventListener - Analytics: Action executed - tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18 conversationId=7babdd64-a6be-454f-8fca-0bb9969fa041 action=SEND_TEXT time=5386ms
+2026-07-30 20:32:57 [orchestrator-event-1] DEBUG c.i.o.i.event.AuditEventListener - Audit: Action executed - action=SEND_TEXT processingTime=5386ms tenantId=d563b428-b1a9-4bf3-af62-a175e92e8e18
+2026-07-30 20:32:57 [orchestrator-event-3] DEBUG c.i.o.i.e.NotificationEventListener - Action executed event processed: action=SEND_TEXT
+2026-07-30 20:32:57 [tomcat-handler-5] INFO  c.i.a.i.c.WhatsAppWebhookController - === WEBHOOK PROCESADO EXITOSAMENTE ===
+2026-07-30 20:32:57 [orchestrator-event-4] DEBUG c.i.o.i.m.OrchestratorMetricsService - Metrics recorded: channel=WHATSAPP action=SEND_TEXT time=5386ms

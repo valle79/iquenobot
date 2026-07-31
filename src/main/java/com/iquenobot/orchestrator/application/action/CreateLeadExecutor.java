@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.UUID;
 
@@ -66,7 +67,7 @@ public class CreateLeadExecutor implements ActionExecutor {
         boolean exists = leadRepository.existsByTenantIdAndContactIdAndCreatedAtAfter(
                 context.getTenantId(),
                 context.getContact().getId(),
-                LocalDateTime.now().minusHours(DEDUP_HOURS)
+                LocalDateTime.now(ZoneOffset.UTC).minusHours(DEDUP_HOURS)
         );
 
         if (exists) {

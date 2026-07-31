@@ -116,7 +116,7 @@ export default function UsersPage() {
         <div className="flex items-center gap-2">
           <Clock size={14} className="text-gray-400" />
           <span className="text-sm text-gray-500">
-            {row.original.lastLoginAt ? dayjs(row.original.lastLoginAt).fromNow() : 'Nunca'}
+            {row.original.lastLoginAt ? dayjs.utc(row.original.lastLoginAt).fromNow() : 'Nunca'}
           </span>
         </div>
       ),

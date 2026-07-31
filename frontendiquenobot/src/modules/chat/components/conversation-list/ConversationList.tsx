@@ -109,7 +109,7 @@ const displayName =
 
           {conversation.lastMessageAt && (
             <span className="ml-2 shrink-0 text-xs text-gray-400">
-              {dayjs(conversation.lastMessageAt).fromNow()}
+              {dayjs.utc(conversation.lastMessageAt).fromNow()}
             </span>
           )}
         </div>

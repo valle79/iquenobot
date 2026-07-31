@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -85,14 +86,14 @@ public class SendTextExecutor implements ActionExecutor {
                 .channelMessageId(channelMessageId)
                 .fromBot(true)
                 .botIntent(intentDetected)
-                .sentAt(LocalDateTime.now())
+                .sentAt(LocalDateTime.now(ZoneOffset.UTC))
                 .build();
 
         messageRepository.save(botMessage);
 
         var conv = context.getConversation();
         conversationRepository.incrementIncomingMessageMetrics(
-                conv.getId(), context.getTenantId(), LocalDateTime.now());
+                conv.getId(), context.getTenantId(), LocalDateTime.now(ZoneOffset.UTC));
 
         eventPublisher.publish(new BotAnsweredEvent(
                 context.getTenantId().toString(),

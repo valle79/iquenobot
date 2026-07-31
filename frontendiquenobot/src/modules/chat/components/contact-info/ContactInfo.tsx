@@ -118,7 +118,7 @@ export function ContactInfo({ conversationId, open, onClose }: ContactInfoProps)
             <InfoRow
               icon={Clock}
               label="Último contacto"
-              value={contact.lastContactedAt ? dayjs(contact.lastContactedAt).fromNow() : 'Nunca'}
+              value={contact.lastContactedAt ? dayjs.utc(contact.lastContactedAt).fromNow() : 'Nunca'}
             />
           </div>
 

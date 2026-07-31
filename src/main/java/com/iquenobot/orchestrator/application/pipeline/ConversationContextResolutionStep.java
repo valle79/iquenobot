@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,7 +78,7 @@ public class ConversationContextResolutionStep implements PipelineStep, MessageP
 
         long secondsSinceLastMessage = 0;
         if (lastContactMessageAt != null) {
-            secondsSinceLastMessage = Duration.between(lastContactMessageAt, LocalDateTime.now()).getSeconds();
+            secondsSinceLastMessage = Duration.between(lastContactMessageAt, LocalDateTime.now(ZoneOffset.UTC)).getSeconds();
         }
 
         boolean firstMessage = totalMessages <= 1;

@@ -93,7 +93,7 @@ export function InternalNotes({ conversationId }: InternalNotesProps) {
               <div className="flex items-center gap-2">
                 <Avatar name={note.author} src={note.authorAvatar} size="xs" />
                 <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{note.author}</span>
-                <span className="text-xs text-gray-400">{dayjs(note.createdAt).fromNow()}</span>
+                <span className="text-xs text-gray-400">{dayjs.utc(note.createdAt).fromNow()}</span>
               </div>
               {note.authorId === user?.id && (
                 <button

@@ -1,6 +1,7 @@
 package com.iquenobot.orchestrator.interfaces.event;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 public abstract class OrchestratorEvent {
@@ -12,7 +13,7 @@ public abstract class OrchestratorEvent {
 
     protected OrchestratorEvent(String tenantId, String conversationId) {
         this.eventId = UUID.randomUUID();
-        this.occurredAt = LocalDateTime.now();
+        this.occurredAt = LocalDateTime.now(ZoneOffset.UTC);
         this.tenantId = tenantId;
         this.conversationId = conversationId;
     }

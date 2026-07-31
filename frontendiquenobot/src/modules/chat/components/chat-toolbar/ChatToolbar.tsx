@@ -195,7 +195,7 @@ export function ChatToolbar({ onToggleInfo, showInfo }: ChatToolbarProps) {
             </p>
             <p className="flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400">
               <Clock size={10} />
-              Transferida {dayjs(conversation.botHandoffAt).fromNow()}
+              Transferida {dayjs.utc(conversation.botHandoffAt).fromNow()}
             </p>
           </div>
         </div>

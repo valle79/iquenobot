@@ -57,7 +57,7 @@ function NotificationItem({ notification, onMarkRead }: { notification: Notifica
           {!notification.read && <span className="h-2 w-2 rounded-full bg-brand-600" />}
         </div>
         <div className="mt-1 flex items-center gap-2">
-          <p className="text-xs text-gray-400">{dayjs(notification.createdAt).fromNow()}</p>
+          <p className="text-xs text-gray-400">{dayjs.utc(notification.createdAt).fromNow()}</p>
           <Badge variant={notification.priority === 'HIGH' || notification.priority === 'URGENT' ? 'warning' : 'neutral'} size="sm">
             {notification.priority}
           </Badge>

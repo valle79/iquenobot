@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Component
@@ -49,12 +50,12 @@ public class MessagePersistenceStep implements PipelineStep, MessagePipeline.Pri
                 .senderName(context.getContact().getFullName())
                 .senderPhone(context.getContact().getPhone())
                 .fromBot(false)
-                .sentAt(message.getTimestamp() != null ? message.getTimestamp() : LocalDateTime.now())
+                .sentAt(message.getTimestamp() != null ? message.getTimestamp() : LocalDateTime.now(ZoneOffset.UTC))
                 .build();
 
         persisted = messageRepository.save(persisted);
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         conversationRepository.incrementIncomingMessageMetrics(
                 conversation.getId(), context.getTenantId(), now);
 

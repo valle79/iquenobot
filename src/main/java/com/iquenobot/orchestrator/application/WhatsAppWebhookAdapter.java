@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 
@@ -243,7 +244,7 @@ private IncomingMessage convertToIncomingMessage(
 
             .timestamp(timestamp != null
                     ? LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC)
-                    : LocalDateTime.now())
+                    : LocalDateTime.now(ZoneOffset.UTC))
 
             .build();
 }

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Component
@@ -78,7 +79,7 @@ public class ConversationResolutionStep implements PipelineStep, MessagePipeline
                 .status(ConversationStatus.OPEN)
                 .priority(ConversationPriority.MEDIUM)
                 .channelConversationId(channelConversationId)
-                .lastMessageAt(LocalDateTime.now())
+                .lastMessageAt(LocalDateTime.now(ZoneOffset.UTC))
                 .messageCount(0)
                 .unreadCount(0)
                 .botConversation(false)

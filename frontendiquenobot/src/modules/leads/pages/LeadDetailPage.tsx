@@ -139,7 +139,7 @@ export default function LeadDetailPage() {
                 <div>
                   <p className="text-xs font-medium text-gray-500">Último contacto</p>
                   <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                    {dayjs(lead.lastContactAt).fromNow()}
+                    {dayjs.utc(lead.lastContactAt).fromNow()}
                   </p>
                 </div>
               )}
@@ -236,7 +236,7 @@ export default function LeadDetailPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{lead.assignedTo.fullName}</p>
                   <p className="text-xs text-gray-500">
-                    Asignado {lead.assignedAt ? dayjs(lead.assignedAt).fromNow() : ''}
+                    Asignado {lead.assignedAt ? dayjs.utc(lead.assignedAt).fromNow() : ''}
                   </p>
                 </div>
               </div>

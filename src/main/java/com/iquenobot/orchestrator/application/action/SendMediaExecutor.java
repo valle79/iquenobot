@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -77,7 +78,7 @@ public class SendMediaExecutor implements ActionExecutor {
                     .content(caption != null ? caption : "Media message")
                     .channelMessageId(messageId)
                     .fromBot(true)
-                    .sentAt(LocalDateTime.now())
+                    .sentAt(LocalDateTime.now(ZoneOffset.UTC))
                     .build();
 
             messageRepository.save(botMessage);

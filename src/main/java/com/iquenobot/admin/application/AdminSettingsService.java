@@ -3,6 +3,7 @@ package com.iquenobot.admin.application;
 import com.iquenobot.setting.domain.dto.SettingDto;
 import com.iquenobot.setting.domain.entity.Setting;
 import com.iquenobot.setting.domain.repository.SettingRepository;
+import com.iquenobot.shared.application.SystemSettingsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,9 +19,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AdminSettingsService {
 
-    private static final UUID SYSTEM_TENANT_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    private static final UUID SYSTEM_TENANT_ID = SystemSettingsService.SYSTEM_TENANT_ID;
 
     private final SettingRepository settingRepository;
+    private final SystemSettingsService systemSettingsService;
 
     @Transactional(readOnly = true)
     public List<SettingDto> getByCategory(String category) {
@@ -48,6 +50,8 @@ public class AdminSettingsService {
             setting.setValue(entry.getValue());
             settingRepository.save(setting);
         }
+
+        systemSettingsService.evict(category);
 
         return settingRepository.findByTenantIdAndCategoryAndDeletedFalse(SYSTEM_TENANT_ID, category)
                 .stream()

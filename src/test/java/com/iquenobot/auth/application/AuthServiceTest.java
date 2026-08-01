@@ -9,6 +9,7 @@ import com.iquenobot.auth.domain.repository.UserRepository;
 import com.iquenobot.auth.domain.repository.UserSessionRepository;
 import com.iquenobot.auth.interfaces.mapper.AuthMapper;
 import com.iquenobot.security.application.JwtService;
+import com.iquenobot.shared.application.SystemSettingsService;
 import com.iquenobot.shared.enums.RoleType;
 import com.iquenobot.shared.enums.TenantStatus;
 import com.iquenobot.shared.enums.UserStatus;
@@ -45,6 +46,8 @@ class AuthServiceTest {
     private AuthMapper authMapper;
     @Mock
     private JwtService jwtService;
+    @Mock
+    private SystemSettingsService systemSettingsService;
 
     @InjectMocks
     private AuthService authService;

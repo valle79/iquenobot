@@ -95,6 +95,12 @@ export interface SettingDto {
   description: string
 }
 
+export interface BackupInfo {
+  fileName: string
+  sizeBytes: number
+  createdAt: string
+}
+
 export const adminService = {
   getTenants: async (params?: TenantQueryParams): Promise<PagedResponse<TenantDto>> => {
     const response = await api.get<ApiResponse<PagedResponse<TenantDto>>>('/admin/tenants', { params })
@@ -163,6 +169,20 @@ export const adminService = {
 
   updateSettings: async (category: string, settings: Record<string, string>): Promise<SettingDto[]> => {
     const response = await api.put<ApiResponse<SettingDto[]>>(`/admin/settings/${category}`, settings)
+    return response.data.data
+  },
+
+  testSmtp: async (to: string): Promise<void> => {
+    await api.post<ApiResponse<null>>('/admin/settings/smtp/test', { to })
+  },
+
+  getBackups: async (): Promise<BackupInfo[]> => {
+    const response = await api.get<ApiResponse<BackupInfo[]>>('/admin/settings/backups')
+    return response.data.data
+  },
+
+  createBackup: async (): Promise<BackupInfo> => {
+    const response = await api.post<ApiResponse<BackupInfo>>('/admin/settings/backups')
     return response.data.data
   },
 }

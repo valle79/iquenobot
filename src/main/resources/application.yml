@@ -101,11 +101,11 @@ logging:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:}
+    secret: ${JWT_SECRET:iquenobot-dev-secret-key-minimo-32-caracteres-256bits}
     access-token-expiration: ${JWT_ACCESS_EXPIRATION:900000}
     refresh-token-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
   crypto:
-    secret: ${CRYPTO_SECRET:}
+    secret: ${CRYPTO_SECRET:iquenobot-dev-crypto-key-32-caracteres-minimo}
   cors:
     allowed-origins: ${CORS_ORIGINS:*}
   base-url: ${BASE_URL:http://localhost:8085}

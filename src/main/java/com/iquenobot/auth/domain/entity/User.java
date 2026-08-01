@@ -108,9 +108,12 @@ public class User extends SoftDeletableEntity {
         return emailVerified;
     }
 
+    public void lockAccount(int lockoutMinutes) {
+        this.lockedUntil = LocalDateTime.now().plusMinutes(lockoutMinutes);
+    }
+
     public void lockAccount() {
-        this.lockedUntil = LocalDateTime.now().plusMinutes(30);
-        this.loginAttempts = 5;
+        lockAccount(30);
     }
 
     public void unlockAccount() {
@@ -118,11 +121,15 @@ public class User extends SoftDeletableEntity {
         this.loginAttempts = 0;
     }
 
-    public void incrementLoginAttempts() {
+    public void incrementLoginAttempts(int maxAttempts, int lockoutMinutes) {
         this.loginAttempts++;
-        if (this.loginAttempts >= 5) {
-            lockAccount();
+        if (this.loginAttempts >= maxAttempts) {
+            lockAccount(lockoutMinutes);
         }
+    }
+
+    public void incrementLoginAttempts() {
+        incrementLoginAttempts(5, 30);
     }
 
     public void resetLoginAttempts() {

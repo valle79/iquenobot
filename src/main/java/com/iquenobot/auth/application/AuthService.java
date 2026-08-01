@@ -22,6 +22,7 @@ import com.iquenobot.auth.domain.repository.UserSessionRepository;
 
 import com.iquenobot.auth.interfaces.mapper.AuthMapper;
 import com.iquenobot.security.application.JwtService;
+import com.iquenobot.shared.application.SystemSettingsService;
 import com.iquenobot.shared.domain.dto.PagedResponse;
 import com.iquenobot.shared.domain.util.TenantContext;
 import com.iquenobot.shared.enums.RoleType;
@@ -58,6 +59,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final SystemSettingsService systemSettingsService;
 
     @Transactional
     public AuthResponseDto login(LoginRequestDto loginRequest) {
@@ -76,7 +78,9 @@ public class AuthService {
 
         // Validate password
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            user.incrementLoginAttempts();
+            int maxAttempts = systemSettingsService.getInt("security", "max_login_attempts", 5);
+            int lockoutMinutes = systemSettingsService.getInt("security", "lockout_minutes", 15);
+            user.incrementLoginAttempts(maxAttempts, lockoutMinutes);
             userRepository.save(user);
             throw new UnauthorizedException("Credenciales inválidas");
         }
@@ -248,6 +252,8 @@ public class AuthService {
             throw new BusinessException("El email ya está registrado en esta empresa");
         }
 
+        validatePasswordStrength(request.getPassword());
+
         // Create user
         User user = authMapper.toUser(request);
         user.setId(UUID.randomUUID());
@@ -329,6 +335,8 @@ public class AuthService {
             throw new UnauthorizedException("La contraseña actual no es correcta");
         }
 
+        validatePasswordStrength(request.getNewPassword());
+
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
         log.info("Password changed for user: {}", user.getEmail());
@@ -361,6 +369,8 @@ public class AuthService {
             throw new BusinessException("El token de recuperación ha expirado");
         }
 
+        validatePasswordStrength(request.getNewPassword());
+
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setPasswordResetToken(null);
         user.setPasswordResetExpiresAt(null);
@@ -388,6 +398,16 @@ public class AuthService {
                 .filter(user -> user.getEmail().equals(email) && !user.isDeleted())
                 .findFirst()
                 .orElseThrow(() -> new UnauthorizedException("Usuario no encontrado"));
+    }
+
+    private void validatePasswordStrength(String password) {
+        if (password == null) {
+            throw new BusinessException("La contraseña es obligatoria");
+        }
+        int minLength = systemSettingsService.getInt("security", "password_min_length", 8);
+        if (password.length() < minLength) {
+            throw new BusinessException("La contraseña debe tener al menos " + minLength + " caracteres");
+        }
     }
 
     private void validateUserForLogin(User user) {

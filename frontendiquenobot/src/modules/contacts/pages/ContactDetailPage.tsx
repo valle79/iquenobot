@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Mail, Phone, Building, Globe, Calendar, MessageCircle, Tag, Edit, Ban, CheckCircle } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, Building, Globe, Calendar, MessageCircle, Tag, Edit, Ban, CheckCircle, CreditCard, MapPin } from 'lucide-react'
 import { contactService } from '@/services/contact.service'
 import { Button } from '@/shared/atoms/Button/Button'
 import { Avatar } from '@/shared/atoms/Avatar/Avatar'
@@ -121,7 +121,9 @@ export default function ContactDetailPage() {
               { icon: Mail, label: 'Email', value: contact.email },
               { icon: Phone, label: 'Teléfono', value: contact.phone },
               { icon: Phone, label: 'WhatsApp', value: contact.whatsappPhone },
+              { icon: CreditCard, label: 'Documento', value: contact.documentNumber ? `${contact.documentType || ''} ${contact.documentNumber}` : '' },
               { icon: Building, label: 'Empresa', value: contact.company },
+              { icon: MapPin, label: 'Dirección', value: contact.address },
               { icon: Globe, label: 'Idioma', value: contact.language },
             ].map(({ icon: Icon, label, value }) => (
               <div key={label} className="flex items-center gap-3">

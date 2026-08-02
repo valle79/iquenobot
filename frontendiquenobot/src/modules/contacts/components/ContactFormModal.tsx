@@ -2,9 +2,10 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { User, Mail, Phone, Building2, Briefcase, Globe, Tag } from 'lucide-react'
+import { User, Mail, Phone, Building2, Briefcase, Globe, Tag, CreditCard, MapPin } from 'lucide-react'
 import { Modal } from '@/shared/atoms/Modal/Modal'
 import { Input } from '@/shared/atoms/Input/Input'
+import { Select } from '@/shared/atoms/Select/Select'
 import { Button } from '@/shared/atoms/Button/Button'
 import { useCreateContact, useUpdateContact } from '../hooks/useContacts'
 import type { ContactDto } from '@/types/contact'
@@ -15,6 +16,12 @@ const schema = z.object({
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   phone: z.string().optional(),
   company: z.string().optional(),
+  documentType: z.enum(['', 'DNI', 'RUC']).optional(),
+  documentNumber: z
+    .string()
+    .optional()
+    .refine((v) => !v || /^\d{8}$|^\d{11}$/.test(v), '8 dígitos (DNI) u 11 (RUC)'),
+  address: z.string().max(255).optional(),
   jobTitle: z.string().optional(),
   notes: z.string().optional(),
   tags: z.string().optional(),
@@ -48,12 +55,15 @@ export function ContactFormModal({ open, contact, onClose }: ContactFormModalPro
         email: contact.email || '',
         phone: contact.phone || '',
         company: contact.company || '',
+        documentType: contact.documentType || '',
+        documentNumber: contact.documentNumber || '',
+        address: contact.address || '',
         jobTitle: contact.jobTitle || '',
         notes: contact.notes || '',
         tags: contact.tags || '',
       })
     } else {
-      reset({ firstName: '', lastName: '', email: '', phone: '', company: '', jobTitle: '', notes: '', tags: '' })
+      reset({ firstName: '', lastName: '', email: '', phone: '', company: '', documentType: '', documentNumber: '', address: '', jobTitle: '', notes: '', tags: '' })
     }
   }, [contact, reset])
 
@@ -89,6 +99,18 @@ export function ContactFormModal({ open, contact, onClose }: ContactFormModalPro
           <Input label="Cargo" placeholder="Cargo" leftIcon={<Briefcase size={16} />}
             error={errors.jobTitle?.message} {...register('jobTitle')} />
         </div>
+        <div className="grid grid-cols-2 gap-4">
+          <Select label="Tipo de documento" options={[
+            { value: '', label: 'Seleccionar' },
+            { value: 'DNI', label: 'DNI' },
+            { value: 'RUC', label: 'RUC' },
+          ]}
+            error={errors.documentType?.message} {...register('documentType')} />
+          <Input label="Número de documento" placeholder="12345678" leftIcon={<CreditCard size={16} />}
+            error={errors.documentNumber?.message} {...register('documentNumber')} />
+        </div>
+        <Input label="Dirección" placeholder="Av. Los Olivos 123, Lima" leftIcon={<MapPin size={16} />}
+          error={errors.address?.message} {...register('address')} />
         <Input label="Etiquetas" placeholder="vip, cliente, etc." leftIcon={<Tag size={16} />}
           error={errors.tags?.message} {...register('tags')} />
         <div className="space-y-1.5">

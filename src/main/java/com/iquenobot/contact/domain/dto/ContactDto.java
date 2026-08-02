@@ -27,6 +27,9 @@ public class ContactDto {
     private String phone;
     private String whatsappPhone;
     private String company;
+    private String documentType;
+    private String documentNumber;
+    private String address;
     private String jobTitle;
     private String avatarUrl;
     private ContactStatus status;

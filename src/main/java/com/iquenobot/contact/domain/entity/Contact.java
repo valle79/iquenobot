@@ -55,6 +55,15 @@ public class Contact extends SoftDeletableEntity {
     @Column(name = "company", length = 200)
     private String company;
 
+    @Column(name = "document_type", length = 20)
+    private String documentType;
+
+    @Column(name = "document_number", length = 11)
+    private String documentNumber;
+
+    @Column(name = "address", length = 255)
+    private String address;
+
     @Column(name = "job_title", length = 100)
     private String jobTitle;
 

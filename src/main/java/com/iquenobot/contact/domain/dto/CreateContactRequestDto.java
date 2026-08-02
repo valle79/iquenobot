@@ -35,6 +35,15 @@ public class CreateContactRequestDto {
     @Size(max = 200, message = "La empresa no puede exceder 200 caracteres")
     private String company;
 
+    @Pattern(regexp = "DNI|RUC", message = "El tipo de documento debe ser DNI o RUC")
+    private String documentType;
+
+    @Pattern(regexp = "\\d{8}|\\d{11}", message = "El documento debe tener 8 dígitos (DNI) u 11 dígitos (RUC)")
+    private String documentNumber;
+
+    @Size(max = 255, message = "La dirección no puede exceder 255 caracteres")
+    private String address;
+
     @Size(max = 100, message = "El cargo no puede exceder 100 caracteres")
     private String jobTitle;
 

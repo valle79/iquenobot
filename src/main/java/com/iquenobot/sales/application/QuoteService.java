@@ -72,6 +72,7 @@ public class QuoteService {
                 .quoteNumber(quoteNumber)
                 .items(toJson(items))
                 .subtotal(subtotal)
+                .discount(BigDecimal.ZERO)
                 .igv(igv)
                 .total(total)
                 .currency("PEN")

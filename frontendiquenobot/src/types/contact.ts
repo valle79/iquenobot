@@ -11,6 +11,9 @@ export interface ContactDto {
   phone: string
   whatsappPhone: string
   company: string
+  documentType: string
+  documentNumber: string
+  address: string
   jobTitle: string
   avatarUrl: string
   status: ContactStatus
@@ -36,6 +39,9 @@ export interface CreateContactRequest {
   phone?: string
   whatsappPhone?: string
   company?: string
+  documentType?: string
+  documentNumber?: string
+  address?: string
   jobTitle?: string
   avatarUrl?: string
   language?: string

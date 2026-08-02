@@ -8,6 +8,8 @@ import com.iquenobot.chatbot.domain.entity.ChatbotFlow;
 import com.iquenobot.chatbot.domain.entity.ChatbotIntent;
 import com.iquenobot.chatbot.domain.repository.ChatbotFlowRepository;
 import com.iquenobot.chatbot.domain.repository.ChatbotIntentRepository;
+import com.iquenobot.contact.domain.entity.Contact;
+import com.iquenobot.contact.domain.repository.ContactRepository;
 import com.iquenobot.knowledge.application.KnowledgeBaseService;
 import com.iquenobot.shared.domain.util.TenantContext;
 import com.iquenobot.shared.enums.ChatbotFlowTrigger;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.regex.Matcher;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +39,7 @@ public class ChatbotService {
     private final ChatbotIntentRepository intentRepository;
     private final IAIProvider aiProvider;
     private final KnowledgeBaseService knowledgeBaseService;
+    private final ContactRepository contactRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Random random = new Random();
 
@@ -104,6 +109,10 @@ public class ChatbotService {
         UUID tenantId = getTenantId();
         
         log.info("Processing chatbot message for tenant: {}", tenantId);
+
+        // Si el cliente envía sus datos de facturación (DNI/RUC, razón social,
+        // dirección), se capturan y guardan en su contacto antes de responder.
+        captureContactDetails(message, context);
 
         // 1. Try to detect intent
         ChatbotIntent intent = detectIntent(tenantId, message);
@@ -371,6 +380,199 @@ public class ChatbotService {
                     .requiresHumanAgent(true)
                     .build();
         }
+    }
+
+    /**
+     * Señales de que el mensaje del cliente contiene datos de facturación
+     * (DNI/RUC, dirección, razón social). Se usa solo para evitar invocar al
+     * extractor en mensajes irrelevantes.
+     */
+    private static final java.util.regex.Pattern TAX_DETAILS_TRIGGER = java.util.regex.Pattern.compile(
+            "\\b(dni|ruc|documento|raz[oó]n\\s+social|direcci[oó]n|av\\.|calle|jr\\.|urb\\.|mz\\.|lt\\.)\\b"
+                    + "|\\b\\d{8}\\b|\\b\\d{11}\\b",
+            java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Señales de razón social o dirección: solo cuando aparecen se invoca al
+     * LLM para extraerlas (los DNI/RUC se capturan por regex, sin llamadas
+     * extra de IA, para no demorar la conversación ni gastar tokens).
+     */
+    private static final java.util.regex.Pattern BUSINESS_DETAILS_TRIGGER = java.util.regex.Pattern.compile(
+            "\\b(raz[oó]n\\s+social|direcci[oó]n|av\\.|calle|jr\\.|urb\\.|mz\\.|lt\\.|empresa|s\\.?a\\.?c\\.?"
+                    + "|eirl|srl|ltda)\\b",
+            java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Extrae los datos de facturación del cliente (DNI/RUC, nombre o razón
+     * social, dirección) desde sus mensajes y los guarda en su contacto para
+     * que las cotizaciones en PDF salgan con datos formales. El proceso nunca
+     * interrumpe el flujo normal del chat: ante cualquier error solo registra
+     * el aviso.
+     */
+    private void captureContactDetails(String message, Map<String, Object> context) {
+        if (message == null || message.isBlank()
+                || !TAX_DETAILS_TRIGGER.matcher(message.toLowerCase()).find()) {
+            return;
+        }
+        String contactIdStr = (String) context.get("contactId");
+        if (contactIdStr == null) {
+            return;
+        }
+        try {
+            UUID tenantId = getTenantId();
+            UUID contactId = UUID.fromString(contactIdStr);
+            Contact contact = contactRepository.findByIdAndTenantIdAndDeletedFalse(contactId, tenantId)
+                    .orElse(null);
+            if (contact == null) {
+                return;
+            }
+            if (applyTaxInfo(contact, extractTaxInfo(message))) {
+                contactRepository.save(contact);
+                log.info("Tax details captured for contact {}", contactId);
+            }
+        } catch (Exception e) {
+            log.warn("Could not capture tax details from message: {}", e.getMessage());
+        }
+    }
+
+    private record ContactTaxInfo(String documentType, String documentNumber, String fullName, String address) {
+    }
+
+    /**
+     * Extrae los datos fiscales: DNI/RUC siempre por regex (instantáneo, sin
+     * IA). El LLM solo se invoca si el mensaje sugiere razón social o
+     * dirección, que no pueden capturarse de forma confiable por patrones.
+     */
+    private ContactTaxInfo extractTaxInfo(String message) {
+        ContactTaxInfo byRegex = extractTaxInfoByRegex(message);
+        if (!BUSINESS_DETAILS_TRIGGER.matcher(message.toLowerCase()).find()) {
+            return byRegex;
+        }
+        try {
+            AIMessageDto aiMessage = AIMessageDto.builder()
+                    .role("user")
+                    .content(message)
+                    .build();
+            AIResponseDto response = aiProvider.chatCompletion(
+                    List.of(aiMessage),
+                    "Eres un extractor de datos de facturación peruana. Del mensaje del cliente "
+                            + "extrae: documentType (solo \"DNI\" o \"RUC\"), documentNumber (solo "
+                            + "dígitos), fullName (nombre completo o razón social) y address "
+                            + "(dirección). Responde ÚNICAMENTE con un JSON válido, sin texto "
+                            + "adicional, con este formato: "
+                            + "{\"documentType\":\"DNI\",\"documentNumber\":\"12345678\","
+                            + "\"fullName\":\"...\",\"address\":\"...\"}. Usa null para lo que "
+                            + "no aparezca en el mensaje.",
+                    0.0, null);
+            if (response == null || response.getContent() == null || response.getContent().isBlank()) {
+                return byRegex;
+            }
+            String content = response.getContent().replaceAll("```json|```", "").trim();
+            int start = content.indexOf('{');
+            int end = content.lastIndexOf('}');
+            if (start < 0 || end <= start) {
+                return byRegex;
+            }
+            JsonNode node = objectMapper.readTree(content.substring(start, end + 1));
+            return new ContactTaxInfo(
+                    node.hasNonNull("documentType") ? node.get("documentType").asText() : null,
+                    node.hasNonNull("documentNumber") ? node.get("documentNumber").asText() : null,
+                    node.hasNonNull("fullName") ? node.get("fullName").asText() : null,
+                    node.hasNonNull("address") ? node.get("address").asText() : null);
+        } catch (Exception e) {
+            log.warn("LLM tax extraction failed, using regex fallback: {}", e.getMessage());
+            return byRegex;
+        }
+    }
+
+    /**
+     * Captura RUC (11 dígitos) o DNI (8 dígitos) directamente del mensaje,
+     * sin llamar al LLM.
+     */
+    private ContactTaxInfo extractTaxInfoByRegex(String message) {
+        String text = message.toLowerCase();
+        Matcher ruc = java.util.regex.Pattern.compile("\\b\\d{11}\\b").matcher(text);
+        if (ruc.find()) {
+            return new ContactTaxInfo("RUC", ruc.group(), null, null);
+        }
+        Matcher dni = java.util.regex.Pattern.compile("\\b\\d{8}\\b").matcher(text);
+        if (dni.find()) {
+            return new ContactTaxInfo("DNI", dni.group(), null, null);
+        }
+        return new ContactTaxInfo(null, null, null, null);
+    }
+
+    /**
+     * Aplica al contacto los datos fiscales extraídos, sin sobreescribir
+     * información ya registrada. Devuelve true si algo cambió.
+     */
+    private boolean applyTaxInfo(Contact contact, ContactTaxInfo info) {
+        boolean changed = false;
+
+        String docNumber = cleanDigits(info.documentNumber());
+        String docType = normalizeDocumentType(info.documentType(), docNumber);
+
+        if (docNumber != null && docNumber.length() == 11 && !docNumber.equals(contact.getDocumentNumber())) {
+            contact.setDocumentNumber(docNumber);
+            changed = true;
+        } else if (docNumber != null && docNumber.length() == 8 && !docNumber.equals(contact.getDocumentNumber())) {
+            contact.setDocumentNumber(docNumber);
+            changed = true;
+        }
+        if (docType != null && !docType.equals(contact.getDocumentType())) {
+            contact.setDocumentType(docType);
+            changed = true;
+        }
+
+        if (hasText(info.fullName())) {
+            String fullName = info.fullName().trim();
+            if ("RUC".equals(contact.getDocumentType())) {
+                if (!hasText(contact.getCompany()) || !contact.getCompany().equalsIgnoreCase(fullName)) {
+                    contact.setCompany(fullName);
+                    changed = true;
+                }
+            } else if (!hasText(contact.getFirstName()) && !hasText(contact.getLastName())) {
+                String[] parts = fullName.split("\\s+", 2);
+                contact.setFirstName(parts[0]);
+                if (parts.length > 1) {
+                    contact.setLastName(parts[1]);
+                }
+                contact.updateFullName();
+                changed = true;
+            }
+        }
+
+        if (hasText(info.address()) && !info.address().trim().equals(contact.getAddress())) {
+            contact.setAddress(info.address().trim());
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private String cleanDigits(String value) {
+        if (value == null) {
+            return null;
+        }
+        String digits = value.replaceAll("\\D", "");
+        return (digits.length() == 8 || digits.length() == 11) ? digits : null;
+    }
+
+    private String normalizeDocumentType(String docType, String docNumber) {
+        if (docType != null) {
+            String normalized = docType.trim().toUpperCase();
+            if ("DNI".equals(normalized) || "RUC".equals(normalized)) {
+                return normalized;
+            }
+        }
+        if (docNumber != null) {
+            return docNumber.length() == 11 ? "RUC" : "DNI";
+        }
+        return null;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
     private String[] extractKeywords(String json) {

@@ -5,6 +5,8 @@ import com.iquenobot.conversation.domain.entity.MessageAttachment;
 import com.iquenobot.conversation.domain.repository.ConversationMessageRepository;
 import com.iquenobot.conversation.domain.repository.ConversationRepository;
 import com.iquenobot.conversation.domain.repository.MessageAttachmentRepository;
+import com.iquenobot.contact.domain.entity.Contact;
+import com.iquenobot.contact.domain.repository.ContactRepository;
 import com.iquenobot.orchestrator.domain.model.ActionType;
 import com.iquenobot.orchestrator.domain.model.Decision;
 import com.iquenobot.orchestrator.domain.model.ProcessingContext;
@@ -58,6 +60,7 @@ public class SendQuoteExecutor implements ActionExecutor {
     private final MessageAttachmentRepository attachmentRepository;
     private final QuoteHistoryService quoteHistoryService;
     private final QuoteEventPublisher eventPublisher;
+    private final ContactRepository contactRepository;
     private final List<ChannelMessageSender> channelSenders;
 
     @Override
@@ -81,13 +84,18 @@ public class SendQuoteExecutor implements ActionExecutor {
 
         String customerMessage = (String) params.get("messageContent");
 
+        // Se recarga el contacto desde la BD para incluir los datos fiscales que
+        // el cliente haya enviado (DNI/RUC, dirección) justo antes de cotizar.
+        Contact contact = contactRepository.findById(context.getContact().getId())
+                .orElse(context.getContact());
+
         Quote quote = null;
         try {
             quote = quoteService.createQuote(
-                    context.getTenant(), context.getContact(), context.getConversation(),
+                    context.getTenant(), contact, context.getConversation(),
                     products, customerMessage);
 
-            byte[] pdf = quoteService.generatePdf(quote, context.getTenant(), context.getContact());
+            byte[] pdf = quoteService.generatePdf(quote, context.getTenant(), contact);
             String filename = "cotizacion_" + quote.getQuoteNumber() + ".pdf";
             String storageKey = QuoteStorageKeyBuilder.build(
                     quote.getQuoteNumber(), quote.getTenantId(), LocalDateTime.now(ZoneOffset.UTC));
@@ -103,7 +111,7 @@ public class SendQuoteExecutor implements ActionExecutor {
             quoteHistoryService.record(quote, QuoteHistoryAction.GENERATED, null, null, null, null,
                     "Cotización generada por el bot con " + products.size() + " producto(s)");
 
-            String caption = buildCaption(context, quote);
+            String caption = buildCaption(context, quote, contact);
             ChannelType channel = context.getIncomingMessage().getChannel();
             ChannelMessageSender sender = channelSenders.stream()
                     .filter(s -> s.supportedChannel() == channel)
@@ -200,11 +208,15 @@ public class SendQuoteExecutor implements ActionExecutor {
         return productRepository.findAllById(ids);
     }
 
-    private String buildCaption(ProcessingContext context, Quote quote) {
+    private String buildCaption(ProcessingContext context, Quote quote, Contact contact) {
         String template = "📄 Estimado(a) {{customer_name}}, te adjunto la cotización "
                 + quote.getQuoteNumber()
-                + " con los productos que solicitaste. Para cualquier consulta, "
-                + "contáctanos al {{contact_phone}} o al {{contact_email}}. ¡Gracias por tu preferencia!";
+                + " con los productos que solicitaste. ";
+        if (contact.getDocumentNumber() == null || contact.getDocumentNumber().isBlank()) {
+            template += "Para formalizar tu cotización, envíanos tu DNI o RUC, nombre o razón social y dirección fiscal. ";
+        }
+        template += "Para cualquier consulta, contáctanos al {{contact_phone}} o al {{contact_email}}. "
+                + "¡Gracias por tu preferencia!";
         return templateResolver.resolve(template, context.getTenant(), context.getContact());
     }
 }

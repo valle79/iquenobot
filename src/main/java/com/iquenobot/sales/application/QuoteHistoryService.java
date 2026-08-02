@@ -34,9 +34,20 @@ public class QuoteHistoryService {
                 .actorName(actorName != null ? actorName : "Bot")
                 .channel(channel)
                 .channelMessageId(channelMessageId)
-                .details(details)
+                .details(truncateDetails(details))
                 .build();
         quoteHistoryRepository.save(entry);
         log.info("Quote history recorded: quote={} action={} actor={}", quote.getQuoteNumber(), action, entry.getActorName());
+    }
+
+    /**
+     * El detalle puede contener mensajes de error muy largos; la columna es
+     * varchar(1000), por lo que se recorta para no violar la restricción.
+     */
+    private String truncateDetails(String details) {
+        if (details == null || details.length() <= 1000) {
+            return details;
+        }
+        return details.substring(0, 997) + "...";
     }
 }

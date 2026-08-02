@@ -147,6 +147,9 @@ public class ContactService {
         contact.setNormalizedPhone(newNormalized);
         contact.setWhatsappPhone(request.getWhatsappPhone());
         contact.setCompany(request.getCompany());
+        contact.setDocumentType(request.getDocumentType());
+        contact.setDocumentNumber(request.getDocumentNumber());
+        contact.setAddress(request.getAddress());
         contact.setJobTitle(request.getJobTitle());
         contact.setAvatarUrl(request.getAvatarUrl());
         contact.setLanguage(request.getLanguage());

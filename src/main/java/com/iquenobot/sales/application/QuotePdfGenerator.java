@@ -134,6 +134,19 @@ public class QuotePdfGenerator {
         addCell(table, "Cliente", false);
         addCell(table, customerName(contact), false);
 
+        if (hasText(contact.getDocumentType()) && hasText(contact.getDocumentNumber())) {
+            addCell(table, contact.getDocumentType(), false);
+            addCell(table, contact.getDocumentNumber(), false);
+        }
+        if (hasText(contact.getCompany()) && !contact.getCompany().equals(customerName(contact))) {
+            addCell(table, "Razón Social", false);
+            addCell(table, contact.getCompany(), false);
+        }
+        if (hasText(contact.getAddress())) {
+            addCell(table, "Dirección", false);
+            addCell(table, contact.getAddress(), false);
+        }
+
         if (hasText(contact.getPhone())) {
             addCell(table, "Teléfono", false);
             addCell(table, contact.getPhone(), false);

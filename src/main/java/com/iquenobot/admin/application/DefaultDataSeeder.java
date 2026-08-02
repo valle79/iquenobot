@@ -107,7 +107,8 @@ public class DefaultDataSeeder {
                         + "automáticamente el PDF de la cotización y se lo envía por WhatsApp. NO prometas "
                         + "envíos por correo electrónico ni por ningún otro medio que no sea WhatsApp.\n"
                         + "2. Antes de cotizar, pide al cliente de forma natural y breve: el producto o modelo, "
-                        + "la cantidad deseada, la ubicación o ciudad y la forma de pago.\n"
+                        + "la cantidad deseada y la forma de pago. Para la cotización formal, pide además su "
+                        + "DNI o RUC, nombre o razón social y dirección fiscal.\n"
                         + "3. NUNCA inventes precios, datos de contacto, correos electrónicos, teléfonos ni "
                         + "promesas. Usa únicamente la información de los módulos del sistema.\n"
                         + "4. Sé breve, claro y profesional; usa emojis con moderación.",

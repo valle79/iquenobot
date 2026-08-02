@@ -188,7 +188,8 @@ public class KnowledgeBaseService {
             "comportamiento", "conducta", "reglas", "normas", "tono", "estilo",
             "politica", "política", "policy", "procedimiento", "protocolo",
             "instrucciones", "guia", "guía", "manual", "script", "prompt",
-            "atencion", "atención", "bot"
+            "atencion", "atención", "bot",
+            "cotizacion", "cotización", "cotiza", "plantilla", "formato"
     };
 
     private static final int BEHAVIOR_MAX_DOCS = 3;
@@ -243,7 +244,9 @@ public class KnowledgeBaseService {
         sb.append("\n\n--- REGLAS DE COMPORTAMIENTO DEL BOT (OBLIGATORIAS) ---\n");
         int total = 0;
         for (KnowledgeBase kb : selected) {
-            String content = kb.getContent();
+            // Se usa el texto efectivo del documento (para plantillas PDF, el texto
+            // extraído automáticamente) como contenido de comportamiento.
+            String content = resolveContextText(kb);
             if (content == null || content.isBlank()) {
                 continue;
             }

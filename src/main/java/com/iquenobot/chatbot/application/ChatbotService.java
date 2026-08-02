@@ -51,6 +51,22 @@ public class ChatbotService {
                     + "|(?<!no )me interesa (comprar|adquirir|hacer (un|el) pedido)");
 
     /**
+     * Señales de una solicitud de cotización en un mensaje que no matcheó ningún
+     * intent ni flow: pedido explícito de cotización/presupuesto, cantidad
+     * deseada ("deseo 2 unidades") o forma de pago mencionada. Cuando se detectan,
+     * la respuesta del LLM se marca con el intent "solicitar_precio" para que el
+     * orquestador genere el PDF y lo envíe por WhatsApp.
+     */
+    public static final java.util.regex.Pattern QUOTE_REQUEST_PATTERN = java.util.regex.Pattern.compile(
+            "\\bcotiz\\w*\\b|\\bpresupuest\\w*\\b"
+                    + "|(deseo|quiero|necesito|requiero)\\s+\\d+\\s*(unidades?|unds?|unid\\.?|und\\.?)"
+                    + "|(?:me\\s+|nos\\s+)?(?:puedes|puede|podrías|podrias|quieres|deseas)?\\s*"
+                    + "(?:mandar|enviar|pasar|hacer|elaborar|dar)\\w*\\s+(?:una\\s+|la\\s+|un\\s+)?"
+                    + "(?:cotizaci\\w+|presupuest\\w+)"
+                    + "|pago\\s+(?:al\\s+|de\\s+)?(?:contado|cash|crédito|credito|letras|plazos"
+                    + "|transferencia|yape|plin|efectivo|contra\\s+entrega)");
+
+    /**
      * Términos que indican una consulta comercial genérica ("¿qué venden?",
      * "¿qué ofrecen?", "catálogo", "precios"...). Aunque no exista contexto
      * previo ni match de KB, el bot responde con el LLM en lugar de pedir
@@ -97,7 +113,14 @@ public class ChatbotService {
         
         // 3. Generate response
         if (flow != null) {
-            return executeFlow(flow, message, context);
+            ChatbotResponseDto response = executeFlow(flow, message, context);
+            // Un flow no debe descartar la intención comercial ya detectada: se propaga
+            // para que el orquestador pueda disparar las acciones correspondientes
+            // (cotización en PDF, creación de lead, etc.).
+            if (intent != null && response.getIntentDetected() == null) {
+                response.setIntentDetected(intent.getIntentName());
+            }
+            return response;
         } else if (intent != null) {
             return executeIntent(intent, message);
         } else {
@@ -326,13 +349,21 @@ public class ChatbotService {
             Double temperature = context.get("temperature") instanceof String t ? Double.parseDouble(t) : null;
             AIResponseDto aiResponse = aiProvider.chatCompletion(history, systemPrompt, temperature, null);
             
-            return ChatbotResponseDto.builder()
+            ChatbotResponseDto response = ChatbotResponseDto.builder()
                     .message(aiResponse.getContent())
                     .confidence(0.0)
                     .requiresHumanAgent(false)
                     .suggestedActions(new ArrayList<>())
                     .entities(new HashMap<>())
                     .build();
+
+            // Si el mensaje del cliente es una solicitud de cotización que no matcheó
+            // ningún intent ni flow (p. ej. "deseo 2 unidades, pago al contado"), se
+            // marca la respuesta para que el orquestador genere y envíe el PDF.
+            if (message != null && QUOTE_REQUEST_PATTERN.matcher(message.toLowerCase()).find()) {
+                response.setIntentDetected("solicitar_precio");
+            }
+            return response;
         } catch (Exception e) {
             log.error("Error generating AI response", e);
             return ChatbotResponseDto.builder()

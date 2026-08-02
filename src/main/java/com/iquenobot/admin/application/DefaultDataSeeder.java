@@ -99,7 +99,19 @@ public class DefaultDataSeeder {
     @Transactional(propagation = Propagation.MANDATORY)
     public void seedDefaultAiConfig(UUID tenantId) {
         Setting aiConfig = createSetting(tenantId, "ai", "provider", "NONE", "text", "Proveedor de IA");
-        Setting aiPrompt = createSetting(tenantId, "ai", "system_prompt", "Eres un asistente virtual de atención al cliente amable y profesional. Responde en el mismo idioma que el cliente.", "text", "Prompt del sistema");
+        Setting aiPrompt = createSetting(tenantId, "ai", "system_prompt",
+                "Eres un asistente virtual de atención al cliente amable y profesional de la empresa. "
+                        + "Responde en el mismo idioma que el cliente.\n\n"
+                        + "REGLAS OBLIGATORIAS:\n"
+                        + "1. Cuando un cliente solicite una cotización o presupuesto, el sistema genera "
+                        + "automáticamente el PDF de la cotización y se lo envía por WhatsApp. NO prometas "
+                        + "envíos por correo electrónico ni por ningún otro medio que no sea WhatsApp.\n"
+                        + "2. Antes de cotizar, pide al cliente de forma natural y breve: el producto o modelo, "
+                        + "la cantidad deseada, la ubicación o ciudad y la forma de pago.\n"
+                        + "3. NUNCA inventes precios, datos de contacto, correos electrónicos, teléfonos ni "
+                        + "promesas. Usa únicamente la información de los módulos del sistema.\n"
+                        + "4. Sé breve, claro y profesional; usa emojis con moderación.",
+                "text", "Prompt del sistema");
         Setting aiTemperature = createSetting(tenantId, "ai", "temperature", "0.7", "text", "Temperatura del modelo");
         Setting aiEnabled = createSetting(tenantId, "ai", "enabled", "false", "boolean", "IA habilitada");
         settingRepository.saveAll(List.of(aiConfig, aiPrompt, aiTemperature, aiEnabled));

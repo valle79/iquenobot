@@ -32,6 +32,15 @@ public class QuoteService {
     private static final Pattern QUANTITY_PATTERN = Pattern.compile(
             "(\\d+)\\s*(unidades?|unds?|unid\\.?|und\\.?)");
 
+    /**
+     * Formas de pago que el cliente puede mencionar al solicitar la cotización.
+     * Se capturan en las observaciones de la cotización (y por tanto en el PDF).
+     */
+    private static final Pattern PAYMENT_PATTERN = Pattern.compile(
+            "\\b(al\\s+|de\\s+)?(contado|cash|crédito|credito|letras|plazos|financiado"
+                    + "|transferencia|yape|plin|efectivo|contra\\s+entrega|depósito|deposito)\\b",
+            Pattern.CASE_INSENSITIVE);
+
     private final QuoteRepository quoteRepository;
     private final QuotePdfGenerator pdfGenerator;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -67,6 +76,7 @@ public class QuoteService {
                 .total(total)
                 .currency("PEN")
                 .status(QuoteStatus.SENT)
+                .observations(extractPaymentObservation(customerMessage))
                 .build();
 
         Quote saved = quoteRepository.save(quote);
@@ -129,6 +139,29 @@ public class QuoteService {
             }
         }
         return null;
+    }
+
+    /**
+     * Extrae la forma de pago mencionada por el cliente en su mensaje para
+     * incluirla en las observaciones de la cotización. Devuelve null si el
+     * cliente no mencionó ninguna.
+     */
+    private String extractPaymentObservation(String customerMessage) {
+        if (customerMessage == null || customerMessage.isBlank()) {
+            return null;
+        }
+        Matcher matcher = PAYMENT_PATTERN.matcher(customerMessage.toLowerCase());
+        StringBuilder payment = new StringBuilder();
+        while (matcher.find()) {
+            String match = matcher.group().trim().replaceAll("\\s+", " ");
+            if (payment.indexOf(match) < 0) {
+                if (payment.length() > 0) {
+                    payment.append(", ");
+                }
+                payment.append(match);
+            }
+        }
+        return payment.length() == 0 ? null : "Forma de pago: " + payment;
     }
 
     private String nextQuoteNumber() {

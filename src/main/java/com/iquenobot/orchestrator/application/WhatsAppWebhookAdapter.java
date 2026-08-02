@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
@@ -24,6 +25,13 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class WhatsAppWebhookAdapter {
+
+    /**
+     * Referencia global de arranque: cualquier webhook (redelivery de Evolution)
+     * con messageTimestamp anterior a este instante corresponde a mensajes
+     * históricos y se descarta para evitar reprocesar y responder mensajes viejos.
+     */
+    private final Instant applicationStartedAt = Instant.now();
 
     private final ConversationOrchestrator orchestrator;
     private final ConversationMessageRepository messageRepository;
@@ -47,6 +55,17 @@ public class WhatsAppWebhookAdapter {
         }
 
         log.debug("Evolution webhook data={}", data);
+
+        // ---------------------------------------------------------------------
+        // MENSAJES ANTERIORES AL ARRANQUE: descartar redeliveries históricas
+        // ---------------------------------------------------------------------
+        Long messageTimestamp = extractTimestamp(data);
+        if (messageTimestamp != null
+                && Instant.ofEpochSecond(messageTimestamp).isBefore(applicationStartedAt)) {
+            log.info("Skipping webhook with old messageTimestamp={} (before application startup)",
+                    messageTimestamp);
+            return ProcessingResult.empty();
+        }
 
         // ---------------------------------------------------------------------
         // DEDUP: evitar procesar mensajes ya recibidos
@@ -139,29 +158,66 @@ public class WhatsAppWebhookAdapter {
     // GROUP DETECTION
     // -------------------------------------------------------------------------
 
-    @SuppressWarnings("unchecked")
-    private boolean isGroupConversation(Map<String, Object> data) {
-        if (data == null) return false;
-        if (data.get("key") instanceof Map<?, ?> key) {
-            Object remoteJid = key.get("remoteJid");
-            return remoteJid instanceof String r && r.contains("@g.us");
-        }
+@SuppressWarnings("unchecked")
+private boolean isGroupConversation(Map<String, Object> data) {
+
+    if (data == null) {
         return false;
     }
 
-private String extractGroupName(Map<String, Object> data) {
-
-    if (data == null) {
-        return "Grupo WhatsApp";
+    if (data.get("key") instanceof Map<?, ?> key) {
+        Object remoteJid = key.get("remoteJid");
+        return remoteJid instanceof String r && r.endsWith("@g.us");
     }
 
-    // Evolution puede enviarlo como pushName
-    Object pushName = data.get("pushName");
-    if (pushName instanceof String p && !p.isBlank()) {
-        return p.trim();
+    return false;
+}
+
+@SuppressWarnings("unchecked")
+private String extractGroupName(String instanceId, Map<String, Object> data) {
+
+    if (data == null || !isGroupConversation(data)) {
+        return null;
     }
 
-    // Fallback
+    // 1. Algunos eventos sí traen subject
+    Object subject = data.get("subject");
+    if (subject instanceof String s && !s.isBlank()) {
+        return s.trim();
+    }
+
+    // 2. Intentar obtenerlo desde message.groupName
+    if (data.get("message") instanceof Map<?, ?> message) {
+        Object groupName = message.get("groupName");
+        if (groupName instanceof String g && !g.isBlank()) {
+            return g.trim();
+        }
+    }
+
+    // 3. Resolver desde Evolution API
+    try {
+        String groupJid = extractConversationJid(data);
+
+        if (groupJid != null) {
+            String resolvedName = evolutionApiProvider.getGroupName(instanceId, groupJid);
+
+            if (resolvedName != null && !resolvedName.isBlank()) {
+                log.info("Nombre del grupo resuelto desde Evolution: {} -> {}",
+                        groupJid, resolvedName);
+                return resolvedName.trim();
+            }
+        }
+
+    } catch (Exception e) {
+        log.warn("No se pudo resolver el nombre del grupo: {}", e.getMessage());
+    }
+
+    // 4. Fallback legible
+    String jid = extractConversationJid(data);
+    if (jid != null && jid.contains("@g.us")) {
+        return "Grupo " + jid.replace("@g.us", "");
+    }
+
     return "Grupo WhatsApp";
 }
 
@@ -180,7 +236,7 @@ private IncomingMessage convertToIncomingMessage(
     // -------------------------------------------------------------
     // Identificador de la conversación
     // -------------------------------------------------------------
-    String conversationJid = extractConversationJid(data);
+    String conversationJid = extractConversationId(data);
 
     // -------------------------------------------------------------
     // Número real del contacto que participa en la conversación
@@ -230,8 +286,8 @@ private IncomingMessage convertToIncomingMessage(
     // -------------------------------------------------------------
     // Conversación grupal
     // -------------------------------------------------------------
-    boolean isGroup = isGroupConversation(data);
-    String groupName = extractGroupName(data);
+boolean isGroup = isGroupConversation(data);
+String groupName = extractGroupName(instanceId, data);
 
     // -------------------------------------------------------------
     // Nombre del contacto
@@ -255,43 +311,41 @@ private IncomingMessage convertToIncomingMessage(
     // -------------------------------------------------------------
     // Construcción del mensaje
     // -------------------------------------------------------------
-    return IncomingMessage.builder()
-            .channelMessageId(messageId)
-            .channel(ChannelType.WHATSAPP)
+return IncomingMessage.builder()
+        .channelMessageId(messageId)
+        .channel(ChannelType.WHATSAPP)
 
-            // Conversación (grupo o chat individual)
-            .channelConversationId(
-                    conversationJid != null ? cleanJid(conversationJid) : null
-            )
+        // Mantener el JID completo del grupo
+        .channelConversationId(conversationJid)
 
-            // Contacto real
-            .sourceIdentifier(senderJid)
-            .sourceName(sourceName)
+        // Contacto real que escribió
+        .sourceIdentifier(senderJid)
+        .sourceName(sourceName)
 
-            .type(type)
-            .content(text != null ? text : "")
+        .type(type)
+        .content(text != null ? text : "")
 
-            // Media
-            .mediaUrl(mediaUrl)
-            .caption(caption)
-            .filename(filename)
-            .mimeType(mimeType)
-            .channelMediaId(mediaKey)
-            .durationSeconds(durationSeconds)
+        .mediaUrl(mediaUrl)
+        .caption(caption)
+        .filename(filename)
+        .mimeType(mimeType)
+        .channelMediaId(mediaKey)
+        .durationSeconds(durationSeconds)
 
-            .instanceId(instanceId)
+        .instanceId(instanceId)
 
-            // Nombre del grupo si aplica
-            .conversationName(isGroup ? groupName : null)
+        // Nombre del grupo
+        .conversationName(groupName)
 
-            .metadata(data)
-            .outbound(outbound)
+        .metadata(data)
+        .outbound(outbound)
+        .group(isGroup)
 
-            .timestamp(timestamp != null
-                    ? LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC)
-                    : LocalDateTime.now(ZoneOffset.UTC))
+        .timestamp(timestamp != null
+                ? LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC)
+                : LocalDateTime.now(ZoneOffset.UTC))
 
-            .build();
+        .build();
 }
 
     /**
@@ -372,55 +426,50 @@ private String extractRemoteJid(Map<String, Object> data) {
 
     if (data.get("key") instanceof Map<?, ?> key) {
 
-        // -------------------------------------------------------------
-        // 🔥 Detectar si es grupo
-        // -------------------------------------------------------------
         Object remoteJidObj = key.get("remoteJid");
         String remoteJid = remoteJidObj instanceof String ? (String) remoteJidObj : null;
 
-        boolean group = remoteJid != null && remoteJid.contains("@g.us");
-
-        // -------------------------------------------------------------
-        // 📱 CHAT INDIVIDUAL
-        // -------------------------------------------------------------
-        if (!group) {
-
-            // Usar siempre remoteJidAlt si existe
-            Object remoteJidAlt = key.get("remoteJidAlt");
-            if (remoteJidAlt instanceof String alt && !alt.isBlank()) {
-                return normalizePhone(cleanJid(alt));
-            }
-
-            // Fallback: remoteJid
-            if (remoteJid != null && !remoteJid.isBlank()) {
-                return normalizePhone(cleanJid(remoteJid));
-            }
+        // =============================================================
+        // CHAT INDIVIDUAL
+        // =============================================================
+        if (remoteJid != null && remoteJid.endsWith("@s.whatsapp.net")) {
+            return normalizePhone(cleanJid(remoteJid));
         }
 
-        // -------------------------------------------------------------
-        // 👥 GRUPOS
-        // -------------------------------------------------------------
-        else {
+        // =============================================================
+        // GRUPO
+        // =============================================================
+        if (remoteJid != null && remoteJid.endsWith("@g.us")) {
 
-            // Para grupos, el contacto es quien participa
+            // usar participant SOLO como contacto que envió el mensaje
             Object participant = key.get("participant");
+
             if (participant instanceof String p && !p.isBlank()) {
                 return normalizePhone(cleanJid(p));
             }
 
-            // Fallback raro
-            if (remoteJid != null && !remoteJid.isBlank()) {
-                return normalizePhone(cleanJid(remoteJid));
-            }
+            // fallback extremo
+            return remoteJid;
         }
     }
 
-    // -------------------------------------------------------------
-    // Fallback Evolution API
-    // -------------------------------------------------------------
-    Object source = data.get("source");
-    if (source instanceof String s && !s.isBlank()) {
-        return normalizePhone(cleanJid(s));
+    return null;
+}
+
+@SuppressWarnings("unchecked")
+private String extractConversationId(Map<String, Object> data) {
+
+    if (data == null) {
+        return null;
+    }
+
+    if (data.get("key") instanceof Map<?, ?> key) {
+
+        Object remoteJid = key.get("remoteJid");
+
+        if (remoteJid instanceof String r && !r.isBlank()) {
+            return r.trim(); // NO limpiar @g.us
+        }
     }
 
     return null;

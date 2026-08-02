@@ -23,6 +23,10 @@ public class ProcessingContext {
     private ConversationContext conversationContext;
     private final List<Decision> secondaryDecisions = new ArrayList<>();
 
+    /** true cuando el mensaje lo procesa el scheduler de consolidación
+     *  (respuesta automática sobre mensajes agregados), no el webhook síncrono. */
+    private boolean scheduledProcessing;
+
     public IncomingMessage getIncomingMessage() { return incomingMessage; }
     public void setIncomingMessage(IncomingMessage incomingMessage) { this.incomingMessage = incomingMessage; }
 
@@ -55,4 +59,7 @@ public class ProcessingContext {
 
     public void addSecondaryDecision(Decision decision) { this.secondaryDecisions.add(decision); }
     public List<Decision> getSecondaryDecisions() { return secondaryDecisions; }
+
+    public boolean isScheduledProcessing() { return scheduledProcessing; }
+    public void setScheduledProcessing(boolean scheduledProcessing) { this.scheduledProcessing = scheduledProcessing; }
 }

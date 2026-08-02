@@ -2,6 +2,7 @@ package com.iquenobot.orchestrator.application;
 
 import com.iquenobot.orchestrator.application.action.ActionDispatcher;
 import com.iquenobot.orchestrator.application.pipeline.MessagePipeline;
+import com.iquenobot.orchestrator.domain.model.ActionType;
 import com.iquenobot.orchestrator.domain.model.Decision;
 import com.iquenobot.orchestrator.domain.model.IncomingMessage;
 import com.iquenobot.orchestrator.domain.model.ProcessingContext;
@@ -53,11 +54,14 @@ public class ConversationOrchestrator {
         log.info("Orchestrator processing message from channel={} source={}",
                 message.getChannel(), message.getSourceIdentifier());
 
-        // Clave de serialización: canal + identificador de la conversación remota.
-        // Si la conversación aún no existe, se usa el remitente (sourceIdentifier),
-        // lo que garantiza que los mensajes de un mismo contacto se procesen en orden.
-        String lockKey = message.getChannel() + ":" +
-                (message.getChannelConversationId() != null
+        // Clave de serialización: canal + identificador de la conversación remota
+        // normalizado a dígitos. El PendingAiResponseScheduler reconstruye la
+        // MISMA clave desde la conversación persistida, de modo que el flujo
+        // síncrono del webhook y la consolidación nunca tocan la conversación
+        // simultáneamente (elimina optimistic locks y deadlocks).
+        String lockKey = normalizeLockKey(
+                message.getChannel() != null ? message.getChannel().name() : "UNKNOWN",
+                message.getChannelConversationId() != null
                         ? message.getChannelConversationId()
                         : message.getSourceIdentifier());
         ReentrantLock lock = conversationLocks.computeIfAbsent(lockKey, k -> new ReentrantLock());
@@ -77,6 +81,42 @@ public class ConversationOrchestrator {
             }
             MDC.clear();
         }
+    }
+
+    /**
+     * Ejecuta una acción bajo el mismo lock de conversación que el flujo de
+     * webhooks, para que el scheduler de consolidación y el pipeline nunca
+     * modifiquen la misma conversación en paralelo dentro de la JVM.
+     */
+    public <T> T withConversationLock(String lockKey, java.util.function.Supplier<T> action) {
+        ReentrantLock lock = conversationLocks.computeIfAbsent(lockKey, k -> new ReentrantLock());
+        boolean locked = lock.tryLock();
+
+        if (!locked) {
+            log.debug("Conversation {} busy with webhook processing, waiting", lockKey);
+            lock.lock();
+        }
+
+        try {
+            return action.get();
+        } finally {
+            lock.unlock();
+            if (conversationLocks.size() > 1000) {
+                conversationLocks.remove(lockKey);
+            }
+        }
+    }
+
+    /**
+     * Normaliza la clave de lock al mismo formato que la conversación
+     * persistida usa en channel_conversation_id (canal + solo dígitos),
+     * garantizando que webhook y scheduler calculen claves idénticas.
+     */
+    public static String normalizeLockKey(String channel, String rawIdentifier) {
+        if (rawIdentifier == null) {
+            rawIdentifier = "";
+        }
+        return channel + ":" + rawIdentifier.replaceAll("[^0-9]", "");
     }
 
     private ProcessingResult doProcessMessage(IncomingMessage message, long startTime, String correlationId) {
@@ -103,7 +143,28 @@ public class ConversationOrchestrator {
                     message
             ));
 
-            Decision decision = decisionEngine.decide(context);
+            // -----------------------------------------------------------------
+            // Mensajes entrantes marcados como pendientes de IA: la respuesta
+            // (y la asignación de agente) la ejecuta PendingAiResponseScheduler
+            // tras la ventana de debounce. Aquí NO se decide nada para no
+            // mutar la conversación en paralelo con la consolidación.
+            // -----------------------------------------------------------------
+            boolean deferred = !message.isOutbound()
+                    && context.getConversation() != null
+                    && context.getConversation().isPendingAiResponse();
+
+            Decision decision;
+            if (deferred) {
+                log.info("Conversation {} is pending AI response; scheduler will handle it "
+                        + "(NO_ACTION = DEFERRED, esperando ventana de consolidación)",
+                        context.getConversation().getId());
+                decision = Decision.builder()
+                        .actionType(ActionType.NO_ACTION)
+                        .reason("DEFERRED: waiting for 4s consolidation window")
+                        .build();
+            } else {
+                decision = decisionEngine.decide(context);
+            }
 
             actionDispatcher.dispatch(decision, context);
 

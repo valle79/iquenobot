@@ -17,6 +17,9 @@ public class BotConfiguration {
     private final double temperature;
     private final boolean humanHandoffEnabled;
     private final String fallbackMessage;
+    private final boolean botResumeEnabled;
+    private final int botResumeDelayMinutes;
+    private final int maxHumanIdleMinutes;
     private final Map<String, Object> extraSettings;
 
     private BotConfiguration(Builder builder) {
@@ -27,6 +30,9 @@ public class BotConfiguration {
         this.temperature = builder.temperature;
         this.humanHandoffEnabled = builder.humanHandoffEnabled;
         this.fallbackMessage = builder.fallbackMessage;
+        this.botResumeEnabled = builder.botResumeEnabled;
+        this.botResumeDelayMinutes = builder.botResumeDelayMinutes;
+        this.maxHumanIdleMinutes = builder.maxHumanIdleMinutes;
         this.extraSettings = builder.extraSettings;
     }
 
@@ -37,6 +43,9 @@ public class BotConfiguration {
     public double getTemperature() { return temperature; }
     public boolean isHumanHandoffEnabled() { return humanHandoffEnabled; }
     public String getFallbackMessage() { return fallbackMessage; }
+    public boolean isBotResumeEnabled() { return botResumeEnabled; }
+    public int getBotResumeDelayMinutes() { return botResumeDelayMinutes; }
+    public int getMaxHumanIdleMinutes() { return maxHumanIdleMinutes; }
     public Map<String, Object> getExtraSettings() { return extraSettings; }
 
     public boolean isAiAvailable() {
@@ -57,6 +66,9 @@ public class BotConfiguration {
         builder.humanHandoffEnabled(getBooleanSetting(settingsByKey, "bot", "human_handoff", true));
         builder.fallbackMessage(getStringSetting(settingsByKey, "bot", "fallback_message",
                 "Lo siento, voy a conectarte con un agente humano."));
+        builder.botResumeEnabled(getBooleanSetting(settingsByKey, "bot", "bot_resume_enabled", true));
+        builder.botResumeDelayMinutes(getIntSetting(settingsByKey, "bot", "bot_resume_delay_minutes", 3));
+        builder.maxHumanIdleMinutes(getIntSetting(settingsByKey, "bot", "max_human_idle_minutes", 15));
 
         return builder.build();
     }
@@ -93,6 +105,16 @@ public class BotConfiguration {
         }
     }
 
+    private static int getIntSetting(Map<String, Setting> settings, String category, String key, int defaultValue) {
+        Setting setting = settings.get(category + "." + key);
+        if (setting == null) return defaultValue;
+        try {
+            return Integer.parseInt(setting.getValue().trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
     public static class Builder {
         private boolean enabled = false;
         private boolean autoReply = false;
@@ -101,6 +123,9 @@ public class BotConfiguration {
         private double temperature = 0.7;
         private boolean humanHandoffEnabled = true;
         private String fallbackMessage = "Lo siento, voy a conectarte con un agente humano.";
+        private boolean botResumeEnabled = true;
+        private int botResumeDelayMinutes = 3;
+        private int maxHumanIdleMinutes = 15;
         private Map<String, Object> extraSettings = Map.of();
 
         public Builder enabled(boolean enabled) { this.enabled = enabled; return this; }
@@ -110,6 +135,9 @@ public class BotConfiguration {
         public Builder temperature(double temperature) { this.temperature = temperature; return this; }
         public Builder humanHandoffEnabled(boolean humanHandoffEnabled) { this.humanHandoffEnabled = humanHandoffEnabled; return this; }
         public Builder fallbackMessage(String fallbackMessage) { this.fallbackMessage = fallbackMessage; return this; }
+        public Builder botResumeEnabled(boolean botResumeEnabled) { this.botResumeEnabled = botResumeEnabled; return this; }
+        public Builder botResumeDelayMinutes(int botResumeDelayMinutes) { this.botResumeDelayMinutes = botResumeDelayMinutes; return this; }
+        public Builder maxHumanIdleMinutes(int maxHumanIdleMinutes) { this.maxHumanIdleMinutes = maxHumanIdleMinutes; return this; }
         public Builder extraSettings(Map<String, Object> extraSettings) { this.extraSettings = extraSettings; return this; }
 
         public BotConfiguration build() {

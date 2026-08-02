@@ -106,6 +106,9 @@ public class ConversationMessage extends BaseEntity {
     @Column(name = "metadata", columnDefinition = "TEXT")
     private String metadata; // JSON metadata for channel-specific data
 
+    @Column(name = "ai_processed", nullable = false)
+    private boolean aiProcessed = false;
+
     @OneToMany(mappedBy = "message", fetch = FetchType.LAZY)
     private Set<MessageAttachment> attachments;
 

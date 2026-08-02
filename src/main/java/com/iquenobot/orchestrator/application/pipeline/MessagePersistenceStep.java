@@ -83,6 +83,17 @@ public class MessagePersistenceStep implements PipelineStep, MessagePipeline.Pri
         conversationRepository.incrementIncomingMessageMetrics(
                 conversation.getId(), context.getTenantId(), now);
 
+        // ---------------------------------------------------------------------
+        // DEBOUNCE: los mensajes entrantes no ejecutan IA aquí.
+        // Solo se marca la conversación como pendiente; el
+        // PendingAiResponseScheduler la consolida y responde después.
+        // ---------------------------------------------------------------------
+        if (!outbound) {
+            conversation.setPendingAiResponse(true);
+            conversationRepository.save(conversation);
+            log.debug("Conversation {} marked as pending AI response", conversation.getId());
+        }
+
         context.setPersistedMessage(persisted);
 
         log.debug("Message persisted: id={} conversation={} type={}",

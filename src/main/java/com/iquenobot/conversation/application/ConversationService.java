@@ -7,6 +7,8 @@ import com.iquenobot.auth.domain.repository.UserRepository;
 import com.iquenobot.contact.application.ContactService;
 import com.iquenobot.contact.domain.entity.Contact;
 import com.iquenobot.contact.domain.repository.ContactRepository;
+import com.iquenobot.channel.domain.entity.WhatsAppChannel;
+import com.iquenobot.channel.domain.repository.WhatsAppChannelRepository;
 import com.iquenobot.conversation.domain.dto.ConversationDto;
 import com.iquenobot.conversation.domain.dto.ConversationMessageDto;
 import com.iquenobot.conversation.domain.dto.CreateConversationRequestDto;
@@ -61,7 +63,9 @@ public class ConversationService {
     private final ContactService contactService;
     private final IWhatsAppProvider whatsAppProvider;
     private final SettingRepository settingRepository;
+    private final WhatsAppChannelRepository whatsAppChannelRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final ConversationHandoffService handoffService;
 
     @Transactional(readOnly = true)
     public ConversationDto getById(UUID id) {
@@ -285,10 +289,14 @@ public class ConversationService {
         // Update contact (atomic, avoids optimistic locking)
         contactRepository.incrementMessageCount(conversation.getContact().getId());
 
+        // Human handoff: el agente intervino de verdad; el bot se pausa
+        // temporalmente y se recupera automáticamente tras inactividad.
+        handoffService.onAgentMessage(conversation, userId);
+
         // Send via Evolution API if WhatsApp channel
         if (conversation.getChannel() == ChannelType.WHATSAPP && conversation.getContact().getPhone() != null) {
             try {
-                String instanceId = getWhatsAppInstanceId(tenantId);
+                String instanceId = resolveWhatsAppInstanceId(conversation, tenantId);
                 if (instanceId != null) {
                     String channelMessageId;
                     if (isText) {
@@ -351,6 +359,23 @@ public class ConversationService {
             case CONTACT -> AttachmentType.CONTACT;
             default -> AttachmentType.DOCUMENT;
         };
+    }
+
+    /**
+     * Resuelve la instancia de WhatsApp para enviar un mensaje saliente:
+     * 1. El instance_name guardado en la conversación (canal que la originó).
+     * 2. El primer canal del tenant (conexión múltiple).
+     * 3. Fallback: setting legacy whatsapp.instance_id.
+     */
+    public String resolveWhatsAppInstanceId(Conversation conversation, UUID tenantId) {
+        if (conversation.getInstanceName() != null && !conversation.getInstanceName().isBlank()) {
+            return conversation.getInstanceName();
+        }
+
+        return whatsAppChannelRepository.findByTenantIdAndDeletedFalse(tenantId).stream()
+                .findFirst()
+                .map(WhatsAppChannel::getInstanceName)
+                .orElseGet(() -> getWhatsAppInstanceId(tenantId));
     }
 
     private String getWhatsAppInstanceId(UUID tenantId) {

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -168,6 +169,88 @@ public class KnowledgeBaseService {
             return sb.toString();
         }
         return "";
+    }
+
+    /**
+     * Keywords que, si aparecen en los tags o título de un documento de KB,
+     * indican que ese documento define el comportamiento del bot (tono, reglas,
+     * procedimientos, qué debe hacer el bot en cada situación).
+     */
+    private static final String[] BEHAVIOR_TAG_KEYWORDS = {
+            "comportamiento", "conducta", "reglas", "normas", "tono", "estilo",
+            "politica", "política", "policy", "procedimiento", "protocolo",
+            "instrucciones", "guia", "guía", "manual", "script", "prompt",
+            "atencion", "atención", "bot"
+    };
+
+    private static final int BEHAVIOR_MAX_DOCS = 3;
+    private static final int BEHAVIOR_MAX_CHARS_PER_DOC = 1500;
+    private static final int BEHAVIOR_MAX_TOTAL_CHARS = 6000;
+
+    /**
+     * Construye el contexto de comportamiento del bot a partir del módulo de
+     * conocimientos: documentos del tenant etiquetados como reglas/comportamiento
+     * (o, si no existen, los más recientes) para que el LLM sepa cómo portarse y
+     * qué realizar en TODAS sus respuestas, no solo cuando matchea una consulta.
+     */
+    @Transactional(readOnly = true)
+    public String buildBehaviorContext() {
+        UUID tenantId = getTenantId();
+        List<KnowledgeBase> all = repository.findByTenantIdAndDeletedFalseOrderByCreatedAtDesc(tenantId);
+        if (all.isEmpty()) {
+            return "";
+        }
+
+        List<KnowledgeBase> behaviorDocs = new ArrayList<>();
+        List<KnowledgeBase> generalDocs = new ArrayList<>();
+        for (KnowledgeBase kb : all) {
+            if (isBehaviorDocument(kb)) {
+                behaviorDocs.add(kb);
+            } else {
+                generalDocs.add(kb);
+            }
+        }
+
+        List<KnowledgeBase> selected = (behaviorDocs.isEmpty() ? generalDocs : behaviorDocs)
+                .stream().limit(BEHAVIOR_MAX_DOCS).toList();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n\n--- REGLAS DE COMPORTAMIENTO DEL BOT (OBLIGATORIAS) ---\n");
+        int total = 0;
+        for (KnowledgeBase kb : selected) {
+            String content = kb.getContent();
+            if (content == null || content.isBlank()) {
+                continue;
+            }
+            if (content.length() > BEHAVIOR_MAX_CHARS_PER_DOC) {
+                content = content.substring(0, BEHAVIOR_MAX_CHARS_PER_DOC) + "...";
+            }
+            if (total + content.length() > BEHAVIOR_MAX_TOTAL_CHARS) {
+                content = content.substring(0, Math.max(0, BEHAVIOR_MAX_TOTAL_CHARS - total)) + "...";
+            }
+            sb.append("[").append(kb.getTitle()).append("]\n").append(content).append("\n\n");
+            total += content.length();
+            if (total >= BEHAVIOR_MAX_TOTAL_CHARS) {
+                break;
+            }
+        }
+        if (total == 0) {
+            return "";
+        }
+        sb.append("Debes comportarte y actuar siguiendo estas reglas de la empresa en TODAS tus respuestas, ");
+        sb.append("y realizar las acciones que indiquen (derivar a agente, ofrecer catálogo, etc.).");
+        return sb.toString();
+    }
+
+    private boolean isBehaviorDocument(KnowledgeBase kb) {
+        String haystack = ((kb.getTags() == null ? "" : kb.getTags())
+                + " " + (kb.getTitle() == null ? "" : kb.getTitle())).toLowerCase();
+        for (String keyword : BEHAVIOR_TAG_KEYWORDS) {
+            if (haystack.contains(keyword)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Transactional(readOnly = true)

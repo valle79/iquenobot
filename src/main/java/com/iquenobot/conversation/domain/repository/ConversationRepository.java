@@ -148,4 +148,48 @@ public interface ConversationRepository extends JpaRepository<Conversation, UUID
     Optional<Conversation> findByChannelConversationIdForUpdate(
             @Param("channelConversationId") String channelConversationId,
             @Param("tenantId") UUID tenantId);
+
+    /**
+     * Conversaciones con respuesta de IA pendiente cuya última actividad superó
+     * la ventana de debounce. Usado por PendingAiResponseScheduler.
+     * Incluye OPEN, IN_PROGRESS y PENDING: el bot NO se detiene por estar la
+     * conversación asignada; la pausa la decide ConversationHandoffService.
+     */
+    @Query("SELECT c FROM Conversation c WHERE c.pendingAiResponse = true " +
+           "AND c.lastMessageAt < :threshold AND c.status IN ('OPEN', 'IN_PROGRESS', 'PENDING') " +
+           "AND c.deleted = false " +
+           "ORDER BY c.lastMessageAt ASC")
+    List<Conversation> findPendingAiConversations(@Param("threshold") LocalDateTime threshold);
+
+    /**
+     * Reclama una conversación pendiente con bloqueo pesimista de fila.
+     * FOR UPDATE SKIP LOCKED: si otra instancia del scheduler ya la está
+     * procesando, esta consulta no espera y no devuelve la fila.
+     */
+    @Query(value = "SELECT * FROM conversations WHERE id = :id " +
+           "AND pending_ai_response = true AND status IN ('OPEN', 'IN_PROGRESS', 'PENDING') " +
+           "AND is_deleted = false " +
+           "FOR UPDATE SKIP LOCKED", nativeQuery = true)
+    Optional<Conversation> findPendingConversationForUpdate(@Param("id") UUID id);
+
+    /**
+     * Activa el handoff humano (update atómico: evita optimistic locks cuando
+     * el agente responde en paralelo al scheduler). Usado por
+     * ConversationHandoffService.onAgentMessage.
+     */
+    @Modifying
+    @Query("""
+            UPDATE Conversation c SET
+                c.humanHandoff = true,
+                c.humanTakenOverAt = COALESCE(c.humanTakenOverAt, :takenOverAt),
+                c.lastAgentReplyAt = :lastAgentReplyAt,
+                c.botResumeAfter = :botResumeAfter,
+                c.updatedAt = :lastAgentReplyAt
+            WHERE c.id = :id AND c.tenantId = :tenantId
+            """)
+    int activateHumanHandoff(@Param("id") UUID id,
+                             @Param("tenantId") UUID tenantId,
+                             @Param("takenOverAt") LocalDateTime takenOverAt,
+                             @Param("lastAgentReplyAt") LocalDateTime lastAgentReplyAt,
+                             @Param("botResumeAfter") LocalDateTime botResumeAfter);
 }

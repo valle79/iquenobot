@@ -27,6 +27,7 @@ public class IncomingMessage {
     private final String conversationName;
     private final Map<String, Object> metadata;
     private final boolean outbound;
+    private final boolean group;
 
     private IncomingMessage(Builder builder) {
         this.channelMessageId = builder.channelMessageId;
@@ -48,6 +49,7 @@ public class IncomingMessage {
         this.conversationName = builder.conversationName;
         this.metadata = builder.metadata;
         this.outbound = builder.outbound;
+        this.group = builder.group;
     }
 
     public String getChannelMessageId() { return channelMessageId; }
@@ -70,6 +72,7 @@ public class IncomingMessage {
     public String getConversationName() { return conversationName; }
     public Map<String, Object> getMetadata() { return metadata; }
     public boolean isOutbound() { return outbound; }
+    public boolean isGroup() { return group; }
 
     public static Builder builder() {
         return new Builder();
@@ -95,6 +98,7 @@ public class IncomingMessage {
         private String conversationName;
         private Map<String, Object> metadata;
         private boolean outbound;
+        private boolean group;
 
         public Builder channelMessageId(String channelMessageId) { this.channelMessageId = channelMessageId; return this; }
         public Builder channel(ChannelType channel) { this.channel = channel; return this; }
@@ -115,6 +119,7 @@ public class IncomingMessage {
         public Builder conversationName(String conversationName) { this.conversationName = conversationName; return this; }
         public Builder metadata(Map<String, Object> metadata) { this.metadata = metadata; return this; }
         public Builder outbound(boolean outbound) { this.outbound = outbound; return this; }
+        public Builder group(boolean group) { this.group = group; return this; }
 
         public IncomingMessage build() {
             return new IncomingMessage(this);

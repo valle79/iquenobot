@@ -81,6 +81,57 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
         }
     }
 
+
+
+public String getGroupName(String instanceId, String groupJid) {
+
+    try {
+
+        String url = evolutionApiUrl + "/group/findGroupInfos/" + instanceId;
+
+        Map<String, Object> payload = Map.of(
+                "groupJid", groupJid
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("apikey", apiKey);
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
+
+        ResponseEntity<Map> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                entity,
+                Map.class
+        );
+
+        Map body = response.getBody();
+
+        if (body == null) {
+            return null;
+        }
+
+        Object subject = body.get("subject");
+
+        if (subject instanceof String s && !s.isBlank()) {
+            return s.trim();
+        }
+
+        return null;
+
+    } catch (Exception e) {
+
+        log.warn(
+                "Error obteniendo nombre del grupo {}: {}",
+                groupJid,
+                e.getMessage()
+        );
+
+        return null;
+    }
+}
+
     @Override
     public String sendMediaMessage(String instanceId, WhatsAppMessageDto message) {
         log.info("Sending media message via Evolution API to: {}", message.getTo());

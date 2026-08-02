@@ -87,4 +87,13 @@ public interface ConversationMessageRepository extends JpaRepository<Conversatio
     Page<ConversationMessage> searchByContent(@Param("tenantId") UUID tenantId, 
                                               @Param("keyword") String keyword, 
                                               Pageable pageable);
+
+    /**
+     * Mensajes entrantes de una conversación aún no consumidos por la
+     * consolidación de respuestas automáticas, en orden cronológico.
+     */
+    @Query("SELECT m FROM ConversationMessage m WHERE m.conversation.id = :conversationId " +
+           "AND m.direction = 'INBOUND' AND m.aiProcessed = false " +
+           "ORDER BY m.sentAt ASC, m.id ASC")
+    List<ConversationMessage> findUnprocessedInboundMessages(@Param("conversationId") UUID conversationId);
 }

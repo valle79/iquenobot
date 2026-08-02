@@ -63,6 +63,12 @@ public class Conversation extends SoftDeletableEntity {
     @Column(name = "channel_conversation_id", length = 100)
     private String channelConversationId;
 
+    @Column(name = "is_group", nullable = false)
+    private boolean isGroup = false;
+
+    @Column(name = "instance_name", length = 120)
+    private String instanceName;
+
     @Column(name = "last_message_at", nullable = false)
     private LocalDateTime lastMessageAt;
 
@@ -107,6 +113,27 @@ public class Conversation extends SoftDeletableEntity {
 
     @Column(name = "bot_fallback_count", nullable = false)
     private int botFallbackCount = 0;
+
+    @Column(name = "pending_ai_response", nullable = false)
+    private boolean pendingAiResponse = false;
+
+    @Column(name = "last_bot_response_at")
+    private LocalDateTime lastBotResponseAt;
+
+    @Column(name = "last_processed_message_hash", length = 64)
+    private String lastProcessedMessageHash;
+
+    @Column(name = "human_handoff", nullable = false)
+    private boolean humanHandoff = false;
+
+    @Column(name = "human_taken_over_at")
+    private LocalDateTime humanTakenOverAt;
+
+    @Column(name = "last_agent_reply_at")
+    private LocalDateTime lastAgentReplyAt;
+
+    @Column(name = "bot_resume_after")
+    private LocalDateTime botResumeAfter;
 
     @OneToMany(mappedBy = "conversation", fetch = FetchType.LAZY)
     private Set<ConversationMessage> messages;
@@ -190,6 +217,21 @@ public class Conversation extends SoftDeletableEntity {
         this.botConversation = false;
         this.botHandoffAt = LocalDateTime.now(ZoneOffset.UTC);
         this.status = ConversationStatus.OPEN;
+    }
+
+    public void activateHumanHandoff(LocalDateTime resumeAfter) {
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        this.humanHandoff = true;
+        if (this.humanTakenOverAt == null) {
+            this.humanTakenOverAt = now;
+        }
+        this.lastAgentReplyAt = now;
+        this.botResumeAfter = resumeAfter;
+    }
+
+    public void resumeBot() {
+        this.humanHandoff = false;
+        this.botResumeAfter = null;
     }
 
     public boolean isHighPriority() {

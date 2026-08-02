@@ -42,11 +42,26 @@ public class AssignAgentExecutor implements ActionExecutor {
             return;
         }
 
-        User agent = selectLeastBusyAgent(context.getTenantId());
+        assignIfUnassigned(conv, context.getTenantId(), context.getContact().getId());
+    }
+
+    /**
+     * Asigna el agente menos ocupado a la conversación si sigue sin asignar.
+     * Reutilizado por el flujo de consolidación (scheduler) cuando el
+     * mensaje entrante se responde de forma diferida.
+     */
+    @Transactional
+    public void assignIfUnassigned(Conversation conv, java.util.UUID tenantId, java.util.UUID contactId) {
+        if (conv.getAssignedUser() != null) {
+            log.debug("Conversation {} already assigned to agent {}", conv.getId(), conv.getAssignedUser().getId());
+            return;
+        }
+
+        User agent = selectLeastBusyAgent(tenantId);
 
         if (agent == null) {
             log.warn("No available agents for tenant={}, conversation {} will remain unassigned",
-                    context.getTenantId(), conv.getId());
+                    tenantId, conv.getId());
             conv.setStatus(ConversationStatus.OPEN);
             conversationRepository.save(conv);
             return;
@@ -56,14 +71,14 @@ public class AssignAgentExecutor implements ActionExecutor {
         conversationRepository.save(conv);
 
         eventPublisher.publish(new AgentAssignedEvent(
-                context.getTenantId().toString(),
+                tenantId.toString(),
                 conv.getId().toString(),
                 agent.getId().toString(),
-                context.getContact().getId().toString()
+                contactId.toString()
         ));
 
         log.info("Conversation {} assigned to agent {} (least busy, {} active conversations)",
-                conv.getId(), agent.getId(), conversationRepository.countByAssignedUser(context.getTenantId(), agent.getId()));
+                conv.getId(), agent.getId(), conversationRepository.countByAssignedUser(tenantId, agent.getId()));
     }
 
     private User selectLeastBusyAgent(java.util.UUID tenantId) {

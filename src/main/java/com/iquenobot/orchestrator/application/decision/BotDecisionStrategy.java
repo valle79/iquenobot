@@ -3,6 +3,7 @@ package com.iquenobot.orchestrator.application.decision;
 import com.iquenobot.ai.domain.dto.AIMessageDto;
 import com.iquenobot.chatbot.application.ChatbotService;
 import com.iquenobot.chatbot.domain.dto.ChatbotResponseDto;
+import com.iquenobot.conversation.application.ConversationHandoffService;
 import com.iquenobot.conversation.domain.entity.Conversation;
 import com.iquenobot.conversation.domain.entity.ConversationMessage;
 import com.iquenobot.conversation.domain.repository.ConversationMessageRepository;
@@ -36,6 +37,7 @@ public class BotDecisionStrategy implements DecisionStrategy {
     private final ConversationRepository conversationRepository;
     private final ConversationMessageRepository messageRepository;
     private final KnowledgeBaseService knowledgeBaseService;
+    private final ConversationHandoffService handoffService;
 
     private record LeadRule(String title, int baseScore) {}
 
@@ -61,6 +63,17 @@ public class BotDecisionStrategy implements DecisionStrategy {
             return false;
         }
 
+        // En el flujo síncrono del webhook, las conversaciones marcadas como
+        // pendientes NO responden aquí: el PendingAiResponseScheduler las
+        // consolida (debounce) y responde una sola vez. El scheduler invoca el
+        // DecisionEngine con scheduledProcessing=true.
+        if (!context.isScheduledProcessing() && context.getConversation() != null
+                && context.getConversation().isPendingAiResponse()) {
+            log.debug("Conversation {} is pending AI response; scheduler will handle it",
+                    context.getConversation().getId());
+            return false;
+        }
+
         BotConfiguration botConfig = context.getBotConfiguration();
         if (botConfig == null || !botConfig.isAiAvailable()) {
             log.debug("Bot not available (enabled={} provider={})",
@@ -72,6 +85,18 @@ public class BotDecisionStrategy implements DecisionStrategy {
         var conversation = context.getConversation();
         if (!conversation.isBotConversation() && conversation.getAssignedUser() != null) {
             log.debug("Conversation {} is assigned to an agent; bot will respond anyway", conversation.getId());
+        }
+
+        // Handoff humano: si un agente intervino y la ventana de pausa sigue
+        // activa, el bot no responde aunque la conversación esté asignada.
+        // Si la ventana venció, canBotRespond reactiva el bot y se persiste.
+        boolean wasHandedOff = conversation.isHumanHandoff();
+        if (!handoffService.canBotRespond(conversation)) {
+            log.debug("Bot paused by human handoff for conversation {}", conversation.getId());
+            return false;
+        }
+        if (wasHandedOff) {
+            conversationRepository.save(conversation);
         }
         return true;
     }
@@ -263,6 +288,13 @@ public class BotDecisionStrategy implements DecisionStrategy {
         String currentChannelMessageId = msg.getChannelMessageId();
         List<AIMessageDto> history = new ArrayList<>();
         for (ConversationMessage m : recent) {
+            // Solo se excluyen los mensajes entrantes aún no consumidos por la
+            // consolidación (ya están contenidos en el texto consolidado actual).
+            // Los mensajes salientes (respuestas del bot o del agente) siempre
+            // forman parte del contexto, aunque su ai_processed sea false.
+            if (m.isInbound() && !m.isAiProcessed()) {
+                continue;
+            }
             if (currentChannelMessageId != null && currentChannelMessageId.equals(m.getChannelMessageId())) {
                 continue;
             }

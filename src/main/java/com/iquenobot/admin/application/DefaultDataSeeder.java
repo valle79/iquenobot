@@ -6,11 +6,14 @@ import com.iquenobot.chatbot.domain.entity.ChatbotFlow;
 import com.iquenobot.chatbot.domain.entity.ChatbotIntent;
 import com.iquenobot.chatbot.domain.repository.ChatbotFlowRepository;
 import com.iquenobot.chatbot.domain.repository.ChatbotIntentRepository;
+import com.iquenobot.channel.domain.entity.WhatsAppChannel;
+import com.iquenobot.channel.domain.repository.WhatsAppChannelRepository;
 import com.iquenobot.role.domain.entity.Role;
 import com.iquenobot.role.domain.repository.RoleRepository;
 import com.iquenobot.setting.domain.entity.Setting;
 import com.iquenobot.setting.domain.repository.SettingRepository;
 import com.iquenobot.shared.enums.ChatbotFlowTrigger;
+import com.iquenobot.shared.enums.WhatsAppChannelStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,7 @@ public class DefaultDataSeeder {
 
     private final RoleRepository roleRepository;
     private final SettingRepository settingRepository;
+    private final WhatsAppChannelRepository whatsAppChannelRepository;
     private final ChatbotIntentRepository chatbotIntentRepository;
     private final ChatbotFlowRepository chatbotFlowRepository;
     private final ObjectMapper objectMapper;
@@ -103,15 +107,28 @@ public class DefaultDataSeeder {
 
     @Transactional(propagation = Propagation.MANDATORY)
     public void seedDefaultWhatsAppConfig(UUID tenantId) {
+        String instanceId = UUID.randomUUID().toString().substring(0, 8);
         List<Setting> whatsapp = List.of(
                 createSetting(tenantId, "whatsapp", "provider", "EVOLUTION_API", "text", "Proveedor WhatsApp"),
                 createSetting(tenantId, "whatsapp", "api_key", "", "text", "API Key"),
                 createSetting(tenantId, "whatsapp", "phone_number", "", "text", "Número de teléfono"),
                 createSetting(tenantId, "whatsapp", "webhook_url", "", "text", "URL del webhook"),
-                createSetting(tenantId, "whatsapp", "instance_id", UUID.randomUUID().toString().substring(0, 8), "text", "ID de instancia"),
+                createSetting(tenantId, "whatsapp", "instance_id", instanceId, "text", "ID de instancia"),
                 createSetting(tenantId, "whatsapp", "connected", "false", "boolean", "Estado de conexión")
         );
         settingRepository.saveAll(whatsapp);
+
+        if (!whatsAppChannelRepository.existsByInstanceNameAndDeletedFalse(instanceId)
+                && whatsAppChannelRepository.countByTenantIdAndDeletedFalse(tenantId) == 0) {
+            WhatsAppChannel channel = WhatsAppChannel.builder()
+                    .id(UUID.randomUUID())
+                    .tenantId(tenantId)
+                    .channelName("WhatsApp Principal")
+                    .instanceName(instanceId)
+                    .status(WhatsAppChannelStatus.DISCONNECTED)
+                    .build();
+            whatsAppChannelRepository.save(channel);
+        }
     }
 
     @Transactional(propagation = Propagation.MANDATORY)

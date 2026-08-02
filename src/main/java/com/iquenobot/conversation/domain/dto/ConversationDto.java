@@ -30,6 +30,8 @@ public class ConversationDto {
     private ConversationPriority priority;
     private String subject;
     private String channelConversationId;
+    private boolean isGroup;
+    private String instanceName;
     
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime lastMessageAt;
@@ -52,6 +54,16 @@ public class ConversationDto {
     private String tags;
     private String metadata;
     private boolean botConversation;
+    private boolean humanHandoff;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime humanTakenOverAt;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime lastAgentReplyAt;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime botResumeAfter;
     
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime botHandoffAt;

@@ -50,6 +50,39 @@ public class ChatbotService {
                     + "|uno|una|este|esta|ese|esa))"
                     + "|(?<!no )me interesa (comprar|adquirir|hacer (un|el) pedido)");
 
+    /**
+     * Términos que indican una consulta comercial genérica ("¿qué venden?",
+     * "¿qué ofrecen?", "catálogo", "precios"...). Aunque no exista contexto
+     * previo ni match de KB, el bot responde con el LLM en lugar de pedir
+     * aclaración, para no rechazar consultas legítimas de venta.
+     */
+    private static final String[] SALES_INQUIRY_TERMS = {
+            "que venden", "q venden", "que vende", "q vende", "que vendes", "q vendes",
+            "que ofrecen", "q ofrecen", "que ofrece", "q ofrece", "que ofreces",
+            "que tienen", "q tienen", "que manejan", "q manejan", "que productos",
+            "catalogo", "catálogo", "sus productos", "tus productos", "los productos",
+            "servicios que", "informacion de productos", "información de productos",
+            "informacion de sus productos", "información de sus productos",
+            "precios", "precio de", "cuanto cuesta", "cuánto cuesta", "cuanto vale", "cuánto vale",
+            "que es lo que venden", "q es lo que venden", "a que se dedican", "a qué se dedican",
+            "que vende la empresa", "q vende la empresa", "en que trabajan", "en qué trabajan",
+            "productos que venden", "productos que ofrecen", "que tipo de productos",
+            "q tipo de productos", "que oferta", "q oferta"
+    };
+
+    private boolean isSalesInquiry(String message) {
+        if (message == null || message.isBlank()) {
+            return false;
+        }
+        String normalized = message.toLowerCase();
+        for (String term : SALES_INQUIRY_TERMS) {
+            if (normalized.contains(term)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Transactional
     public ChatbotResponseDto processMessage(String message, Map<String, Object> context) {
         UUID tenantId = getTenantId();
@@ -101,8 +134,11 @@ public class ChatbotService {
         List<AIMessageDto> history = (List<AIMessageDto>) context.getOrDefault("history", new ArrayList<>());
         boolean hasConversationContext = history.stream().anyMatch(m -> "assistant".equals(m.getRole()));
 
+        // Las consultas comerciales genéricas ("¿qué venden?", "catálogo", "precios"...)
+        // SIEMPRE se responden con el LLM (con el contexto de KB/productos del tenant
+        // si existe), para no rechazar consultas legítimas de venta con "no entendí".
         String kbContext = knowledgeBaseService.buildContextForQuery(buildContextQuery(message, history));
-        if (hasConversationContext || !kbContext.isEmpty()) {
+        if (hasConversationContext || !kbContext.isEmpty() || isSalesInquiry(message)) {
             return generateAIResponse(message, context, kbContext);
         }
 
@@ -266,6 +302,15 @@ public class ChatbotService {
 
         try {
             String systemPrompt = (String) context.get("systemPrompt");
+
+            // El bot siempre se alimenta del módulo de conocimientos: los documentos
+            // de comportamiento del tenant (reglas, tono, procedimientos) definen cómo
+            // debe portarse y qué debe realizar en cada respuesta.
+            String behaviorContext = knowledgeBaseService.buildBehaviorContext();
+            if (behaviorContext != null && !behaviorContext.isEmpty()) {
+                systemPrompt = (systemPrompt != null ? systemPrompt : "") + behaviorContext;
+            }
+
             if (kbContext != null && !kbContext.isEmpty()) {
                 systemPrompt = (systemPrompt != null ? systemPrompt : "") + kbContext;
             }

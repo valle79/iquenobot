@@ -108,6 +108,13 @@
             <version>2.0.3</version>
         </dependency>
 
+        <!-- PDF text extraction -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+
         <!-- Object storage (AWS S3 / Cloudflare R2 / MinIO / GCS via S3 API) -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>

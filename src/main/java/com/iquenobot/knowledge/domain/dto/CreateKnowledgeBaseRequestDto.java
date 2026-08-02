@@ -28,6 +28,12 @@ public class CreateKnowledgeBaseRequestDto {
     @Size(max = 500)
     private String fileUrl;
 
+    /**
+     * Texto extraído automáticamente del PDF adjunto. Solo uso interno del bot,
+     * nunca se expone al cliente final.
+     */
+    private String extractedText;
+
     @Size(max = 500)
     private String tags;
 }

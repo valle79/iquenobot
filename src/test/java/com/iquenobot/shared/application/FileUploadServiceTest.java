@@ -1,6 +1,9 @@
 package com.iquenobot.shared.application;
 
 import com.iquenobot.shared.exception.BusinessException;
+import com.lowagie.text.Document;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.pdf.PdfWriter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -8,6 +11,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,12 +54,36 @@ class FileUploadServiceTest {
     @Test
     void uploadDocument_shouldReturnUrl_whenValidDocument() {
         MultipartFile file = new MockMultipartFile(
-                "file", "doc.pdf", "application/pdf", "pdf-content".getBytes());
+                "file", "doc.txt", "text/plain", "document-content".getBytes());
 
-        String url = fileUploadService.uploadDocument(file);
+        DocumentUploadResult result = fileUploadService.uploadDocument(file);
 
-        assertNotNull(url);
-        assertTrue(url.endsWith(".pdf"));
+        assertNotNull(result.url());
+        assertTrue(result.url().endsWith(".txt"));
+        assertNull(result.pageCount());
+        assertNull(result.extractedText());
+    }
+
+    @Test
+    void uploadDocument_shouldExtractText_whenValidPdf() throws Exception {
+        MultipartFile file = new MockMultipartFile(
+                "file", "doc.pdf", "application/pdf", createValidPdf("Hola mundo del catalogo"));
+
+        DocumentUploadResult result = fileUploadService.uploadDocument(file);
+
+        assertNotNull(result.url());
+        assertTrue(result.url().endsWith(".pdf"));
+        assertEquals(1, result.pageCount());
+        assertNotNull(result.extractedText());
+        assertTrue(result.extractedText().contains("Hola mundo"));
+    }
+
+    @Test
+    void uploadDocument_shouldThrow_whenPdfIsCorrupt() {
+        MultipartFile file = new MockMultipartFile(
+                "file", "doc.pdf", "application/pdf", "not-a-real-pdf".getBytes());
+
+        assertThrows(BusinessException.class, () -> fileUploadService.uploadDocument(file));
     }
 
     @Test
@@ -86,5 +114,15 @@ class FileUploadServiceTest {
     @Test
     void init_shouldCreateDirectories() {
         assertTrue(tempDir.toFile().exists());
+    }
+
+    private byte[] createValidPdf(String text) throws Exception {
+        Document document = new Document();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PdfWriter.getInstance(document, out);
+        document.open();
+        document.add(new Paragraph(text));
+        document.close();
+        return out.toByteArray();
     }
 }

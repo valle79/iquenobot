@@ -1,5 +1,6 @@
 package com.iquenobot.shared.interfaces.controller;
 
+import com.iquenobot.shared.application.DocumentUploadResult;
 import com.iquenobot.shared.application.FileUploadService;
 import com.iquenobot.shared.domain.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,11 +36,11 @@ public class FileUploadController {
     }
 
     @PostMapping(value = "/document", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Subir documento", description = "Sube un documento (PDF, DOC, TXT, CSV). Máximo 10MB.")
+    @Operation(summary = "Subir documento", description = "Sube un documento (PDF, DOC, TXT, CSV). Máximo 10MB. Para PDFs extrae el texto automáticamente (máximo 200 páginas).")
     @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'SUPERVISOR', 'AGENT')")
-    public ResponseEntity<ApiResponse<Map<String, String>>> uploadDocument(@RequestParam("file") MultipartFile file) {
-        String url = fileUploadService.uploadDocument(file);
-        return ResponseEntity.ok(ApiResponse.success(Map.of("url", url), "Documento subido exitosamente"));
+    public ResponseEntity<ApiResponse<DocumentUploadResult>> uploadDocument(@RequestParam("file") MultipartFile file) {
+        DocumentUploadResult result = fileUploadService.uploadDocument(file);
+        return ResponseEntity.ok(ApiResponse.success(result, "Documento subido exitosamente"));
     }
 
     @PostMapping(value = "/attachment", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

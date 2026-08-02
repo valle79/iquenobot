@@ -18,10 +18,16 @@ public interface KnowledgeBaseRepository extends JpaRepository<KnowledgeBase, UU
             SELECT * FROM knowledge_base
             WHERE tenant_id = :tenantId
               AND is_deleted = false
-              AND to_tsvector('spanish', coalesce(content, '') || ' ' || coalesce(title, ''))
+              AND to_tsvector('spanish',
+                  coalesce(content, '') || ' ' ||
+                  coalesce(extracted_text, '') || ' ' ||
+                  coalesce(title, ''))
                   @@ plainto_tsquery('spanish', :query)
             ORDER BY ts_rank(
-                to_tsvector('spanish', coalesce(content, '') || ' ' || coalesce(title, '')),
+                to_tsvector('spanish',
+                    coalesce(content, '') || ' ' ||
+                    coalesce(extracted_text, '') || ' ' ||
+                    coalesce(title, '')),
                 plainto_tsquery('spanish', :query)
             ) DESC
             LIMIT :limit
@@ -34,7 +40,8 @@ public interface KnowledgeBaseRepository extends JpaRepository<KnowledgeBase, UU
             SELECT * FROM knowledge_base
             WHERE tenant_id = :tenantId
               AND is_deleted = false
-              AND (title ILIKE :pattern OR content ILIKE :pattern OR tags ILIKE :pattern)
+              AND (title ILIKE :pattern OR content ILIKE :pattern
+                   OR extracted_text ILIKE :pattern OR tags ILIKE :pattern)
             ORDER BY created_at DESC
             LIMIT 50
             """, nativeQuery = true)

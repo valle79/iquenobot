@@ -16,5 +16,14 @@ export interface CreateKnowledgeBaseRequest {
   sourceType?: string
   sourceUrl?: string
   fileUrl?: string
+  extractedText?: string
   tags?: string
+}
+
+export type UpdateKnowledgeBaseRequest = CreateKnowledgeBaseRequest
+
+export interface DocumentUploadResult {
+  url: string
+  pageCount?: number
+  extractedText?: string
 }

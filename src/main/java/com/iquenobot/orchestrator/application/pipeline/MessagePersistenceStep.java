@@ -1,5 +1,6 @@
 package com.iquenobot.orchestrator.application.pipeline;
 
+import com.iquenobot.conversation.application.ConversationHandoffService;
 import com.iquenobot.conversation.domain.entity.Conversation;
 import com.iquenobot.conversation.domain.entity.ConversationMessage;
 import com.iquenobot.conversation.domain.entity.MessageAttachment;
@@ -31,9 +32,12 @@ public class MessagePersistenceStep implements PipelineStep, MessagePipeline.Pri
     private final ConversationMessageRepository messageRepository;
     private final ConversationRepository conversationRepository;
     private final MessageAttachmentRepository attachmentRepository;
+    private final ConversationHandoffService handoffService;
 
     @Override
-    public int getOrder() { return 40; }
+    public int getOrder() {
+        return 40;
+    }
 
     @Override
     @Transactional
@@ -91,9 +95,20 @@ public class MessagePersistenceStep implements PipelineStep, MessagePipeline.Pri
         // PendingAiResponseScheduler la consolida y responde después.
         // ---------------------------------------------------------------------
         if (!outbound) {
+            // Mensaje del cliente → marcar pendiente de IA
             conversation.setPendingAiResponse(true);
             conversationRepository.save(conversation);
             log.debug("Conversation {} marked as pending AI response", conversation.getId());
+        } else {
+            // Mensaje del agente (desde celular o panel vía webhook) → pausar bot
+            UUID agentId = conversation.getAssignedUser() != null
+                    ? conversation.getAssignedUser().getId()
+                    : null;
+
+            handoffService.onAgentMessage(conversation, agentId);
+
+            log.info("Outbound agent message via webhook → human handoff activated for conversation {}",
+                    conversation.getId());
         }
 
         context.setPersistedMessage(persisted);

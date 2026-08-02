@@ -64,6 +64,7 @@ public class KnowledgeBaseService {
                 .sourceType(request.getSourceType() != null ? request.getSourceType() : "manual")
                 .sourceUrl(request.getSourceUrl())
                 .fileUrl(request.getFileUrl())
+                .extractedText(request.getExtractedText())
                 .tags(request.getTags())
                 .createdBy(userId)
                 .updatedBy(userId)
@@ -91,6 +92,9 @@ public class KnowledgeBaseService {
         kb.setSourceType(request.getSourceType() != null ? request.getSourceType() : "manual");
         kb.setSourceUrl(request.getSourceUrl());
         kb.setFileUrl(request.getFileUrl());
+        if (request.getExtractedText() != null) {
+            kb.setExtractedText(request.getExtractedText());
+        }
         kb.setTags(request.getTags());
         kb.setUpdatedBy(userId);
 
@@ -111,6 +115,10 @@ public class KnowledgeBaseService {
             throw new BusinessException("Entrada de conocimiento no encontrada");
         }
 
+        // El texto extraído es derivado y regenerable: al eliminar la entrada se
+        // libera el espacio, manteniendo el borrado lógico para lo que sí es
+        // información del usuario (content, título, etc.).
+        kb.setExtractedText(null);
         kb.softDelete(userId);
         repository.save(kb);
         log.info("Knowledge base entry deleted: {} in tenant: {}", kb.getTitle(), tenantId);
@@ -142,7 +150,7 @@ public class KnowledgeBaseService {
             sb.append("\n\n--- INFORMACIÓN DE LA EMPRESA ---\n");
             for (KnowledgeBase kb : results) {
                 sb.append("[").append(kb.getTitle()).append("]\n");
-                sb.append(kb.getContent()).append("\n\n");
+                sb.append(resolveContextText(kb)).append("\n\n");
             }
             sb.append("--- FIN INFORMACIÓN ---\n");
         }
@@ -186,6 +194,23 @@ public class KnowledgeBaseService {
     private static final int BEHAVIOR_MAX_DOCS = 3;
     private static final int BEHAVIOR_MAX_CHARS_PER_DOC = 1500;
     private static final int BEHAVIOR_MAX_TOTAL_CHARS = 6000;
+    private static final int MAX_EXTRACTED_CONTEXT_CHARS = 12_000;
+
+    /**
+     * Para entradas PDF con texto extraído se usa ese texto (truncado) como
+     * contexto del bot, ya que contiene la información real del documento.
+     * En el resto de casos se usa la descripción manual.
+     */
+    private String resolveContextText(KnowledgeBase kb) {
+        String extracted = kb.getExtractedText();
+        if ("pdf".equals(kb.getSourceType()) && extracted != null && !extracted.isBlank()) {
+            if (extracted.length() > MAX_EXTRACTED_CONTEXT_CHARS) {
+                return extracted.substring(0, MAX_EXTRACTED_CONTEXT_CHARS) + "...";
+            }
+            return extracted;
+        }
+        return kb.getContent();
+    }
 
     /**
      * Construye el contexto de comportamiento del bot a partir del módulo de

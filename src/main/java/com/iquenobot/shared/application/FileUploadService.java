@@ -51,9 +51,24 @@ public class FileUploadService {
         return storeFile(file, "images");
     }
 
-    public String uploadDocument(MultipartFile file) {
+    public DocumentUploadResult uploadDocument(MultipartFile file) {
         validateFile(file, ALLOWED_DOCUMENT_TYPES, MAX_FILE_SIZE);
-        return storeFile(file, "documents");
+
+        boolean isPdf = "application/pdf".equals(file.getContentType());
+        PdfTextExtractor.PdfExtractionResult extraction = null;
+        if (isPdf) {
+            try {
+                extraction = PdfTextExtractor.extract(file.getBytes());
+            } catch (IOException e) {
+                throw new BusinessException("No se pudo leer el archivo PDF");
+            }
+        }
+
+        String url = storeFile(file, "documents");
+        if (extraction == null) {
+            return new DocumentUploadResult(url, null, null);
+        }
+        return new DocumentUploadResult(url, extraction.pageCount(), extraction.extractedText());
     }
 
     public String uploadAttachment(MultipartFile file) {

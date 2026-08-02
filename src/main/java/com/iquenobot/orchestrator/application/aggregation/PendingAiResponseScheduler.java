@@ -1,6 +1,5 @@
 package com.iquenobot.orchestrator.application.aggregation;
 
-import com.iquenobot.conversation.application.ConversationHandoffService;
 import com.iquenobot.conversation.domain.entity.Conversation;
 import com.iquenobot.conversation.domain.repository.ConversationRepository;
 import com.iquenobot.orchestrator.application.ConversationOrchestrator;
@@ -21,8 +20,10 @@ import java.util.List;
  * actividad superó la ventana de debounce (4s) y las procesa una por una.
  *
  * Thread-safe: el procesamiento por conversación se serializa con
- * FOR UPDATE SKIP LOCKED, por lo que múltiples instancias del scheduler
- * (o reinicios) nunca procesan la misma conversación dos veces.
+ * FOR UPDATE SKIP LOCKED (reclamo en BD dentro de
+ * {@link MessageAggregationService#claimAndProcessPending}), por lo que
+ * múltiples instancias del scheduler (o reinicios) nunca procesan la misma
+ * conversación dos veces.
  */
 @Component
 @RequiredArgsConstructor
@@ -32,7 +33,6 @@ public class PendingAiResponseScheduler {
     private final ConversationRepository conversationRepository;
     private final MessageAggregationService aggregationService;
     private final ConversationOrchestrator orchestrator;
-    private final ConversationHandoffService handoffService;
 
     @Scheduled(fixedDelayString = "${app.ai.pending-response-poll-ms:1000}")
     public void processPendingConversations() {
@@ -53,6 +53,8 @@ public class PendingAiResponseScheduler {
 
                 // Mismo lock que el flujo de webhooks: el pipeline síncrono y la
                 // consolidación nunca tocan la misma conversación en paralelo.
+                // El reclamo real con FOR UPDATE SKIP LOCKED ocurre dentro de
+                // claimAndProcessPending: si otro worker ya la tomó, se salta.
                 String lockKey = ConversationOrchestrator.normalizeLockKey(
                         conversation.getChannel() != null ? conversation.getChannel().name() : "UNKNOWN",
                         conversation.getChannelConversationId() != null
@@ -60,8 +62,7 @@ public class PendingAiResponseScheduler {
                                 : conversation.getId().toString());
 
                 orchestrator.withConversationLock(lockKey, () -> {
-                    handoffService.resumeBotIfAgentIdle(conversation);
-                    aggregationService.processPendingConversation(conversation);
+                    aggregationService.claimAndProcessPending(conversation);
                     return null;
                 });
             } catch (Exception e) {

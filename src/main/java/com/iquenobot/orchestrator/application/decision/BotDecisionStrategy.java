@@ -15,6 +15,7 @@ import com.iquenobot.orchestrator.domain.model.Decision;
 import com.iquenobot.orchestrator.domain.model.IncomingMessage;
 import com.iquenobot.orchestrator.domain.model.ProcessingContext;
 import com.iquenobot.orchestrator.domain.service.DecisionStrategy;
+import com.iquenobot.shared.enums.ConversationStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,297 +34,314 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BotDecisionStrategy implements DecisionStrategy {
 
-    private final ChatbotService chatbotService;
-    private final ConversationRepository conversationRepository;
-    private final ConversationMessageRepository messageRepository;
-    private final KnowledgeBaseService knowledgeBaseService;
-    private final ConversationHandoffService handoffService;
+        private final ChatbotService chatbotService;
+        private final ConversationRepository conversationRepository;
+        private final ConversationMessageRepository messageRepository;
+        private final KnowledgeBaseService knowledgeBaseService;
+        private final ConversationHandoffService handoffService;
 
-    private record LeadRule(String title, int baseScore) {}
-
-    /** Cantidad de mensajes recientes de la conversación que se pasan como contexto al LLM. */
-    private static final int HISTORY_LIMIT = 30;
-
-    private static final Map<String, LeadRule> COMMERCIAL_RULES = Map.of(
-            "solicitar_precio", new LeadRule("Solicitud de cotización", 40),
-            "consulta_envio", new LeadRule("Consulta de envío", 30),
-            "forma_pago", new LeadRule("Interés en compra - forma de pago", 35),
-            "informacion_empresa", new LeadRule("Interés general en productos/servicios", 25)
-    );
-
-    /** Número máximo de intentos de aclaración antes de pasar la conversación al agente. */
-    private static final int MAX_CLARIFICATION_ATTEMPTS = 1;
-
-    @Override
-    public int getPriority() { return 10; }
-
-    @Override
-    public boolean canHandle(ProcessingContext context) {
-        if (context.getIncomingMessage().isOutbound()) {
-            return false;
+        private record LeadRule(String title, int baseScore) {
         }
 
-        // En el flujo síncrono del webhook, las conversaciones marcadas como
-        // pendientes NO responden aquí: el PendingAiResponseScheduler las
-        // consolida (debounce) y responde una sola vez. El scheduler invoca el
-        // DecisionEngine con scheduledProcessing=true.
-        if (!context.isScheduledProcessing() && context.getConversation() != null
-                && context.getConversation().isPendingAiResponse()) {
-            log.debug("Conversation {} is pending AI response; scheduler will handle it",
-                    context.getConversation().getId());
-            return false;
+        /**
+         * Cantidad de mensajes recientes de la conversación que se pasan como contexto
+         * al LLM.
+         */
+        private static final int HISTORY_LIMIT = 30;
+
+        private static final Map<String, LeadRule> COMMERCIAL_RULES = Map.of(
+                        "solicitar_precio", new LeadRule("Solicitud de cotización", 40),
+                        "consulta_envio", new LeadRule("Consulta de envío", 30),
+                        "forma_pago", new LeadRule("Interés en compra - forma de pago", 35),
+                        "informacion_empresa", new LeadRule("Interés general en productos/servicios", 25));
+
+        /**
+         * Número máximo de intentos de aclaración antes de pasar la conversación al
+         * agente.
+         */
+        private static final int MAX_CLARIFICATION_ATTEMPTS = 1;
+
+        @Override
+        public int getPriority() {
+                return 10;
         }
 
-        BotConfiguration botConfig = context.getBotConfiguration();
-        if (botConfig == null || !botConfig.isAiAvailable()) {
-            log.debug("Bot not available (enabled={} provider={})",
-                    botConfig != null ? botConfig.isEnabled() : "N/A",
-                    botConfig != null ? botConfig.getAiProvider() : "N/A");
-            return false;
-        }
-
-        var conversation = context.getConversation();
-        if (!conversation.isBotConversation() && conversation.getAssignedUser() != null) {
-            log.debug("Conversation {} is assigned to an agent; bot will respond anyway", conversation.getId());
-        }
-
-        // Handoff humano: si un agente intervino y la ventana de pausa sigue
-        // activa, el bot no responde aunque la conversación esté asignada.
-        // Si la ventana venció, canBotRespond reactiva el bot y se persiste.
-        boolean wasHandedOff = conversation.isHumanHandoff();
-        if (!handoffService.canBotRespond(conversation)) {
-            log.debug("Bot paused by human handoff for conversation {}", conversation.getId());
-            return false;
-        }
-        if (wasHandedOff) {
-            conversationRepository.save(conversation);
-        }
-        return true;
-    }
-
-    @Override
-    public Decision decide(ProcessingContext context) {
-        var msg = context.getIncomingMessage();
-        var botConfig = context.getBotConfiguration();
-
-        try {
-            var conversation = context.getConversation();
-            boolean isFirstMessage = conversation.getMessageCount() == 0;
-
-            // Para mensajes multimedia sin texto (audio, sticker, foto sin caption),
-            // se pasa el tipo como contexto al chatbot para que no reciba texto vacío.
-            String content = msg.getContent() != null && !msg.getContent().isBlank()
-                    ? msg.getContent()
-                    : "[" + msg.getType() + "]";
-
-            ChatbotResponseDto botResponse = chatbotService.processMessage(
-                    content,
-                    Map.of(
-                            "conversationId", conversation.getId().toString(),
-                            "tenantId", context.getTenantId().toString(),
-                            "contactId", context.getContact().getId().toString(),
-                            "channel", msg.getChannel().name(),
-                            "systemPrompt", botConfig != null ? botConfig.getSystemPrompt() : "",
-                            "fallbackMessage", botConfig != null ? botConfig.getFallbackMessage() : "",
-                            "temperature", String.valueOf(botConfig != null ? botConfig.getTemperature() : 0.7),
-                            "isFirstMessage", isFirstMessage,
-                            "history", buildConversationHistory(context, msg)
-                    )
-            );
-
-            if (botResponse.isRequiresHumanAgent()) {
-                resetFallbackCount(context);
-                return Decision.builder()
-                        .actionType(ActionType.TRANSFER_CONVERSATION)
-                        .reason("Customer requested human agent or bot error")
-                        .requiresAgent(true)
-                        .parameters(Map.of(
-                                "response", botResponse.getMessage(),
-                                "intent", botResponse.getIntentDetected() != null
-                                        ? botResponse.getIntentDetected() : "unknown"
-                        ))
-                        .build();
-            }
-
-            if (botResponse.isRequiresClarification()) {
-                return handleClarification(context, botResponse);
-            }
-
-            resetFallbackCount(context);
-
-            String intent = botResponse.getIntentDetected() != null
-                    ? botResponse.getIntentDetected() : "unknown";
-
-            boolean purchaseIntent = hasPurchaseIntent(context, intent);
-
-            LeadRule rule = COMMERCIAL_RULES.get(intent);
-            if (rule != null) {
-                context.addSecondaryDecision(Decision.builder()
-                        .actionType(ActionType.CREATE_LEAD)
-                        .reason("Commercial intent detected: " + intent)
-                        .parameters(Map.of(
-                                "intent", intent,
-                                "title", rule.title(),
-                                "baseScore", String.valueOf(rule.baseScore()),
-                                "messageContent", msg.getContent()
-                        ))
-                        .build());
-            }
-
-            if (purchaseIntent) {
-                log.info("Purchase intent detected for conversation {}; transferring to agent for closing",
-                        conversation.getId());
-                return Decision.builder()
-                        .actionType(ActionType.TRANSFER_CONVERSATION)
-                        .reason("Customer shows purchase intent: " + intent)
-                        .requiresAgent(true)
-                        .parameters(Map.of(
-                                "response", botResponse.getMessage(),
-                                "intent", intent
-                        ))
-                        .build();
-            }
-
-            if ("solicitar_precio".equals(intent)) {
-                List<UUID> productIds = findMatchingProductIds(context, msg);
-                if (!productIds.isEmpty()) {
-                    log.info("Quote requested for conversation {} with {} product(s); generating quote PDF",
-                            conversation.getId(), productIds.size());
-                    return Decision.builder()
-                            .actionType(ActionType.SEND_QUOTE)
-                            .reason("Customer requested a quote")
-                            .parameters(Map.of(
-                                    "productIds", productIds.stream()
-                                            .map(UUID::toString)
-                                            .collect(Collectors.joining(",")),
-                                    "messageContent", msg.getContent() != null ? msg.getContent() : ""
-                            ))
-                            .build();
+        @Override
+        public boolean canHandle(ProcessingContext context) {
+                if (context.getIncomingMessage().isOutbound()) {
+                        return false;
                 }
-            }
 
-            return Decision.builder()
-                    .actionType(ActionType.SEND_TEXT)
-                    .reason("Bot responded to message")
-                    .parameters(Map.of(
-                            "response", botResponse.getMessage(),
-                            "intent", intent,
-                            "flowExecuted", botResponse.getFlowExecuted() != null
-                                    ? botResponse.getFlowExecuted() : ""
-                    ))
-                    .build();
+                if (!context.isScheduledProcessing() && context.getConversation() != null
+                                && context.getConversation().isPendingAiResponse()) {
+                        log.debug("Conversation {} is pending AI response; scheduler will handle it",
+                                        context.getConversation().getId());
+                        return false;
+                }
 
-        } catch (Exception e) {
-            log.warn("Chatbot processing failed, transferring to human: {}", e.getMessage());
-            return Decision.builder()
-                    .actionType(ActionType.TRANSFER_CONVERSATION)
-                    .reason("Bot error: " + e.getMessage())
-                    .requiresAgent(true)
-                    .build();
-        }
-    }
+                BotConfiguration botConfig = context.getBotConfiguration();
+                if (botConfig == null || !botConfig.isAiAvailable()) {
+                        log.debug("Bot not available (enabled={} provider={})",
+                                        botConfig != null ? botConfig.isEnabled() : "N/A",
+                                        botConfig != null ? botConfig.getAiProvider() : "N/A");
+                        return false;
+                }
 
-    /**
-     * El bot actúa como filtro de calificación: cuando no entiende al cliente,
-     * le pide con cortesía que detalle su consulta y mantiene la conversación.
-     * Solo transfiere al agente humano si el cliente vuelve a escribir algo
-     * que no se entiende (agotó los intentos de aclaración).
-     */
-    private Decision handleClarification(ProcessingContext context, ChatbotResponseDto botResponse) {
-        var conversation = context.getConversation();
-        int fallbacks = conversation.getBotFallbackCount();
+                var conversation = context.getConversation();
 
-        if (fallbacks >= MAX_CLARIFICATION_ATTEMPTS) {
-            log.info("Conversation {} unable to understand customer after {} attempts; transferring to agent",
-                    conversation.getId(), fallbacks + 1);
-            resetFallbackCount(context);
-            return Decision.builder()
-                    .actionType(ActionType.TRANSFER_CONVERSATION)
-                    .reason("Unable to understand customer after clarification attempts")
-                    .requiresAgent(true)
-                    .parameters(Map.of(
-                            "response", botResponse.getMessage(),
-                            "intent", "unknown"
-                    ))
-                    .build();
+                // -----------------------------------------------------------------
+                // RESPETAR TIEMPO DE ESPERA DEL AGENTE
+                // -----------------------------------------------------------------
+                if (conversation.getAssignedUser() != null
+                                && conversation.getStatus() == ConversationStatus.IN_PROGRESS
+                                && !handoffService.canBotRespond(conversation)) {
+
+                        log.info("Conversation {} assigned to agent {}. Bot blocked by inactivity window.",
+                                        conversation.getId(),
+                                        conversation.getAssignedUser().getId());
+
+                        return false;
+                }
+
+                // Handoff humano
+                boolean wasHandedOff = conversation.isHumanHandoff();
+                if (!handoffService.canBotRespond(conversation)) {
+                        log.debug("Bot paused by human handoff for conversation {}", conversation.getId());
+                        return false;
+                }
+
+                if (wasHandedOff) {
+                        conversationRepository.save(conversation);
+                }
+
+                return true;
         }
 
-        conversation.setBotFallbackCount(fallbacks + 1);
-        conversationRepository.save(conversation);
-        log.info("Conversation {} not understood (attempt {}/{}); asking customer to clarify",
-                conversation.getId(), fallbacks + 1, MAX_CLARIFICATION_ATTEMPTS + 1);
+        @Override
+        public Decision decide(ProcessingContext context) {
+                var msg = context.getIncomingMessage();
+                var botConfig = context.getBotConfiguration();
 
-        return Decision.builder()
-                .actionType(ActionType.SEND_TEXT)
-                .reason("Bot requested clarification")
-                .parameters(Map.of(
-                        "response", botResponse.getMessage(),
-                        "intent", "unknown"
-                ))
-                .build();
-    }
+                try {
+                        var conversation = context.getConversation();
+                        boolean isFirstMessage = conversation.getMessageCount() == 0;
 
-    private boolean hasPurchaseIntent(ProcessingContext context, String intent) {
-        String content = context.getIncomingMessage().getContent();
-        return content != null && ChatbotService.PURCHASE_INTENT_PATTERN.matcher(content.toLowerCase()).find();
-    }
+                        // Para mensajes multimedia sin texto (audio, sticker, foto sin caption),
+                        // se pasa el tipo como contexto al chatbot para que no reciba texto vacío.
+                        String content = msg.getContent() != null && !msg.getContent().isBlank()
+                                        ? msg.getContent()
+                                        : "[" + msg.getType() + "]";
 
-    /**
-     * Construye el historial reciente de la conversación en formato de mensajes
-     * para el LLM (user/assistant). Esto permite al bot interpretar mensajes que
-     * dependen del contexto previo, p. ej. "la opción 4" cuando antes listó
-     * productos. El mensaje que se está procesando se excluye: ChatbotService lo
-     * agrega como última entrada al generar la respuesta.
-     */
-    private List<AIMessageDto> buildConversationHistory(ProcessingContext context, IncomingMessage msg) {
-        var conversation = context.getConversation();
-        if (conversation.getId() == null) {
-            return List.of();
+                        ChatbotResponseDto botResponse = chatbotService.processMessage(
+                                        content,
+                                        Map.of(
+                                                        "conversationId", conversation.getId().toString(),
+                                                        "tenantId", context.getTenantId().toString(),
+                                                        "contactId", context.getContact().getId().toString(),
+                                                        "channel", msg.getChannel().name(),
+                                                        "systemPrompt",
+                                                        botConfig != null ? botConfig.getSystemPrompt() : "",
+                                                        "fallbackMessage",
+                                                        botConfig != null ? botConfig.getFallbackMessage() : "",
+                                                        "temperature",
+                                                        String.valueOf(botConfig != null ? botConfig.getTemperature()
+                                                                        : 0.7),
+                                                        "isFirstMessage", isFirstMessage,
+                                                        "history", buildConversationHistory(context, msg)));
+
+                        if (botResponse.isRequiresHumanAgent()) {
+                                resetFallbackCount(context);
+                                return Decision.builder()
+                                                .actionType(ActionType.TRANSFER_CONVERSATION)
+                                                .reason("Customer requested human agent or bot error")
+                                                .requiresAgent(true)
+                                                .parameters(Map.of(
+                                                                "response", botResponse.getMessage(),
+                                                                "intent", botResponse.getIntentDetected() != null
+                                                                                ? botResponse.getIntentDetected()
+                                                                                : "unknown"))
+                                                .build();
+                        }
+
+                        if (botResponse.isRequiresClarification()) {
+                                return handleClarification(context, botResponse);
+                        }
+
+                        resetFallbackCount(context);
+
+                        String intent = botResponse.getIntentDetected() != null
+                                        ? botResponse.getIntentDetected()
+                                        : "unknown";
+
+                        boolean purchaseIntent = hasPurchaseIntent(context, intent);
+
+                        LeadRule rule = COMMERCIAL_RULES.get(intent);
+                        if (rule != null) {
+                                context.addSecondaryDecision(Decision.builder()
+                                                .actionType(ActionType.CREATE_LEAD)
+                                                .reason("Commercial intent detected: " + intent)
+                                                .parameters(Map.of(
+                                                                "intent", intent,
+                                                                "title", rule.title(),
+                                                                "baseScore", String.valueOf(rule.baseScore()),
+                                                                "messageContent", msg.getContent()))
+                                                .build());
+                        }
+
+                        if (purchaseIntent) {
+                                log.info("Purchase intent detected for conversation {}; transferring to agent for closing",
+                                                conversation.getId());
+                                return Decision.builder()
+                                                .actionType(ActionType.TRANSFER_CONVERSATION)
+                                                .reason("Customer shows purchase intent: " + intent)
+                                                .requiresAgent(true)
+                                                .parameters(Map.of(
+                                                                "response", botResponse.getMessage(),
+                                                                "intent", intent))
+                                                .build();
+                        }
+
+                        if ("solicitar_precio".equals(intent)) {
+                                List<UUID> productIds = findMatchingProductIds(context, msg);
+                                if (!productIds.isEmpty()) {
+                                        log.info("Quote requested for conversation {} with {} product(s); generating quote PDF",
+                                                        conversation.getId(), productIds.size());
+                                        return Decision.builder()
+                                                        .actionType(ActionType.SEND_QUOTE)
+                                                        .reason("Customer requested a quote")
+                                                        .parameters(Map.of(
+                                                                        "productIds", productIds.stream()
+                                                                                        .map(UUID::toString)
+                                                                                        .collect(Collectors
+                                                                                                        .joining(",")),
+                                                                        "messageContent",
+                                                                        msg.getContent() != null ? msg.getContent()
+                                                                                        : ""))
+                                                        .build();
+                                }
+                        }
+
+                        return Decision.builder()
+                                        .actionType(ActionType.SEND_TEXT)
+                                        .reason("Bot responded to message")
+                                        .parameters(Map.of(
+                                                        "response", botResponse.getMessage(),
+                                                        "intent", intent,
+                                                        "flowExecuted", botResponse.getFlowExecuted() != null
+                                                                        ? botResponse.getFlowExecuted()
+                                                                        : ""))
+                                        .build();
+
+                } catch (Exception e) {
+                        log.warn("Chatbot processing failed, transferring to human: {}", e.getMessage());
+                        return Decision.builder()
+                                        .actionType(ActionType.TRANSFER_CONVERSATION)
+                                        .reason("Bot error: " + e.getMessage())
+                                        .requiresAgent(true)
+                                        .build();
+                }
         }
-        Page<ConversationMessage> page = messageRepository.findByConversationIdOrderBySentAtDesc(
-                conversation.getId(), PageRequest.of(0, HISTORY_LIMIT));
-        List<ConversationMessage> recent = new ArrayList<>(page.getContent());
-        Collections.reverse(recent);
 
-        String currentChannelMessageId = msg.getChannelMessageId();
-        List<AIMessageDto> history = new ArrayList<>();
-        for (ConversationMessage m : recent) {
-            // Solo se excluyen los mensajes entrantes aún no consumidos por la
-            // consolidación (ya están contenidos en el texto consolidado actual).
-            // Los mensajes salientes (respuestas del bot o del agente) siempre
-            // forman parte del contexto, aunque su ai_processed sea false.
-            if (m.isInbound() && !m.isAiProcessed()) {
-                continue;
-            }
-            if (currentChannelMessageId != null && currentChannelMessageId.equals(m.getChannelMessageId())) {
-                continue;
-            }
-            String content = m.getContent();
-            if (content == null || content.isBlank()) {
-                continue;
-            }
-            history.add(AIMessageDto.builder()
-                    .role(m.isInbound() ? "user" : "assistant")
-                    .content(content)
-                    .build());
-        }
-        return history;
-    }
+        /**
+         * El bot actúa como filtro de calificación: cuando no entiende al cliente,
+         * le pide con cortesía que detalle su consulta y mantiene la conversación.
+         * Solo transfiere al agente humano si el cliente vuelve a escribir algo
+         * que no se entiende (agotó los intentos de aclaración).
+         */
+        private Decision handleClarification(ProcessingContext context, ChatbotResponseDto botResponse) {
+                var conversation = context.getConversation();
+                int fallbacks = conversation.getBotFallbackCount();
 
-    private List<UUID> findMatchingProductIds(ProcessingContext context, IncomingMessage msg) {
-        String content = msg.getContent();
-        if (content == null || content.isBlank()) {
-            return List.of();
-        }
-        return knowledgeBaseService.findMatchingProducts(context.getTenantId(), content)
-                .stream().map(p -> p.getId()).toList();
-    }
+                if (fallbacks >= MAX_CLARIFICATION_ATTEMPTS) {
+                        log.info("Conversation {} unable to understand customer after {} attempts; transferring to agent",
+                                        conversation.getId(), fallbacks + 1);
+                        resetFallbackCount(context);
+                        return Decision.builder()
+                                        .actionType(ActionType.TRANSFER_CONVERSATION)
+                                        .reason("Unable to understand customer after clarification attempts")
+                                        .requiresAgent(true)
+                                        .parameters(Map.of(
+                                                        "response", botResponse.getMessage(),
+                                                        "intent", "unknown"))
+                                        .build();
+                }
 
-    private void resetFallbackCount(ProcessingContext context) {
-        var conversation = context.getConversation();
-        if (conversation.getBotFallbackCount() != 0) {
-            conversation.setBotFallbackCount(0);
-            conversationRepository.save(conversation);
+                conversation.setBotFallbackCount(fallbacks + 1);
+                conversationRepository.save(conversation);
+                log.info("Conversation {} not understood (attempt {}/{}); asking customer to clarify",
+                                conversation.getId(), fallbacks + 1, MAX_CLARIFICATION_ATTEMPTS + 1);
+
+                return Decision.builder()
+                                .actionType(ActionType.SEND_TEXT)
+                                .reason("Bot requested clarification")
+                                .parameters(Map.of(
+                                                "response", botResponse.getMessage(),
+                                                "intent", "unknown"))
+                                .build();
         }
-    }
+
+        private boolean hasPurchaseIntent(ProcessingContext context, String intent) {
+                String content = context.getIncomingMessage().getContent();
+                return content != null && ChatbotService.PURCHASE_INTENT_PATTERN.matcher(content.toLowerCase()).find();
+        }
+
+        /**
+         * Construye el historial reciente de la conversación en formato de mensajes
+         * para el LLM (user/assistant). Esto permite al bot interpretar mensajes que
+         * dependen del contexto previo, p. ej. "la opción 4" cuando antes listó
+         * productos. El mensaje que se está procesando se excluye: ChatbotService lo
+         * agrega como última entrada al generar la respuesta.
+         */
+        private List<AIMessageDto> buildConversationHistory(ProcessingContext context, IncomingMessage msg) {
+                var conversation = context.getConversation();
+                if (conversation.getId() == null) {
+                        return List.of();
+                }
+                Page<ConversationMessage> page = messageRepository.findByConversationIdOrderBySentAtDesc(
+                                conversation.getId(), PageRequest.of(0, HISTORY_LIMIT));
+                List<ConversationMessage> recent = new ArrayList<>(page.getContent());
+                Collections.reverse(recent);
+
+                String currentChannelMessageId = msg.getChannelMessageId();
+                List<AIMessageDto> history = new ArrayList<>();
+                for (ConversationMessage m : recent) {
+                        // Solo se excluyen los mensajes entrantes aún no consumidos por la
+                        // consolidación (ya están contenidos en el texto consolidado actual).
+                        // Los mensajes salientes (respuestas del bot o del agente) siempre
+                        // forman parte del contexto, aunque su ai_processed sea false.
+                        if (m.isInbound() && !m.isAiProcessed()) {
+                                continue;
+                        }
+                        if (currentChannelMessageId != null
+                                        && currentChannelMessageId.equals(m.getChannelMessageId())) {
+                                continue;
+                        }
+                        String content = m.getContent();
+                        if (content == null || content.isBlank()) {
+                                continue;
+                        }
+                        history.add(AIMessageDto.builder()
+                                        .role(m.isInbound() ? "user" : "assistant")
+                                        .content(content)
+                                        .build());
+                }
+                return history;
+        }
+
+        private List<UUID> findMatchingProductIds(ProcessingContext context, IncomingMessage msg) {
+                String content = msg.getContent();
+                if (content == null || content.isBlank()) {
+                        return List.of();
+                }
+                return knowledgeBaseService.findMatchingProducts(context.getTenantId(), content)
+                                .stream().map(p -> p.getId()).toList();
+        }
+
+        private void resetFallbackCount(ProcessingContext context) {
+                var conversation = context.getConversation();
+                if (conversation.getBotFallbackCount() != 0) {
+                        conversation.setBotFallbackCount(0);
+                        conversationRepository.save(conversation);
+                }
+        }
 }

@@ -50,37 +50,54 @@ public class MessageAggregationService {
     private final AssignAgentExecutor assignAgentExecutor;
     private final ConversationHandoffService handoffService;
 
+    /**
+     * Reclama la conversación pendiente con bloqueo pesimista de fila
+     * (FOR UPDATE SKIP LOCKED) y, solo si el reclamo fue exitoso, la consolida.
+     *
+     * El reclamo se hace ANTES de cualquier reanudación del bot o del
+     * procesamiento, dentro de la misma transacción: si otra instancia o hilo
+     * del scheduler ya la reclamó, esta llamada no espera y no procesa nada,
+     * garantizando que una conversación jamás genera dos respuestas.
+     *
+     * Es el único punto de entrada del scheduler hacia la consolidación.
+     */
     @Transactional
-    public void processPendingConversation(Conversation candidate) {
-
-        // -----------------------------------------------------------------
-        // 1. Reclamo con bloqueo pesimista: si otra instancia del scheduler
-        //    ya procesa esta conversación, SKIP LOCKED no devuelve la fila.
-        // -----------------------------------------------------------------
-        Optional<Conversation> locked = conversationRepository
+    public void claimAndProcessPending(Conversation candidate) {
+        Optional<Conversation> claimed = conversationRepository
                 .findPendingConversationForUpdate(candidate.getId());
-        if (locked.isEmpty()) {
+        if (claimed.isEmpty()) {
             log.debug("Conversation {} already claimed by another worker", candidate.getId());
             return;
         }
-        Conversation conversation = locked.get();
+        Conversation conversation = claimed.get();
 
         if (!conversation.isPendingAiResponse()) {
             return;
         }
 
-        // -----------------------------------------------------------------
-        // 2. Handoff humano: si un agente intervino y está dentro de su
-        //    ventana de atención, el bot se pausa (los mensajes quedan
-        //    pendientes y se reintenta en el próximo tick; al vencer la
-        //    ventana, canBotRespond reactiva el bot automáticamente).
-        // -----------------------------------------------------------------
+        // Handoff humano: si un agente intervino y está dentro de su ventana de
+        // atención, el bot se pausa (al vencer la ventana, canBotRespond
+        // reactiva el bot automáticamente y el próximo tick consolida).
         if (!handoffService.canBotRespond(conversation)) {
             return;
         }
 
+        processPendingConversation(conversation);
+    }
+
+    /**
+     * Consolida los mensajes entrantes no procesados de una conversación en una
+     * única interacción lógica (debounce de 4s) y dispara una única respuesta
+     * automática, con validaciones anti-duplicados (hash del contenido y ventana
+     * mínima de 10s entre respuestas del bot).
+     *
+     * La conversación ya debe estar reclamada (ver {@link #claimAndProcessPending}).
+     */
+    @Transactional
+    public void processPendingConversation(Conversation conversation) {
+
         // -----------------------------------------------------------------
-        // 3. Mensajes entrantes aún no consumidos (orden cronológico)
+        // 1. Mensajes entrantes aún no consumidos (orden cronológico)
         // -----------------------------------------------------------------
         List<ConversationMessage> pendingMessages =
                 messageRepository.findUnprocessedInboundMessages(conversation.getId());
@@ -91,7 +108,7 @@ public class MessageAggregationService {
         }
 
         // -----------------------------------------------------------------
-        // 3. Ventana de debounce: esperar 4s desde la última actividad del
+        // 2. Ventana de debounce: esperar 4s desde la última actividad del
         //    contacto para agrupar todos los mensajes de la ráfaga.
         // -----------------------------------------------------------------
         LocalDateTime lastActivity = conversation.getLastMessageAt() != null
@@ -105,7 +122,7 @@ public class MessageAggregationService {
         }
 
         // -----------------------------------------------------------------
-        // 4. Consolidación del texto
+        // 3. Consolidación del texto
         // -----------------------------------------------------------------
         String consolidated = consolidate(pendingMessages);
         if (consolidated.isBlank()) {
@@ -116,7 +133,7 @@ public class MessageAggregationService {
         }
 
         // -----------------------------------------------------------------
-        // 5. Validación anti-duplicados
+        // 4. Validación anti-duplicados
         // -----------------------------------------------------------------
         String hash = sha256(consolidated);
 
@@ -138,18 +155,18 @@ public class MessageAggregationService {
         }
 
         // -----------------------------------------------------------------
-        // 6. Respuesta automática (una única por lote consolidado)
+        // 5. Respuesta automática (una única por lote consolidado)
         // -----------------------------------------------------------------
         aiResponseService.generateAndSendResponse(
                 conversation.getTenantId(), conversation, consolidated);
 
         // -----------------------------------------------------------------
-        // 7. Flags post-respuesta, todo en la misma transacción
+        // 6. Flags post-respuesta, todo en la misma transacción
         // -----------------------------------------------------------------
         markProcessed(conversation, pendingMessages, hash, true);
 
         // -----------------------------------------------------------------
-        // 8. Asignación de agente (mismo criterio que el flujo síncrono
+        // 7. Asignación de agente (mismo criterio que el flujo síncrono
         //    original: conversación OPEN sin agente). Ahora el webhook ya
         //    no la ejecuta para no competir con la consolidación.
         // -----------------------------------------------------------------

@@ -77,28 +77,46 @@ public class ConversationResolutionStep
      * - WHATSAPP:120363424364570024@g.us
      * - WHATSAPP:51972349298@s.whatsapp.net
      */
-    private String buildChannelConversationId(IncomingMessage message) {
+@SuppressWarnings("StringSplitter")
+private String buildChannelConversationId(IncomingMessage message) {
 
-        String conversationKey = message.getChannelConversationId();
+    String conversationKey = message.getChannelConversationId();
 
-        // ---------------------------------------------------------------------
-        // IMPORTANTE:
-        // Para grupos NUNCA usar sourceIdentifier como fallback.
-        // sourceIdentifier representa al participante, no al grupo.
-        // ---------------------------------------------------------------------
-        if (conversationKey == null || conversationKey.isBlank()) {
-
-            if (message.isGroup()) {
-                throw new IllegalStateException(
-                        "Group WhatsApp message without channelConversationId"
-                );
-            }
-
-            conversationKey = message.getSourceIdentifier();
-        }
-
-        return message.getChannel().name() + ":" + conversationKey.trim();
+    // Para mensajes individuales usamos el sourceIdentifier
+    if (!message.isGroup()) {
+        conversationKey = message.getSourceIdentifier();
     }
+
+    if (conversationKey == null || conversationKey.isBlank()) {
+        throw new IllegalStateException(
+                "WhatsApp message without conversation identifier"
+        );
+    }
+
+    // -------------------------------------------------------------
+    // NORMALIZACIÓN
+    // -------------------------------------------------------------
+    if (!message.isGroup()) {
+
+        // 51960069146@s.whatsapp.net
+        // +51960069146
+        // 51960069146
+        // => +51960069146
+
+        String digits = conversationKey
+                .replace("@s.whatsapp.net", "")
+                .replace("@lid", "")
+                .replaceAll("[^0-9]", "");
+
+        conversationKey = "+" + digits;
+
+    } else {
+        // Los grupos conservan el JID completo
+        conversationKey = conversationKey.trim();
+    }
+
+    return message.getChannel().name() + ":" + conversationKey;
+}
 
     private Conversation resolveConversation(
             ProcessingContext context,

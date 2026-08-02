@@ -1,5 +1,5 @@
 import { useState, useRef, type KeyboardEvent } from 'react'
-import { BookOpen, Plus, Search, Trash2, Globe, FileText, Type, X, Upload, Link, ExternalLink, Tag } from 'lucide-react'
+import { BookOpen, Plus, Pencil, Save, Search, Trash2, Globe, FileText, Type, X, Upload, Link, ExternalLink, Tag } from 'lucide-react'
 import { Button } from '@/shared/atoms/Button/Button'
 import { Input } from '@/shared/atoms/Input/Input'
 import { Select } from '@/shared/atoms/Select/Select'
@@ -8,7 +8,7 @@ import { EmptyState } from '@/shared/molecules/EmptyState'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/core/api/client'
 import { toast } from 'sonner'
-import type { KnowledgeBaseDto, CreateKnowledgeBaseRequest } from '@/types/knowledge'
+import type { KnowledgeBaseDto, CreateKnowledgeBaseRequest, UpdateKnowledgeBaseRequest, DocumentUploadResult } from '@/types/knowledge'
 import type { ApiResponse } from '@/types/api'
 
 const SOURCE_OPTIONS = [
@@ -116,18 +116,21 @@ function TagInput({ value, onChange, suggestions }: { value: string; onChange: (
   )
 }
 
-function KnowledgeBaseForm({ allTags, onClose }: { allTags: string[]; onClose: () => void }) {
+function KnowledgeBaseForm({ entry, allTags, onClose }: { entry?: KnowledgeBaseDto; allTags: string[]; onClose: () => void }) {
   const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
-  const [sourceType, setSourceType] = useState('manual')
-  const [sourceUrl, setSourceUrl] = useState('')
-  const [tags, setTags] = useState('')
-  const [fileUrl, setFileUrl] = useState('')
-  const [fileName, setFileName] = useState('')
+  const [title, setTitle] = useState(entry?.title ?? '')
+  const [content, setContent] = useState(entry?.content ?? '')
+  const [sourceType, setSourceType] = useState(entry?.sourceType ?? 'manual')
+  const [sourceUrl, setSourceUrl] = useState(entry?.sourceUrl ?? '')
+  const [tags, setTags] = useState(entry?.tags ?? '')
+  const [fileUrl, setFileUrl] = useState(entry?.fileUrl ?? '')
+  const [fileName, setFileName] = useState(entry?.fileUrl ? entry.fileUrl.split('/').pop() ?? '' : '')
   const [uploading, setUploading] = useState(false)
+  const [extractedText, setExtractedText] = useState('')
+  const [extractedTextDirty, setExtractedTextDirty] = useState(false)
+  const [pageCount, setPageCount] = useState<number | null>(null)
 
   const createMutation = useMutation({
     mutationFn: (dto: CreateKnowledgeBaseRequest) =>
@@ -138,6 +141,19 @@ function KnowledgeBaseForm({ allTags, onClose }: { allTags: string[]; onClose: (
       onClose()
     },
     onError: () => toast.error('Error al crear la entrada'),
+  })
+
+  const updateMutation = useMutation({
+    mutationFn: (dto: UpdateKnowledgeBaseRequest) => {
+      if (!entry) return Promise.reject(new Error('Entrada no encontrada'))
+      return api.put<ApiResponse<KnowledgeBaseDto>>(`/knowledge-base/${entry.id}`, dto)
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['knowledge-base'] })
+      toast.success('Entrada actualizada exitosamente')
+      onClose()
+    },
+    onError: () => toast.error('Error al actualizar la entrada'),
   })
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,14 +173,19 @@ function KnowledgeBaseForm({ allTags, onClose }: { allTags: string[]; onClose: (
     try {
       const formData = new FormData()
       formData.append('file', file)
-      const res = await api.post<ApiResponse<{ url: string }>>('/upload/document', formData, {
+      const res = await api.post<ApiResponse<DocumentUploadResult>>('/upload/document', formData, {
         headers: { 'Content-Type': null },
       })
-      setFileUrl(res.data.data.url)
+      const result = res.data.data
+      setFileUrl(result.url)
+      setPageCount(result.pageCount ?? null)
+      setExtractedText(result.extractedText ?? '')
+      setExtractedTextDirty(true)
       if (!title) setTitle(file.name.replace(/\.pdf$/i, ''))
       toast.success('PDF subido correctamente')
-    } catch {
-      toast.error('Error al subir el PDF')
+    } catch (error: unknown) {
+      const data = (error as { response?: { data?: { message?: string } } }).response?.data
+      toast.error(data?.message ?? 'Error al subir el PDF')
       setFileName('')
     } finally {
       setUploading(false)
@@ -174,20 +195,27 @@ function KnowledgeBaseForm({ allTags, onClose }: { allTags: string[]; onClose: (
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!title.trim() || !content.trim()) return
-    createMutation.mutate({
+    const payload: CreateKnowledgeBaseRequest = {
       title: title.trim(),
       content: content.trim(),
       sourceType,
       sourceUrl: sourceUrl.trim() || undefined,
       fileUrl: fileUrl || undefined,
+      extractedText: extractedTextDirty ? extractedText : undefined,
       tags: tags || undefined,
-    })
+    }
+    if (entry) {
+      updateMutation.mutate(payload)
+    } else {
+      createMutation.mutate(payload)
+    }
   }
 
   const canSubmit = title.trim() && content.trim()
+  const isEdit = !!entry
 
   return (
-    <Modal open onClose={onClose} title="Nueva entrada" size="xl">
+    <Modal open onClose={onClose} title={isEdit ? 'Editar entrada' : 'Nueva entrada'} size="xl">
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input label="Título" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ej: Política de devoluciones" required />
 
@@ -210,7 +238,14 @@ function KnowledgeBaseForm({ allTags, onClose }: { allTags: string[]; onClose: (
                     <span className="font-medium">{fileName}</span>
                     <button
                       type="button"
-                      onClick={(e) => { e.stopPropagation(); setFileUrl(''); setFileName('') }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setFileUrl('')
+                        setFileName('')
+                        setExtractedText('')
+                        setExtractedTextDirty(true)
+                        setPageCount(null)
+                      }}
                       className="ml-2 text-gray-400 hover:text-red-500"
                     >
                       <X size={16} />
@@ -233,6 +268,12 @@ function KnowledgeBaseForm({ allTags, onClose }: { allTags: string[]; onClose: (
                 className="hidden"
                 onChange={handleFileSelect}
               />
+              {pageCount !== null && (
+                <p className={`text-xs ${pageCount > 100 ? 'font-medium text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400'}`}>
+                  Texto extraído de {pageCount} página{pageCount === 1 ? '' : 's'}
+                  {pageCount > 100 && ' — PDF grande, verifica que sea el archivo correcto'}
+                </p>
+              )}
               <textarea
                 className="h-28 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
                 value={content}
@@ -281,8 +322,9 @@ function KnowledgeBaseForm({ allTags, onClose }: { allTags: string[]; onClose: (
 
         <div className="flex justify-end gap-3 pt-2">
           <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
-          <Button type="submit" loading={createMutation.isPending} disabled={!canSubmit}>
-            <Plus size={16} className="mr-1" />Crear
+          <Button type="submit" loading={isEdit ? updateMutation.isPending : createMutation.isPending} disabled={!canSubmit}>
+            {isEdit ? <Save size={16} className="mr-1" /> : <Plus size={16} className="mr-1" />}
+            {isEdit ? 'Guardar cambios' : 'Crear'}
           </Button>
         </div>
       </form>
@@ -299,7 +341,7 @@ const sourceConfig: Record<string, { icon: React.ReactNode; label: string }> = {
 
 export default function KnowledgeBasePage() {
   const queryClient = useQueryClient()
-  const [showForm, setShowForm] = useState(false)
+  const [formEntry, setFormEntry] = useState<KnowledgeBaseDto | 'new' | null>(null)
   const [search, setSearch] = useState('')
 
   const { data: entries, isLoading } = useQuery({
@@ -347,7 +389,7 @@ export default function KnowledgeBasePage() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Base de Conocimiento</h3>
             <p className="mt-1 text-sm text-gray-500">Información que el bot usará para responder a los clientes</p>
           </div>
-          <Button onClick={() => setShowForm(true)}><Plus size={16} className="mr-1" />Agregar</Button>
+          <Button onClick={() => setFormEntry('new')}><Plus size={16} className="mr-1" />Agregar</Button>
         </div>
 
         <div className="relative mt-4">
@@ -373,7 +415,7 @@ export default function KnowledgeBasePage() {
                 ? 'No se encontraron entradas con ese texto. Intenta con otros términos.'
                 : 'Agrega las políticas, productos e información de tu empresa para que el bot responda con datos reales.'
             }
-            action={search ? undefined : { label: 'Agregar primera entrada', onClick: () => setShowForm(true) }}
+            action={search ? undefined : { label: 'Agregar primera entrada', onClick: () => setFormEntry('new') }}
             className="mt-8"
           />
         ) : (
@@ -410,21 +452,37 @@ export default function KnowledgeBasePage() {
                     </div>
                   )}
                 </div>
-                <button
-                  onClick={() => {
-                    if (confirm('¿Eliminar esta entrada?')) deleteMutation.mutate(entry.id)
-                  }}
-                  className="shrink-0 self-center rounded-lg p-1.5 text-gray-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div className="flex shrink-0 items-center gap-1 self-center">
+                  <button
+                    onClick={() => { setFormEntry(entry) }}
+                    className="rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                    title="Editar entrada"
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm('¿Eliminar esta entrada?')) deleteMutation.mutate(entry.id)
+                    }}
+                    className="rounded-lg p-1.5 text-gray-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+                    title="Eliminar entrada"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {showForm && <KnowledgeBaseForm allTags={allTags} onClose={() => setShowForm(false)} />}
+      {formEntry && (
+        <KnowledgeBaseForm
+          entry={formEntry === 'new' ? undefined : formEntry}
+          allTags={allTags}
+          onClose={() => setFormEntry(null)}
+        />
+      )}
     </div>
   )
 }

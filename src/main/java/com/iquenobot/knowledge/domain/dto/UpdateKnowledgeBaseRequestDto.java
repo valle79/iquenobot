@@ -28,6 +28,13 @@ public class UpdateKnowledgeBaseRequestDto {
     @Size(max = 500)
     private String fileUrl;
 
+    /**
+     * Texto extraído automáticamente del PDF adjunto. Si es null se conserva el
+     * valor actual (para ediciones que no reemplazan el archivo); si se envía
+     * vacío se limpia (cuando el PDF fue reemplazado o retirado).
+     */
+    private String extractedText;
+
     @Size(max = 500)
     private String tags;
 }

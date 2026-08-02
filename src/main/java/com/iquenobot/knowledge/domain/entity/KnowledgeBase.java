@@ -34,6 +34,9 @@ public class KnowledgeBase extends SoftDeletableEntity {
     @Column(name = "file_url", length = 500)
     private String fileUrl;
 
+    @Column(name = "extracted_text", columnDefinition = "TEXT")
+    private String extractedText;
+
     @Column(name = "tags", length = 500)
     private String tags;
 }

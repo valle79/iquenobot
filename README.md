@@ -68,7 +68,7 @@ CORS_ORIGINS=*
 LOG_LEVEL=INFO
 
 # WhatsApp Evolution API (opcional)
-WHATSAPP_EVOLUTION_BASE_URL=http://localhost:8080
+WHATSAPP_EVOLUTION_BASE_URL=http://localhost:8081
 WHATSAPP_EVOLUTION_API_KEY=
 
 # OpenAI (opcional)

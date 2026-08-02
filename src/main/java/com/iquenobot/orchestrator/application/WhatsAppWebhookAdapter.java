@@ -294,14 +294,18 @@ String groupName = extractGroupName(instanceId, data);
     // -------------------------------------------------------------
     // IMPORTANTE:
     // - Mensajes entrantes: usar pushName del remitente.
-    // - Mensajes salientes: NO usar pushName porque será tu propio nombre
-    //   (LuisDev). En ese caso usamos el número del contacto y luego el
-    //   ContactResolutionStep obtendrá el nombre real desde la base de datos.
+    // - Mensajes salientes en grupos: usar el pushName del remitente
+    //   (quien escribe desde el celular, p.ej. "LuisDev").
+    // - Mensajes salientes en chats individuales: NO usar pushName
+    //   (sería tu propio nombre); se usa el número del contacto y luego
+    //   el ContactResolutionStep obtendrá el nombre real desde la base.
     // -------------------------------------------------------------
     String sourceName;
 
     if (outbound) {
-        sourceName = senderJid;
+        sourceName = (isGroup && pushName != null && !pushName.isBlank())
+                ? pushName.trim()
+                : senderJid;
     } else {
         sourceName = (pushName != null && !pushName.isBlank())
                 ? pushName.trim()

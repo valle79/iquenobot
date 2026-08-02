@@ -62,6 +62,10 @@ const ConversationItem = memo(function ConversationItem({
   const lastMessage = conversation.lastMessage
   const unread = conversation.unreadCount ?? 0
 
+  const isGroup =
+    conversation.channel === 'WHATSAPP' &&
+    conversation.channelConversationId?.endsWith('@g.us')
+
   const lastMessagePreview =
     lastMessage?.content?.trim() ||
     (lastMessage
@@ -84,12 +88,17 @@ const ConversationItem = memo(function ConversationItem({
 // ===============================
 // DISPLAY NAME PRIORITY (WhatsApp-like)
 // ===============================
-const displayName =
-  contact?.displayName?.trim() ||
-  contact?.fullName?.trim() ||
-  conversation?.subject?.trim() ||
-  contact?.phone ||
-  'Contacto sin nombre'
+const displayName = isGroup
+  ? conversation?.subject?.trim() ||
+    contact?.displayName?.trim() ||
+    contact?.fullName?.trim() ||
+    contact?.phone ||
+    'Contacto sin nombre'
+  : contact?.displayName?.trim() ||
+    contact?.fullName?.trim() ||
+    conversation?.subject?.trim() ||
+    contact?.phone ||
+    'Contacto sin nombre'
 
   const avatarName = displayName
   const avatarUrl = contact?.avatarUrl
@@ -220,13 +229,21 @@ export function ConversationList() {
     return conversations.filter((c) => {
       const contact = c.contact
 
-const name = (
-  contact?.displayName?.trim() ||
-  contact?.fullName?.trim() ||
-  c.subject?.trim() ||
-  contact?.phone ||
-  ''
-).toLowerCase()
+      const isGroupConv =
+        c.channel === 'WHATSAPP' &&
+        c.channelConversationId?.endsWith('@g.us')
+
+      const name = isGroupConv
+        ? (c.subject?.trim() ||
+          contact?.displayName?.trim() ||
+          contact?.fullName?.trim() ||
+          contact?.phone ||
+          '').toLowerCase()
+        : (contact?.displayName?.trim() ||
+          contact?.fullName?.trim() ||
+          c.subject?.trim() ||
+          contact?.phone ||
+          '').toLowerCase()
 
       const email = contact?.email?.toLowerCase() ?? ''
       const phone = contact?.phone ?? ''

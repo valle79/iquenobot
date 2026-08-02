@@ -32,7 +32,7 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
 
     private final RestTemplate restTemplate;
 
-    @Value("${evolution.api.url:http://localhost:8080}")
+    @Value("${evolution.api.url:http://localhost:8081}")
     private String evolutionApiUrl;
 
     @Value("${evolution.api.key:}")
@@ -85,12 +85,49 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
 
 public String getGroupName(String instanceId, String groupJid) {
 
-    try {
+    if (instanceId == null || instanceId.isBlank() || groupJid == null || groupJid.isBlank()) {
+        return null;
+    }
 
+    // Evolution API v2.3.x: GET /group/findGroupInfos/{instance}?groupJid=...
+    // Respuesta: objeto del grupo { id, subject, ... }
+    try {
+        java.net.URI uri = org.springframework.web.util.UriComponentsBuilder
+                .fromHttpUrl(evolutionApiUrl)
+                .path("/group/findGroupInfos/{instance}")
+                .queryParam("groupJid", groupJid)
+                .buildAndExpand(instanceId)
+                .encode()
+                .toUri();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("apikey", apiKey);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<Map> response = restTemplate.exchange(
+                uri,
+                HttpMethod.GET,
+                entity,
+                Map.class
+        );
+
+        String subject = extractSubject(response.getBody());
+
+        if (subject != null) {
+            return subject;
+        }
+
+    } catch (Exception e) {
+        log.warn("Error obteniendo nombre del grupo {} (GET): {}", groupJid, e.getMessage());
+    }
+
+    // Fallback Evolution API v2 (otras versiones): POST /group/findGroupInfos/{instance} con "groupJids" (array)
+    try {
         String url = evolutionApiUrl + "/group/findGroupInfos/" + instanceId;
 
         Map<String, Object> payload = Map.of(
-                "groupJid", groupJid
+                "groupJids", java.util.List.of(groupJid)
         );
 
         HttpHeaders headers = new HttpHeaders();
@@ -106,31 +143,48 @@ public String getGroupName(String instanceId, String groupJid) {
                 Map.class
         );
 
-        Map body = response.getBody();
+        String subject = extractSubject(response.getBody());
 
+        if (subject != null) {
+            return subject;
+        }
+
+    } catch (Exception e) {
+        log.warn("Error obteniendo nombre del grupo {} (POST): {}", groupJid, e.getMessage());
+    }
+
+    return null;
+}
+
+    /**
+     * Extrae el subject de la respuesta de findGroupInfos (v1 y v2).
+     * v2 responde un array de grupos; v1 responde el array o un objeto.
+     */
+    @SuppressWarnings("unchecked")
+    private String extractSubject(Map body) {
         if (body == null) {
             return null;
         }
 
-        Object subject = body.get("subject");
+        Object candidate = body;
 
-        if (subject instanceof String s && !s.isBlank()) {
-            return s.trim();
+        if (body.get("groups") instanceof java.util.List<?> groups && !groups.isEmpty()) {
+            candidate = groups.get(0);
+        }
+
+        if (candidate instanceof java.util.List<?> list && !list.isEmpty()) {
+            candidate = list.get(0);
+        }
+
+        if (candidate instanceof Map<?, ?> group) {
+            Object subject = group.get("subject");
+            if (subject instanceof String s && !s.isBlank()) {
+                return s.trim();
+            }
         }
 
         return null;
-
-    } catch (Exception e) {
-
-        log.warn(
-                "Error obteniendo nombre del grupo {}: {}",
-                groupJid,
-                e.getMessage()
-        );
-
-        return null;
     }
-}
 
     @Override
     public String sendMediaMessage(String instanceId, WhatsAppMessageDto message) {

@@ -37,6 +37,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -226,6 +228,10 @@ public class AuthService {
             throw new UnauthorizedException("Contexto de tenant no disponible");
         }
 
+        if (request.getRole() == RoleType.TENANT_ADMIN && !isSuperAdmin()) {
+            throw new BusinessException("Solo el super administrador puede crear otro administrador de empresa");
+        }
+
         return createUserForTenant(request, UUID.fromString(tenantId));
     }
 
@@ -244,19 +250,25 @@ public class AuthService {
         // Check user limit
         long currentUserCount = userRepository.countByTenantIdAndDeletedFalse(tenantId);
         if (!tenant.canCreateMoreUsers((int) currentUserCount)) {
-            throw new BusinessException("Se ha alcanzado el límite de usuarios para este plan");
+            throw new BusinessException(String.format(
+                    "Se ha alcanzado el límite de usuarios (%d) configurado para esta empresa. Contacta al super administrador para ampliarlo",
+                    tenant.getMaxUsers()));
         }
 
         // Check role-specific limits (agents / supervisors)
         if (request.getRole() == RoleType.AGENT) {
             long currentAgents = userRepository.countByTenantIdAndRoleAndDeletedFalse(tenantId, RoleType.AGENT);
             if (!tenant.canCreateMoreAgents((int) currentAgents)) {
-                throw new BusinessException("Se ha alcanzado el límite de agentes configurado para esta empresa");
+                throw new BusinessException(String.format(
+                        "Se ha alcanzado el límite de agentes (%d) configurado para esta empresa. Contacta al super administrador para ampliarlo",
+                        tenant.getMaxAgents()));
             }
         } else if (request.getRole() == RoleType.SUPERVISOR) {
             long currentSupervisors = userRepository.countByTenantIdAndRoleAndDeletedFalse(tenantId, RoleType.SUPERVISOR);
             if (!tenant.canCreateMoreSupervisors((int) currentSupervisors)) {
-                throw new BusinessException("Se ha alcanzado el límite de supervisores configurado para esta empresa");
+                throw new BusinessException(String.format(
+                        "Se ha alcanzado el límite de supervisores (%d) configurado para esta empresa. Contacta al super administrador para ampliarlo",
+                        tenant.getMaxSupervisors()));
             }
         }
 
@@ -304,6 +316,10 @@ public class AuthService {
         UUID tenantId = getTenantId();
         User user = userRepository.findByIdAndTenantIdAndDeletedFalse(id, tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+        if (request.getRole() != null && request.getRole() == RoleType.TENANT_ADMIN && !isSuperAdmin()) {
+            throw new BusinessException("Solo el super administrador puede asignar el rol de administrador de empresa");
+        }
 
         if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
         if (request.getLastName() != null) user.setLastName(request.getLastName());
@@ -497,5 +513,11 @@ public class AuthService {
             throw new BusinessException("Contexto de tenant no disponible");
         }
         return UUID.fromString(tenantIdStr);
+    }
+
+    private boolean isSuperAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_SUPER_ADMIN"));
     }
 }

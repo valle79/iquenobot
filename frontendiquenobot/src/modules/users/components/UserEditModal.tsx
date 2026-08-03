@@ -2,10 +2,12 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { ShieldAlert } from 'lucide-react'
 import { Modal } from '@/shared/atoms/Modal/Modal'
 import { Input } from '@/shared/atoms/Input/Input'
 import { Select } from '@/shared/atoms/Select/Select'
 import { Button } from '@/shared/atoms/Button/Button'
+import { useAuthStore } from '@/core/auth/auth.store'
 import { useUpdateUser } from '../hooks/useUsers'
 import type { UserDto } from '@/types/auth'
 
@@ -19,7 +21,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-const roleOptions = [
+const allRoleOptions = [
   { value: 'TENANT_ADMIN', label: 'Admin' },
   { value: 'SUPERVISOR', label: 'Supervisor' },
   { value: 'AGENT', label: 'Agente' },
@@ -39,6 +41,12 @@ interface UserEditModalProps {
 
 export function UserEditModal({ open, user, onClose }: UserEditModalProps) {
   const updateUser = useUpdateUser()
+  const { user: currentUser } = useAuthStore()
+  const canManageAdmins = currentUser?.role === 'SUPER_ADMIN'
+  const roleOptions = allRoleOptions.filter(
+    (option) => canManageAdmins || option.value !== 'TENANT_ADMIN',
+  )
+  const isEditingAdmin = user?.role === 'TENANT_ADMIN'
 
   const {
     register,
@@ -70,7 +78,7 @@ export function UserEditModal({ open, user, onClose }: UserEditModalProps) {
           firstName: data.firstName,
           lastName: data.lastName,
           phone: data.phone || undefined,
-          role: data.role as any,
+          role: isEditingAdmin && !canManageAdmins ? user.role : (data.role as any),
           status: data.status as any,
         },
       })
@@ -88,7 +96,17 @@ export function UserEditModal({ open, user, onClose }: UserEditModalProps) {
           <Input label="Apellido" error={errors.lastName?.message} {...register('lastName')} />
         </div>
         <Input label="Teléfono" error={errors.phone?.message} {...register('phone')} />
-        <Select label="Rol" error={errors.role?.message} options={roleOptions} {...register('role')} />
+        {isEditingAdmin && !canManageAdmins ? (
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Rol</label>
+            <div className="flex items-center gap-2 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300">
+              <ShieldAlert size={15} className="text-gray-400" />
+              Admin (solo el super administrador puede cambiar este rol)
+            </div>
+          </div>
+        ) : (
+          <Select label="Rol" error={errors.role?.message} options={roleOptions} {...register('role')} />
+        )}
         <Select label="Estado" error={errors.status?.message} options={statusOptions} {...register('status')} />
 
         <div className="flex justify-end gap-3 pt-4">

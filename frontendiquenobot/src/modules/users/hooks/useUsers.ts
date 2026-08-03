@@ -6,6 +6,11 @@ import { useDebounce } from '@/hooks/useDebounce'
 import { toast } from 'sonner'
 import type { CreateUserRequest, UpdateUserRequest } from '@/types/auth'
 
+function getErrorMessage(error: unknown): string {
+  const err = error as { response?: { data?: { message?: string } }; message?: string }
+  return err.response?.data?.message ?? err.message ?? 'Error inesperado'
+}
+
 export function useUsers() {
   const [page, setPage] = useState(0)
   const [search, setSearch] = useState('')
@@ -52,7 +57,7 @@ export function useCreateUser() {
       queryClient.invalidateQueries({ queryKey: ['users'] })
       toast.success('Usuario creado exitosamente')
     },
-    onError: () => toast.error('Error al crear usuario'),
+    onError: (error) => toast.error(getErrorMessage(error)),
   })
 }
 
@@ -65,6 +70,6 @@ export function useUpdateUser() {
       queryClient.invalidateQueries({ queryKey: ['users'] })
       toast.success('Usuario actualizado')
     },
-    onError: () => toast.error('Error al actualizar usuario'),
+    onError: (error) => toast.error(getErrorMessage(error)),
   })
 }

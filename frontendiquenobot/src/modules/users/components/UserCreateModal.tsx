@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Building2 } from 'lucide-react'
+import { Building2, CheckCircle2 } from 'lucide-react'
 import { Modal } from '@/shared/atoms/Modal/Modal'
 import { Input } from '@/shared/atoms/Input/Input'
 import { Select } from '@/shared/atoms/Select/Select'
@@ -21,7 +21,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-const roleOptions = [
+const allRoleOptions = [
   { value: 'TENANT_ADMIN', label: 'Admin' },
   { value: 'SUPERVISOR', label: 'Supervisor' },
   { value: 'AGENT', label: 'Agente' },
@@ -34,7 +34,11 @@ interface UserCreateModalProps {
 
 export function UserCreateModal({ open, onClose }: UserCreateModalProps) {
   const createUser = useCreateUser()
-  const { tenant } = useAuthStore()
+  const { tenant, user: currentUser } = useAuthStore()
+  const canManageAdmins = currentUser?.role === 'SUPER_ADMIN'
+  const roleOptions = allRoleOptions.filter(
+    (option) => canManageAdmins || option.value !== 'TENANT_ADMIN',
+  )
 
   const {
     register,
@@ -66,14 +70,32 @@ export function UserCreateModal({ open, onClose }: UserCreateModalProps) {
     <Modal open={open} onClose={onClose} title="Nuevo usuario" description="Crea un nuevo usuario en el sistema" size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {tenant && (
-          <div className="flex items-center gap-2 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700 dark:bg-brand-900/20 dark:text-brand-400">
-            <Building2 size={16} />
-            <span>
-              El usuario se creará en <strong>{tenant.companyName}</strong>
-              <span className="ml-2 rounded-md bg-brand-100 px-2 py-0.5 text-xs dark:bg-brand-900/40">
-                @{tenant.subdomain}
+          <div className="space-y-2 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700 dark:bg-brand-900/20 dark:text-brand-400">
+            <div className="flex items-center gap-2">
+              <Building2 size={16} />
+              <span>
+                El usuario se creará en <strong>{tenant.companyName}</strong>
+                <span className="ml-2 rounded-md bg-brand-100 px-2 py-0.5 text-xs dark:bg-brand-900/40">
+                  @{tenant.subdomain}
+                </span>
               </span>
-            </span>
+            </div>
+            {(tenant.maxAgents != null || tenant.maxSupervisors != null) && (
+              <div className="flex items-center gap-2 text-xs text-brand-600 dark:text-brand-300">
+                <CheckCircle2 size={14} />
+                <span>
+                  Límites:{' '}
+                  {[
+                    tenant.maxAgents != null && `${tenant.maxAgents} agentes`,
+                    tenant.maxSupervisors != null
+                      ? `${tenant.maxSupervisors} supervisores`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </span>
+              </div>
+            )}
           </div>
         )}
         <div className="grid grid-cols-2 gap-4">

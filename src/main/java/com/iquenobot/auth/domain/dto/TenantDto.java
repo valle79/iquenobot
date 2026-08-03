@@ -47,6 +47,8 @@ public class TenantDto {
 
     private Integer maxUsers;
     private Integer maxConversations;
+    private Integer maxAgents;
+    private Integer maxSupervisors;
     private String features;
     private int userCount;
 

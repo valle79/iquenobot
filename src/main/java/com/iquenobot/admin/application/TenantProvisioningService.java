@@ -44,8 +44,15 @@ public class TenantProvisioningService {
         log.info("Starting tenant provisioning for: {}", request.getCompanyName());
 
         // 1. Validate uniqueness
+        if (tenantRepository.existsByCompanyNameAndDeletedFalse(request.getCompanyName().trim())) {
+            throw new BusinessException("El nombre de la empresa ya está en uso");
+        }
         if (tenantRepository.existsBySubdomainAndDeletedFalse(request.getSubdomain())) {
             throw new BusinessException("El subdominio ya está en uso");
+        }
+        if (request.getWebsiteUrl() != null && !request.getWebsiteUrl().isBlank()
+                && tenantRepository.existsByWebsiteUrlAndDeletedFalse(request.getWebsiteUrl().trim())) {
+            throw new BusinessException("El sitio web ya está registrado por otra empresa");
         }
         if (tenantRepository.existsByContactEmailAndDeletedFalse(request.getContactEmail())) {
             throw new BusinessException("El email de contacto ya está registrado");

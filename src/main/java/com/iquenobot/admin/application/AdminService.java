@@ -3,6 +3,7 @@ package com.iquenobot.admin.application;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iquenobot.admin.domain.dto.SystemStatsDto;
+import com.iquenobot.admin.domain.dto.TenantUniquenessDto;
 import com.iquenobot.admin.domain.dto.UpdateTenantRequestDto;
 import com.iquenobot.auth.domain.dto.CreateTenantRequestDto;
 import com.iquenobot.auth.domain.dto.CreateUserRequestDto;
@@ -98,6 +99,18 @@ public class AdminService {
         return toFullTenantDto(tenant);
     }
 
+    @Transactional(readOnly = true)
+    public TenantUniquenessDto checkTenantUniqueness(String companyName, String subdomain, String websiteUrl) {
+        return TenantUniquenessDto.builder()
+                .companyNameAvailable(companyName == null || companyName.isBlank()
+                        || !tenantRepository.existsByCompanyNameAndDeletedFalse(companyName.trim()))
+                .subdomainAvailable(subdomain == null || subdomain.isBlank()
+                        || !tenantRepository.existsBySubdomainAndDeletedFalse(subdomain.trim()))
+                .websiteUrlAvailable(websiteUrl == null || websiteUrl.isBlank()
+                        || !tenantRepository.existsByWebsiteUrlAndDeletedFalse(websiteUrl.trim()))
+                .build();
+    }
+
     @Transactional
     public TenantDto createTenant(CreateTenantRequestDto request) {
         log.info("Admin provisioning new tenant: {}", request.getCompanyName());
@@ -142,12 +155,29 @@ public class AdminService {
             throw new BusinessException("No se puede modificar el tenant del sistema");
         }
 
-        if (request.getCompanyName() != null) tenant.setCompanyName(request.getCompanyName());
+        if (request.getCompanyName() != null) {
+            String newName = request.getCompanyName().trim();
+            if (!newName.equalsIgnoreCase(tenant.getCompanyName())
+                    && tenantRepository.existsByCompanyNameAndDeletedFalse(newName)) {
+                throw new BusinessException("El nombre de la empresa ya está en uso");
+            }
+            tenant.setCompanyName(newName);
+        }
         if (request.getBusinessName() != null) tenant.setBusinessName(request.getBusinessName());
         if (request.getRuc() != null) tenant.setRuc(request.getRuc());
         if (request.getContactEmail() != null) tenant.setContactEmail(request.getContactEmail());
         if (request.getContactPhone() != null) tenant.setContactPhone(request.getContactPhone());
-        if (request.getWebsiteUrl() != null) tenant.setWebsiteUrl(request.getWebsiteUrl());
+        if (request.getWebsiteUrl() != null) {
+            String newUrl = request.getWebsiteUrl().trim();
+            if (newUrl.isEmpty()) {
+                tenant.setWebsiteUrl(null);
+            } else if (!newUrl.equalsIgnoreCase(tenant.getWebsiteUrl())
+                    && tenantRepository.existsByWebsiteUrlAndDeletedFalse(newUrl)) {
+                throw new BusinessException("El sitio web ya está registrado por otra empresa");
+            } else {
+                tenant.setWebsiteUrl(newUrl);
+            }
+        }
         if (request.getLogoUrl() != null) tenant.setLogoUrl(request.getLogoUrl());
         if (request.getAddress() != null) tenant.setAddress(request.getAddress());
         if (request.getCity() != null) tenant.setCity(request.getCity());
@@ -161,6 +191,8 @@ public class AdminService {
         if (request.getSubscriptionPlan() != null) tenant.setSubscriptionPlan(request.getSubscriptionPlan());
         if (request.getMaxUsers() != null) tenant.setMaxUsers(request.getMaxUsers());
         if (request.getMaxConversations() != null) tenant.setMaxConversations(request.getMaxConversations());
+        if (request.getMaxAgents() != null) tenant.setMaxAgents(request.getMaxAgents());
+        if (request.getMaxSupervisors() != null) tenant.setMaxSupervisors(request.getMaxSupervisors());
         if (request.getPlanId() != null) {
             Plan plan = planRepository.findByIdAndDeletedFalse(request.getPlanId())
                     .orElseThrow(() -> new ResourceNotFoundException("Plan no encontrado"));

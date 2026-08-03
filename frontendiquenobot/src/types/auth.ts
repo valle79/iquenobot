@@ -53,6 +53,8 @@ export interface TenantDto {
   subscriptionExpiresAt: string
   maxUsers: number
   maxConversations: number
+  maxAgents: number
+  maxSupervisors: number
   features: string
   createdAt: string
   updatedAt: string
@@ -91,6 +93,8 @@ export interface CreateTenantRequest {
   subscriptionPlan?: string
   maxUsers?: number
   maxConversations?: number
+  maxAgents?: number
+  maxSupervisors?: number
   adminEmail: string
   adminPassword: string
   adminFirstName: string

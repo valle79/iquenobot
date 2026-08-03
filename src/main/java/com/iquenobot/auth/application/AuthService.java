@@ -247,6 +247,19 @@ public class AuthService {
             throw new BusinessException("Se ha alcanzado el límite de usuarios para este plan");
         }
 
+        // Check role-specific limits (agents / supervisors)
+        if (request.getRole() == RoleType.AGENT) {
+            long currentAgents = userRepository.countByTenantIdAndRoleAndDeletedFalse(tenantId, RoleType.AGENT);
+            if (!tenant.canCreateMoreAgents((int) currentAgents)) {
+                throw new BusinessException("Se ha alcanzado el límite de agentes configurado para esta empresa");
+            }
+        } else if (request.getRole() == RoleType.SUPERVISOR) {
+            long currentSupervisors = userRepository.countByTenantIdAndRoleAndDeletedFalse(tenantId, RoleType.SUPERVISOR);
+            if (!tenant.canCreateMoreSupervisors((int) currentSupervisors)) {
+                throw new BusinessException("Se ha alcanzado el límite de supervisores configurado para esta empresa");
+            }
+        }
+
         // Validate email uniqueness within tenant
         if (userRepository.existsByEmailAndTenantIdAndDeletedFalse(request.getEmail(), tenantId)) {
             throw new BusinessException("El email ya está registrado en esta empresa");

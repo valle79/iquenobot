@@ -68,6 +68,8 @@ public class UpdateTenantRequestDto {
     private String subscriptionPlan;
     private Integer maxUsers;
     private Integer maxConversations;
+    private Integer maxAgents;
+    private Integer maxSupervisors;
     private UUID planId;
     private LocalDate subscriptionExpiresAt;
 }

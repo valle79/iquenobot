@@ -2,6 +2,7 @@ package com.iquenobot.admin.interfaces.controller;
 
 import com.iquenobot.admin.application.AdminService;
 import com.iquenobot.admin.domain.dto.SystemStatsDto;
+import com.iquenobot.admin.domain.dto.TenantUniquenessDto;
 import com.iquenobot.admin.domain.dto.UpdateTenantRequestDto;
 import com.iquenobot.auth.domain.dto.CreateTenantRequestDto;
 import com.iquenobot.auth.domain.dto.TenantDto;
@@ -56,6 +57,17 @@ public class AdminController {
     @Operation(summary = "Obtener empresa")
     public ResponseEntity<ApiResponse<TenantDto>> getTenant(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success(adminService.getTenantById(id)));
+    }
+
+    @GetMapping("/tenants/check-unique")
+    @Operation(summary = "Verificar unicidad de nombre, subdominio y sitio web",
+            description = "Devuelve si el nombre de empresa, subdominio y sitio web están disponibles")
+    public ResponseEntity<ApiResponse<TenantUniquenessDto>> checkTenantUniqueness(
+            @RequestParam(required = false) String companyName,
+            @RequestParam(required = false) String subdomain,
+            @RequestParam(required = false) String websiteUrl) {
+        return ResponseEntity.ok(ApiResponse.success(
+                adminService.checkTenantUniqueness(companyName, subdomain, websiteUrl)));
     }
 
     @PostMapping("/tenants")

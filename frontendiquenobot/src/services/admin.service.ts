@@ -51,6 +51,18 @@ export interface TenantQueryParams {
   size?: number
 }
 
+export interface TenantUniquenessResult {
+  companyNameAvailable: boolean
+  subdomainAvailable: boolean
+  websiteUrlAvailable: boolean
+}
+
+export interface TenantUniquenessParams {
+  companyName?: string
+  subdomain?: string
+  websiteUrl?: string
+}
+
 export interface PlanDto {
   id: string
   name: string
@@ -109,6 +121,16 @@ export const adminService = {
 
   getTenant: async (id: string): Promise<TenantDto> => {
     const response = await api.get<ApiResponse<TenantDto>>(`/admin/tenants/${id}`)
+    return response.data.data
+  },
+
+  checkTenantUniqueness: async (
+    params: TenantUniquenessParams,
+  ): Promise<TenantUniquenessResult> => {
+    const response = await api.get<ApiResponse<TenantUniquenessResult>>(
+      '/admin/tenants/check-unique',
+      { params },
+    )
     return response.data.data
   },
 

@@ -80,6 +80,12 @@ public class Tenant extends SoftDeletableEntity {
     @Column(name = "max_conversations")
     private Integer maxConversations;
 
+    @Column(name = "max_agents")
+    private Integer maxAgents;
+
+    @Column(name = "max_supervisors")
+    private Integer maxSupervisors;
+
     @Column(name = "features", length = 2000)
     private String features;
 
@@ -120,6 +126,14 @@ public class Tenant extends SoftDeletableEntity {
 
     public boolean canCreateMoreUsers(int currentUserCount) {
         return maxUsers == null || currentUserCount < maxUsers;
+    }
+
+    public boolean canCreateMoreAgents(int currentAgentCount) {
+        return maxAgents == null || currentAgentCount < maxAgents;
+    }
+
+    public boolean canCreateMoreSupervisors(int currentSupervisorCount) {
+        return maxSupervisors == null || currentSupervisorCount < maxSupervisors;
     }
 
     public boolean canCreateMoreConversations(int currentConversationCount) {

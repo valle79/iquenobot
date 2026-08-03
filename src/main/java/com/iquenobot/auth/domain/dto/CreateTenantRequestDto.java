@@ -1,6 +1,7 @@
 package com.iquenobot.auth.domain.dto;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -75,6 +76,12 @@ public class CreateTenantRequestDto {
     private String subscriptionPlan;
     private Integer maxUsers;
     private Integer maxConversations;
+
+    @Min(value = 0, message = "El límite de agentes no puede ser negativo")
+    private Integer maxAgents;
+
+    @Min(value = 0, message = "El límite de supervisores no puede ser negativo")
+    private Integer maxSupervisors;
 
     @NotBlank(message = "El email del administrador es obligatorio")
     @Email

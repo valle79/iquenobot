@@ -14,12 +14,12 @@ import com.iquenobot.orchestrator.domain.service.ChannelMessageSender;
 import com.iquenobot.orchestrator.interfaces.event.AgentAssignedEvent;
 import com.iquenobot.orchestrator.domain.service.EventPublisher;
 import com.iquenobot.shared.application.MessageTemplateResolver;
-import com.iquenobot.shared.enums.ConversationStatus;
 import com.iquenobot.shared.enums.MessageDirection;
 import com.iquenobot.shared.enums.MessageStatus;
 import com.iquenobot.shared.enums.MessageType;
 import com.iquenobot.shared.enums.RoleType;
 import com.iquenobot.shared.enums.SenderType;
+import com.iquenobot.shared.enums.ChannelType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -74,67 +74,123 @@ public class TransferConversationExecutor implements ActionExecutor {
                 conv.getId(), agent != null ? "agent " + agent.getId() : "queue (no agents available)");
     }
 
-    private void sendHandoffMessage(Decision decision, ProcessingContext context) {
-        String responseText = decision.getParameters() != null
-                ? (String) decision.getParameters().get("response")
-                : null;
+private void sendHandoffMessage(Decision decision, ProcessingContext context) {
 
-        if (responseText == null || responseText.isBlank()) {
-            return;
-        }
+    String responseText = decision.getParameters() != null
+            ? (String) decision.getParameters().get("response")
+            : null;
 
-        responseText = templateResolver.resolve(responseText, context.getTenant(), context.getContact());
-
-        String channelMessageId = null;
-
-        try {
-            var channel = context.getIncomingMessage().getChannel();
-            ChannelMessageSender sender = channelSenders.stream()
-                    .filter(s -> s.supportedChannel() == channel)
-                    .findFirst()
-                    .orElse(null);
-
-            if (sender != null) {
-                String instanceId = context.getIncomingMessage().getInstanceId();
-                String recipient;
-                if (conversation.isGroup() && channel == ChannelType.WHATSAPP) {
-                    recipient = conversation.resolveChannelRecipient();
-                } else {
-                    recipient = switch (channel) {
-                        case WHATSAPP, SMS -> context.getContact().resolveWhatsAppNumber();
-                        default -> context.getIncomingMessage().getSourceIdentifier();
-                    };
-                }
-                channelMessageId = sender.sendTextMessage(instanceId, recipient, responseText);
-                log.info("Handoff message sent via {}: conversation={} recipient={}",
-                        channel, context.getConversation().getId(), recipient);
-            } else {
-                log.warn("No channel sender available for channel={}, handoff message not delivered", channel);
-            }
-        } catch (Exception e) {
-            log.error("Failed to send handoff message via channel: {}", e.getMessage(), e);
-        }
-
-        try {
-            ConversationMessage botMessage = ConversationMessage.builder()
-                    .id(UUID.randomUUID())
-                    .tenantId(context.getTenantId())
-                    .conversation(context.getConversation())
-                    .direction(MessageDirection.OUTBOUND)
-                    .senderType(SenderType.BOT)
-                    .type(MessageType.TEXT)
-                    .status(channelMessageId != null ? MessageStatus.SENT : MessageStatus.FAILED)
-                    .content(responseText)
-                    .channelMessageId(channelMessageId)
-                    .fromBot(true)
-                    .botIntent("handoff")
-                    .sentAt(LocalDateTime.now(ZoneOffset.UTC))
-                    .build();
-            messageRepository.save(botMessage);
-        } catch (Exception e) {
-            log.error("Failed to persist handoff message: {}", e.getMessage(), e);
-        }
+    if (responseText == null || responseText.isBlank()) {
+        return;
     }
+
+    responseText = templateResolver.resolve(
+            responseText,
+            context.getTenant(),
+            context.getContact());
+
+    String channelMessageId = null;
+
+    try {
+        var channel = context.getIncomingMessage().getChannel();
+
+        ChannelMessageSender sender = channelSenders.stream()
+                .filter(s -> s.supportedChannel() == channel)
+                .findFirst()
+                .orElse(null);
+
+        if (sender != null) {
+
+            String instanceId = context.getIncomingMessage().getInstanceId();
+
+            Conversation conversation = context.getConversation();
+
+            String recipient;
+
+            // ===== WHATSAPP GRUPOS =====
+            if (conversation != null
+                    && conversation.isGroup()
+                    && channel == ChannelType.WHATSAPP) {
+
+                recipient = conversation.resolveChannelRecipient();
+
+            } else {
+
+                // ===== CHAT DIRECTO =====
+                recipient = switch (channel) {
+
+                    case WHATSAPP, SMS -> {
+
+                        String number = context.getContact().resolveWhatsAppNumber();
+
+                        yield number != null
+                                ? number.replace("+", "")
+                                : null;
+                    }
+
+                    default -> context.getIncomingMessage().getSourceIdentifier();
+                };
+            }
+
+            if (recipient == null || recipient.isBlank()) {
+                throw new IllegalStateException(
+                        "No se pudo resolver el destinatario del mensaje de transferencia");
+            }
+
+            channelMessageId = sender.sendTextMessage(
+                    instanceId,
+                    recipient,
+                    responseText);
+
+            log.info(
+                    "Handoff message sent via {}: conversation={} recipient={}",
+                    channel,
+                    context.getConversation().getId(),
+                    recipient);
+
+        } else {
+
+            log.warn(
+                    "No channel sender available for channel={}, handoff message not delivered",
+                    channel);
+        }
+
+    } catch (Exception e) {
+
+        log.error(
+                "Failed to send handoff message via channel: {}",
+                e.getMessage(),
+                e);
+    }
+
+    try {
+        ConversationMessage botMessage = ConversationMessage.builder()
+                .id(UUID.randomUUID())
+                .tenantId(context.getTenantId())
+                .conversation(context.getConversation())
+                .direction(MessageDirection.OUTBOUND)
+                .senderType(SenderType.BOT)
+                .type(MessageType.TEXT)
+                .status(channelMessageId != null
+                        ? MessageStatus.SENT
+                        : MessageStatus.FAILED)
+                .content(responseText)
+                .channelMessageId(channelMessageId)
+                .fromBot(true)
+                .botIntent("handoff")
+                .sentAt(LocalDateTime.now(ZoneOffset.UTC))
+                .build();
+
+        messageRepository.save(botMessage);
+
+    } catch (Exception e) {
+
+        log.error(
+                "Failed to persist handoff message: {}",
+                e.getMessage(),
+                e);
+    }
+}
 
     private User selectLeastBusyAgent(UUID tenantId) {
         List<User> agents = userRepository.findActiveUsersByRoles(tenantId,

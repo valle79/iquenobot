@@ -61,7 +61,8 @@ const typeColors: Record<string, string> = {
   NEW_MESSAGE: 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
   NEW_CONVERSATION: 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
   CONVERSATION_ASSIGNED: 'bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
-  CONVERSATION_ESCALATED: 'bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
+  CONVERSATION_ESCALATED:
+    'bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
   LEAD_ASSIGNED: 'bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
   LEAD_CREATED: 'bg-purple-100 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400',
   LEAD_STATUS_CHANGED: 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
@@ -89,12 +90,14 @@ const typeLabels: Record<string, string> = {
   CUSTOM: 'Notificación',
 }
 
-const priorityBadge: Record<string, { variant: 'error' | 'warning' | 'info' | 'neutral'; label: string }> = {
+type PriorityBadge = { variant: 'error' | 'warning' | 'info' | 'neutral'; label: string }
+
+const priorityBadge = {
   URGENT: { variant: 'error', label: 'Urgente' },
   HIGH: { variant: 'warning', label: 'Alta' },
   NORMAL: { variant: 'info', label: 'Normal' },
   LOW: { variant: 'neutral', label: 'Baja' },
-}
+} satisfies Record<string, PriorityBadge>
 
 type Filter = 'all' | 'unread'
 
@@ -130,19 +133,25 @@ interface NotificationItemProps {
   onDelete: (id: string) => void
 }
 
-function NotificationItem({ notification, onMarkRead, onMarkUnread, onDelete }: NotificationItemProps) {
+function NotificationItem({
+  notification,
+  onMarkRead,
+  onMarkUnread,
+  onDelete,
+}: NotificationItemProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate()
   const Icon = typeIcons[notification.type] ?? Bell
   const colorClass = typeColors[notification.type] ?? 'bg-gray-100 text-gray-500 dark:bg-gray-800'
-  const priority = priorityBadge[notification.priority] ?? priorityBadge.NORMAL
+  const priority = priorityBadge[notification.priority ?? 'NORMAL'] ?? priorityBadge.NORMAL
   const isQuote = notification.message.startsWith('«')
 
   const menuItems: DropdownItem[] = [
     {
       label: notification.read ? 'Marcar como no leída' : 'Marcar como leída',
       icon: notification.read ? Mail : MailOpen,
-      onClick: () => (notification.read ? onMarkUnread(notification.id) : onMarkRead(notification.id)),
+      onClick: () =>
+        notification.read ? onMarkUnread(notification.id) : onMarkRead(notification.id),
     },
     { type: 'separator' },
     {
@@ -162,6 +171,7 @@ function NotificationItem({ notification, onMarkRead, onMarkUnread, onDelete }: 
     <div
       className={cn(
         'group flex gap-4 border-b border-gray-100 p-4 transition-colors last:border-b-0 dark:border-gray-800',
+        'first:rounded-t-xl last:rounded-b-xl',
         !notification.read && 'bg-brand-50/60 dark:bg-brand-900/10',
       )}
       onClick={() => {
@@ -169,7 +179,7 @@ function NotificationItem({ notification, onMarkRead, onMarkUnread, onDelete }: 
       }}
     >
       <div className="flex flex-col items-center gap-2">
-        {!notification.read && <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-600" />}
+        {!notification.read && <span className="bg-brand-600 mt-1 h-2 w-2 shrink-0 rounded-full" />}
         {notification.imageUrl ? (
           <img
             src={notification.imageUrl}
@@ -177,7 +187,12 @@ function NotificationItem({ notification, onMarkRead, onMarkUnread, onDelete }: 
             className="h-10 w-10 shrink-0 rounded-full object-cover ring-2 ring-gray-100 dark:ring-gray-800"
           />
         ) : (
-          <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-full', colorClass)}>
+          <div
+            className={cn(
+              'flex h-10 w-10 shrink-0 items-center justify-center rounded-full',
+              colorClass,
+            )}
+          >
             <Icon size={18} />
           </div>
         )}
@@ -185,7 +200,9 @@ function NotificationItem({ notification, onMarkRead, onMarkUnread, onDelete }: 
 
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{notification.title}</p>
+          <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">
+            {notification.title}
+          </p>
           <div onClick={(e) => e.stopPropagation()} className="relative shrink-0">
             <Dropdown
               open={menuOpen}
@@ -216,7 +233,9 @@ function NotificationItem({ notification, onMarkRead, onMarkUnread, onDelete }: 
         </p>
 
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <span className="text-xs text-gray-400">{dayjs.utc(notification.createdAt).fromNow()}</span>
+          <span className="text-xs text-gray-400">
+            {dayjs.utc(notification.createdAt).fromNow()}
+          </span>
           <Badge variant={priority.variant} size="sm">
             {priority.label}
           </Badge>
@@ -254,7 +273,10 @@ function NotificationsSkeleton() {
       </div>
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-950">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="flex gap-4 border-b border-gray-100 p-4 last:border-b-0 dark:border-gray-800">
+          <div
+            key={i}
+            className="flex gap-4 border-b border-gray-100 p-4 last:border-b-0 dark:border-gray-800"
+          >
             <Skeleton variant="circular" width={40} height={40} />
             <div className="flex-1 space-y-2">
               <Skeleton width="50%" />
@@ -275,7 +297,11 @@ export default function NotificationsPage() {
   const [items, setItems] = useState<NotificationDto[]>([])
   const pageRef = useRef(0)
 
-  const { data, isLoading, isError, error, refetch, isFetching } = useNotifications(page, PAGE_SIZE, filter === 'unread')
+  const { data, isLoading, isError, error, refetch, isFetching } = useNotifications(
+    page,
+    PAGE_SIZE,
+    filter === 'unread',
+  )
   const unreadCountQuery = useUnreadCount()
   const markAsReadMutation = useMarkAsRead()
   const markAsUnreadMutation = useMarkAsUnread()
@@ -283,24 +309,32 @@ export default function NotificationsPage() {
   const deleteMutation = useDeleteNotification()
 
   useEffect(() => {
-    setPage(0)
-    pageRef.current = 0
+    pageRef.current = -1
     setItems([])
+    setPage(0)
   }, [filter])
 
   useEffect(() => {
-    if (!data) return
-    if (data.page === 0 || data.page > pageRef.current) {
-      setItems((prev) => (data.page === 0 ? [...data.content] : [...prev, ...data.content]))
-      pageRef.current = data.page
+    if (!data) {
+      return
     }
+
+    if (data.page === 0) {
+      // reemplaza completamente la lista
+      setItems(data.content)
+    } else if (data.page > pageRef.current) {
+      // agrega páginas adicionales
+      setItems((prev) => [...prev, ...data.content])
+    }
+
+    pageRef.current = data.page
   }, [data])
 
-  const handleRefetch = () => {
-    setPage(0)
+  const handleRefetch = async () => {
     pageRef.current = 0
-    setItems([])
-    void refetch()
+
+    // NO borrar items
+    await refetch()
   }
 
   const grouped = useMemo(() => groupByDay(items), [items])
@@ -311,9 +345,24 @@ export default function NotificationsPage() {
   const hasMore = data ? page + 1 < data.totalPages : false
 
   const stats = [
-    { label: 'Sin leer', value: unreadCount, icon: BellRing, color: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400' },
-    { label: 'Alta prioridad', value: highCount, icon: AlertTriangle, color: 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400' },
-    { label: 'De hoy', value: todayCount, icon: CalendarClock, color: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' },
+    {
+      label: 'Sin leer',
+      value: unreadCount,
+      icon: BellRing,
+      color: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400',
+    },
+    {
+      label: 'Alta prioridad',
+      value: highCount,
+      icon: AlertTriangle,
+      color: 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400',
+    },
+    {
+      label: 'De hoy',
+      value: todayCount,
+      icon: CalendarClock,
+      color: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
+    },
   ]
 
   if (isLoading && items.length === 0) return <NotificationsSkeleton />
@@ -332,13 +381,17 @@ export default function NotificationsPage() {
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-600 text-white shadow-sm dark:bg-brand-500">
+          <div className="bg-brand-600 dark:bg-brand-500 flex h-11 w-11 items-center justify-center rounded-xl text-white shadow-sm">
             <Bell size={22} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('navigation.notifications')}</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              {t('navigation.notifications')}
+            </h1>
             <p className="mt-0.5 text-sm text-gray-500">
-              {unreadCount > 0 ? `${unreadCount} sin leer · ${totalElements} en total` : 'Estás al día, sin notificaciones pendientes'}
+              {unreadCount > 0
+                ? `${unreadCount} sin leer · ${totalElements} en total`
+                : 'Estás al día, sin notificaciones pendientes'}
             </p>
           </div>
         </div>
@@ -347,7 +400,12 @@ export default function NotificationsPage() {
             <RefreshCw size={16} className={cn(isFetching && 'animate-spin')} />
           </Button>
           {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={() => markAllAsReadMutation.mutate()} loading={markAllAsReadMutation.isPending}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => markAllAsReadMutation.mutate()}
+              loading={markAllAsReadMutation.isPending}
+            >
               <CheckCheck size={16} />
               Marcar todas como leídas
             </Button>
@@ -361,11 +419,18 @@ export default function NotificationsPage() {
             key={stat.label}
             className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-950"
           >
-            <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', stat.color)}>
+            <div
+              className={cn(
+                'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+                stat.color,
+              )}
+            >
               <stat.icon size={18} />
             </div>
             <div className="min-w-0">
-              <p className="text-xl font-bold leading-tight text-gray-900 dark:text-gray-100">{stat.value}</p>
+              <p className="text-xl leading-tight font-bold text-gray-900 dark:text-gray-100">
+                {stat.value}
+              </p>
               <p className="truncate text-xs text-gray-500">{stat.label}</p>
             </div>
           </div>
@@ -404,10 +469,12 @@ export default function NotificationsPage() {
           {grouped.map((group) => (
             <div key={group.label}>
               <div className="mb-2 flex items-center gap-2 px-1">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400">{group.label}</h2>
+                <h2 className="text-xs font-semibold tracking-wider text-gray-400 uppercase">
+                  {group.label}
+                </h2>
                 <div className="h-px flex-1 bg-gray-200 dark:bg-gray-800" />
               </div>
-              <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-950">
+              <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-950">
                 {group.items.map((notification) => (
                   <NotificationItem
                     key={notification.id}

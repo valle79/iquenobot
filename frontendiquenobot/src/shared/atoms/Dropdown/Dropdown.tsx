@@ -2,7 +2,7 @@ import { type ReactNode, useRef, useEffect } from 'react'
 import { cn } from '@/shared/utils'
 import type { LucideIcon } from 'lucide-react'
 
-interface DropdownItem {
+export interface DropdownItem {
   label?: string
   icon?: LucideIcon
   onClick?: () => void

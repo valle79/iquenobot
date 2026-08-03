@@ -115,6 +115,10 @@ app:
     max-image-size: 5MB
   storage:
     provider: ${STORAGE_PROVIDER:local}
+    cloudinary:
+      cloud-name: ${CLOUDINARY_CLOUD_NAME:}
+      api-key: ${CLOUDINARY_API_KEY:}
+      api-secret: ${CLOUDINARY_API_SECRET:}
     s3:
       region: ${S3_REGION:us-east-1}
       bucket: ${S3_BUCKET:}

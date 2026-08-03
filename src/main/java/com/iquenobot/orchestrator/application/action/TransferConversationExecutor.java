@@ -96,10 +96,15 @@ public class TransferConversationExecutor implements ActionExecutor {
 
             if (sender != null) {
                 String instanceId = context.getIncomingMessage().getInstanceId();
-                String recipient = switch (channel) {
-                    case WHATSAPP, SMS -> context.getContact().getPhone();
-                    default -> context.getIncomingMessage().getSourceIdentifier();
-                };
+                String recipient;
+                if (conversation.isGroup() && channel == ChannelType.WHATSAPP) {
+                    recipient = conversation.resolveChannelRecipient();
+                } else {
+                    recipient = switch (channel) {
+                        case WHATSAPP, SMS -> context.getContact().resolveWhatsAppNumber();
+                        default -> context.getIncomingMessage().getSourceIdentifier();
+                    };
+                }
                 channelMessageId = sender.sendTextMessage(instanceId, recipient, responseText);
                 log.info("Handoff message sent via {}: conversation={} recipient={}",
                         channel, context.getConversation().getId(), recipient);

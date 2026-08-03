@@ -129,6 +129,46 @@ private String buildChannelConversationId(IncomingMessage message) {
                         channelConversationId,
                         context.getTenantId()
                 )
+                // Si no existe la conversación por su identificador de canal
+                // (p.ej. fue creada desde el panel sin channelConversationId o
+                // con otro formato), reutilizamos la conversación activa del
+                // mismo contacto + canal para evitar duplicados.
+                .orElseGet(() ->
+                        findActiveByContactOrCreate(
+                                context,
+                                channelConversationId,
+                                contact
+                        )
+                );
+    }
+
+    @Transactional
+    protected Conversation findActiveByContactOrCreate(
+            ProcessingContext context,
+            String channelConversationId,
+            Contact contact
+    ) {
+
+        return conversationRepository
+                .findActiveByContactAndChannel(
+                        context.getTenantId(),
+                        contact.getId(),
+                        context.getIncomingMessage().getChannel()
+                )
+                .stream()
+                .findFirst()
+                .map(existing -> {
+                    // Vincular el identificador de canal a la conversación
+                    // existente para futuras búsquedas
+                    if (!channelConversationId.equals(existing.getChannelConversationId())) {
+                        String previousKey = existing.getChannelConversationId();
+                        existing.setChannelConversationId(channelConversationId);
+                        conversationRepository.save(existing);
+                        log.info("Reusing existing conversation {} for contact {} (key {} -> {})",
+                                existing.getId(), contact.getId(), previousKey, channelConversationId);
+                    }
+                    return existing;
+                })
                 .orElseGet(() ->
                         createConversationSafely(
                                 context,
@@ -186,7 +226,6 @@ if (message.isGroup()
         && message.getConversationName() != null
         && !message.getConversationName().isBlank()
         && !"Grupo WhatsApp".equals(message.getConversationName())
-        && !message.getConversationName().startsWith("Grupo ")
         && !Objects.equals(
                 conversation.getSubject(),
                 message.getConversationName()

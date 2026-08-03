@@ -1,21 +1,18 @@
 package com.iquenobot.shared.application;
 
+import com.iquenobot.shared.domain.service.StorageService;
 import com.iquenobot.shared.exception.BusinessException;
-import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Set;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class FileUploadService {
 
@@ -27,24 +24,7 @@ public class FileUploadService {
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     private static final long MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
-    @Value("${app.upload.path:uploads}")
-    private String uploadPath;
-
-    @Value("${app.base-url:http://localhost:8085}")
-    private String baseUrl;
-
-    private Path uploadDir;
-
-    @PostConstruct
-    void init() {
-        this.uploadDir = Paths.get(uploadPath).toAbsolutePath().normalize();
-        try {
-            Files.createDirectories(this.uploadDir);
-            log.info("File upload directory created at: {}", this.uploadDir);
-        } catch (IOException e) {
-            throw new BusinessException("Could not create upload directory: " + this.uploadDir);
-        }
-    }
+    private final StorageService storageService;
 
     public String uploadImage(MultipartFile file) {
         validateFile(file, ALLOWED_IMAGE_TYPES, MAX_IMAGE_SIZE);
@@ -89,6 +69,37 @@ public class FileUploadService {
         }
 
         String subdirectory = resolveSubdirectory(mimeType);
+        String objectKey = buildKey(subdirectory, originalFilename, mimeType);
+        StorageService.StoredObject stored = storageService.store(data, objectKey, mimeType);
+
+        log.info("File stored from bytes: {} (original: {}, mime: {})", objectKey, originalFilename, mimeType);
+        return stored.publicUrl();
+    }
+
+    public void deleteFile(String fileUrl) {
+        if (fileUrl == null || fileUrl.isBlank()) {
+            return;
+        }
+        String objectKey = extractObjectKey(fileUrl);
+        if (objectKey == null) {
+            return;
+        }
+        storageService.delete(objectKey);
+        log.info("File deleted: {}", objectKey);
+    }
+
+    private String storeFile(MultipartFile file, String subdirectory) {
+        String objectKey = buildKey(subdirectory, file.getOriginalFilename(), file.getContentType());
+        try {
+            StorageService.StoredObject stored = storageService.store(file.getBytes(), objectKey, file.getContentType());
+            log.info("File stored: {} (original: {})", objectKey, file.getOriginalFilename());
+            return stored.publicUrl();
+        } catch (IOException e) {
+            throw new BusinessException("Could not store file: " + file.getOriginalFilename());
+        }
+    }
+
+    private String buildKey(String subdirectory, String originalFilename, String mimeType) {
         String extension = "";
         if (originalFilename != null && originalFilename.contains(".")) {
             extension = originalFilename.substring(originalFilename.lastIndexOf("."));
@@ -96,19 +107,29 @@ public class FileUploadService {
         if (extension.isBlank() && mimeType != null) {
             extension = extensionForMimeType(mimeType);
         }
+        return subdirectory + "/" + UUID.randomUUID() + extension;
+    }
 
-        String filename = UUID.randomUUID().toString() + extension;
-        Path targetPath = this.uploadDir.resolve(subdirectory).resolve(filename);
-
-        try {
-            Files.createDirectories(targetPath.getParent());
-            Files.write(targetPath, data);
-            log.info("File stored from bytes: {} (original: {}, mime: {})", filename, originalFilename, mimeType);
-
-            return baseUrl + "/uploads/" + subdirectory + "/" + filename;
-        } catch (IOException e) {
-            throw new BusinessException("Could not store file: " + originalFilename);
+    /**
+     * Convierte la URL pública de vuelta a su object key según el proveedor de
+     * almacenamiento (local o Cloudinary). Devuelve null si la URL no es
+     * reconocida.
+     */
+    private String extractObjectKey(String fileUrl) {
+        int cloudinaryMarker = fileUrl.indexOf("/upload/");
+        if (cloudinaryMarker >= 0) {
+            String suffix = fileUrl.substring(cloudinaryMarker + "/upload/".length());
+            int versionStart = suffix.indexOf("/v");
+            if (versionStart == 0) {
+                suffix = suffix.substring(suffix.indexOf("/", 2) + 1);
+            }
+            return suffix;
         }
+        int localMarker = fileUrl.indexOf("/uploads/");
+        if (localMarker >= 0) {
+            return fileUrl.substring(localMarker + "/uploads/".length());
+        }
+        return null;
     }
 
     private String resolveSubdirectory(String mimeType) {
@@ -135,45 +156,6 @@ public class FileUploadService {
             case "text/plain" -> ".txt";
             default -> "";
         };
-    }
-
-    public void deleteFile(String fileUrl) {
-        if (fileUrl == null || fileUrl.isBlank()) return;
-
-        String relativePath = fileUrl.replace(baseUrl + "/uploads/", "");
-        Path filePath = this.uploadDir.resolve(relativePath).normalize();
-
-        if (!filePath.startsWith(this.uploadDir)) {
-            throw new BusinessException("Cannot delete file outside upload directory");
-        }
-
-        try {
-            Files.deleteIfExists(filePath);
-            log.info("File deleted: {}", filePath);
-        } catch (IOException e) {
-            log.warn("Could not delete file: {}", filePath, e);
-        }
-    }
-
-    private String storeFile(MultipartFile file, String subdirectory) {
-        String originalFilename = file.getOriginalFilename();
-        String extension = "";
-        if (originalFilename != null && originalFilename.contains(".")) {
-            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        }
-
-        String filename = UUID.randomUUID().toString() + extension;
-        Path targetPath = this.uploadDir.resolve(subdirectory).resolve(filename);
-
-        try {
-            Files.createDirectories(targetPath.getParent());
-            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
-            log.info("File stored: {} (original: {})", filename, originalFilename);
-
-            return baseUrl + "/uploads/" + subdirectory + "/" + filename;
-        } catch (IOException e) {
-            throw new BusinessException("Could not store file: " + originalFilename);
-        }
     }
 
     private void validateFile(MultipartFile file, Set<String> allowedTypes, long maxSize) {

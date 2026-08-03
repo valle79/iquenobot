@@ -298,34 +298,20 @@ public class ConversationService {
             try {
                 String instanceId = resolveWhatsAppInstanceId(conversation, tenantId);
                 if (instanceId != null) {
-                    String channelMessageId;
-                    if (isText) {
-                        WhatsAppMessageDto waMsg = WhatsAppMessageDto.builder()
-                                .to(conversation.getContact().getPhone())
-                                .type(MessageType.TEXT)
-                                .text(request.getContent())
-                                .build();
-                        channelMessageId = whatsAppProvider.sendMessage(instanceId, waMsg);
+                    // Grupos: JID del grupo; individuales: número del contacto
+                    String whatsappNumber = conversation.isGroup()
+                            ? conversation.resolveChannelRecipient()
+                            : conversation.getContact().resolveWhatsAppNumber();
+                    if (whatsappNumber == null || whatsappNumber.isBlank()) {
+                        log.warn("No se pudo resolver el destinatario de WhatsApp para la conversación {}", conversation.getId());
                     } else {
-                        String mediaUrl = attachmentUrls[0].trim();
-                        WhatsAppMessageDto waMsg = WhatsAppMessageDto.builder()
-                                .to(conversation.getContact().getPhone())
-                                .type(request.getType())
-                                .mediaUrl(mediaUrl)
-                                .caption(request.getContent() != null && !request.getContent().isBlank()
-                                        ? request.getContent()
-                                        : null)
-                                .build();
-                        channelMessageId = whatsAppProvider.sendMediaMessage(instanceId, waMsg);
+                        sendWhatsAppViaProvider(conversation, request, isText, attachmentUrls, whatsappNumber, message);
                     }
-                    if (channelMessageId != null) {
-                        message.setChannelMessageId(channelMessageId);
-                        messageRepository.save(message);
-                    }
-                    log.info("WhatsApp message sent via Evolution API, channelId: {}", channelMessageId);
                 }
             } catch (Exception e) {
                 log.warn("Failed to send WhatsApp message via Evolution API: {}", e.getMessage());
+                message.setStatus(MessageStatus.FAILED);
+                messageRepository.save(message);
             }
         }
 
@@ -346,8 +332,44 @@ public class ConversationService {
         return conversationMapper.toMessageDto(message);
     }
 
-    private AttachmentType resolveAttachmentType(MessageType type) {
-        if (type == null) {
+    private void sendWhatsAppViaProvider(Conversation conversation, SendMessageRequestDto request,
+                                         boolean isText, String[] attachmentUrls, String whatsappNumber,
+                                         ConversationMessage message) {
+        String instanceId = resolveWhatsAppInstanceId(conversation, getTenantId());
+        if (instanceId == null) {
+            log.warn("No WhatsApp instance resolved for conversation {}", conversation.getId());
+            return;
+        }
+
+        String channelMessageId;
+        if (isText) {
+            WhatsAppMessageDto waMsg = WhatsAppMessageDto.builder()
+                    .to(whatsappNumber)
+                    .type(MessageType.TEXT)
+                    .text(request.getContent())
+                    .build();
+            channelMessageId = whatsAppProvider.sendMessage(instanceId, waMsg);
+        } else {
+            String mediaUrl = attachmentUrls[0].trim();
+            WhatsAppMessageDto waMsg = WhatsAppMessageDto.builder()
+                    .to(whatsappNumber)
+                    .type(request.getType())
+                    .mediaUrl(mediaUrl)
+                    .caption(request.getContent() != null && !request.getContent().isBlank()
+                            ? request.getContent()
+                            : null)
+                    .build();
+            channelMessageId = whatsAppProvider.sendMediaMessage(instanceId, waMsg);
+        }
+
+        if (channelMessageId != null) {
+            message.setChannelMessageId(channelMessageId);
+            messageRepository.save(message);
+        }
+        log.info("WhatsApp message sent via Evolution API, channelId: {}", channelMessageId);
+    }
+
+    private AttachmentType resolveAttachmentType(MessageType type) {        if (type == null) {
             return AttachmentType.DOCUMENT;
         }
         return switch (type) {

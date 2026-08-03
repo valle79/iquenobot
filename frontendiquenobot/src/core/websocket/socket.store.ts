@@ -11,6 +11,7 @@ interface SocketState {
   listeners: Map<string, Set<MessageHandler>>
   connect: () => void
   disconnect: () => void
+  clear: () => void
   on: (event: string, handler: MessageHandler) => void
   off: (event: string, handler: MessageHandler) => void
   emit: (type: string, payload?: unknown) => void
@@ -98,6 +99,10 @@ export const useSocketStore = create<SocketState>((set, get) => ({
       currentWs = null
     }
     set({ socket: null, isConnected: false, error: null, listeners: new Map() })
+  },
+
+  clear: () => {
+    get().disconnect()
   },
 
   on: (event: string, handler: MessageHandler) => {

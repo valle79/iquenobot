@@ -143,6 +143,32 @@ public class Conversation extends SoftDeletableEntity {
         return !isDeleted() && status != ConversationStatus.CLOSED;
     }
 
+    /**
+     * Destinatario para envíos por WhatsApp:
+     * - Grupos: JID completo del grupo (p.ej. 181161838002355@g.us).
+     * - Individuales: null (se resuelve desde el contacto).
+     */
+    public String resolveChannelRecipient() {
+        if (!isGroup || channelConversationId == null || channelConversationId.isBlank()) {
+            return null;
+        }
+        String jid = channelConversationId;
+        if (jid.startsWith("WHATSAPP:")) {
+            jid = jid.substring("WHATSAPP:".length());
+        }
+        return jid;
+    }
+
+    /**
+     * Nombre legible de la conversación (prioriza el subject del grupo).
+     */
+    public String getDisplayName() {
+        if (subject != null && !subject.isBlank()) {
+            return subject;
+        }
+        return null;
+    }
+
     public boolean canBeAssigned() {
         return status == ConversationStatus.OPEN || status == ConversationStatus.PENDING;
     }

@@ -198,4 +198,25 @@ public class Contact extends SoftDeletableEntity {
     public boolean hasWhatsApp() {
         return whatsappPhone != null && !whatsappPhone.isBlank();
     }
+
+    /**
+     * Número de destino para envíos por WhatsApp (formato internacional sin "+", ej: 51960947459).
+     * Prioriza el número normalizado (con código de país), luego el número de WhatsApp,
+     * y al final el número crudo.
+     */
+    public String resolveWhatsAppNumber() {
+        String candidate;
+        if (hasText(normalizedPhone)) {
+            candidate = normalizedPhone;
+        } else if (hasText(whatsappPhone)) {
+            candidate = whatsappPhone;
+        } else {
+            candidate = phone;
+        }
+        return candidate != null ? candidate.replace("+", "") : null;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
+    }
 }

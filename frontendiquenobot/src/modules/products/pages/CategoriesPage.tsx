@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { Plus, MoreHorizontal, Trash2, Pencil, ArrowUpDown } from 'lucide-react'
 import { useCategories, useCategoryMutations } from '../hooks/useCategories'
 import { CategoryFormModal } from '../components/CategoryFormModal'
+import { useAbility } from '@/core/rbac/permissions'
 import { DataTable } from '@/shared/organisms/DataTable/DataTable'
 import { Button } from '@/shared/atoms/Button/Button'
 import { Badge } from '@/shared/atoms/Badge/Badge'
 import { Dropdown } from '@/shared/atoms/Dropdown/Dropdown'
+import type { DropdownItem } from '@/shared/atoms/Dropdown/Dropdown'
 import { ConfirmDialog } from '@/shared/molecules/ConfirmDialog'
 import { SearchBar } from '@/shared/molecules/SearchBar'
 import { dayjs } from '@/config/dayjs'
@@ -18,6 +20,10 @@ export default function CategoriesPage() {
     search, setSearch, isLoading,
   } = useCategories()
   const { createMutation, updateMutation, deleteMutation } = useCategoryMutations()
+  const { can } = useAbility()
+  const canCreate = can('create', 'categories')
+  const canEdit = can('edit', 'categories')
+  const canDelete = can('delete', 'categories')
   const [deleteTarget, setDeleteTarget] = useState<CategoryDto | null>(null)
   const [formTarget, setFormTarget] = useState<CategoryDto | null>(null)
   const [formOpen, setFormOpen] = useState(false)
@@ -69,17 +75,22 @@ export default function CategoriesPage() {
       cell: ({ row }) => {
         const [menuOpen, setMenuOpen] = useState(false)
         const cat = row.original
+        if (!canEdit && !canDelete) return null
+        const items: DropdownItem[] = []
+        if (canEdit) {
+          items.push({ label: 'Editar', icon: Pencil, onClick: () => { setFormTarget(cat); setFormOpen(true) } })
+        }
+        if (canDelete) {
+          if (canEdit) items.push({ type: 'separator' })
+          items.push({ label: 'Eliminar', icon: Trash2, danger: true as const, onClick: () => setDeleteTarget(cat) })
+        }
         return (
           <Dropdown
             open={menuOpen} onOpenChange={setMenuOpen} align="end"
             trigger={
               <Button variant="ghost" size="sm" icon><MoreHorizontal size={16} /></Button>
             }
-            items={[
-              { label: 'Editar', icon: Pencil, onClick: () => { setFormTarget(cat); setFormOpen(true) } },
-              { type: 'separator' },
-              { label: 'Eliminar', icon: Trash2, danger: true as const, onClick: () => setDeleteTarget(cat) },
-            ]}
+            items={items}
           />
         )
       },
@@ -95,10 +106,12 @@ export default function CategoriesPage() {
             Gestiona las categorías de productos ({totalElements} total)
           </p>
         </div>
-        <Button onClick={() => { setFormTarget(null); setFormOpen(true) }}>
-          <Plus size={18} />
-          Nueva categoría
-        </Button>
+        {canCreate && (
+          <Button onClick={() => { setFormTarget(null); setFormOpen(true) }}>
+            <Plus size={18} />
+            Nueva categoría
+          </Button>
+        )}
       </div>
 
       <div className="flex items-center gap-3">

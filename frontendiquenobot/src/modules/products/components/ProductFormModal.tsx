@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -7,6 +7,7 @@ import { Modal } from '@/shared/atoms/Modal/Modal'
 import { Input } from '@/shared/atoms/Input/Input'
 import { Select } from '@/shared/atoms/Select/Select'
 import { Button } from '@/shared/atoms/Button/Button'
+import { ImageUploader } from '@/shared/molecules/ImageUploader'
 import { useCreateProduct, useUpdateProduct } from '../hooks/useProducts'
 import { useActiveCategories } from '../hooks/useCategories'
 import type { ProductDto } from '@/types/product'
@@ -42,6 +43,7 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
   const createMutation = useCreateProduct()
   const updateMutation = useUpdateProduct()
   const { data: categoryOptions } = useActiveCategories()
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
 
   const {
     register,
@@ -52,6 +54,7 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
 
   useEffect(() => {
     if (product) {
+      setImageUrl(product.imageUrl || null)
       reset({
         name: product.name,
         sku: product.sku || '',
@@ -63,6 +66,7 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
         tags: product.tags || '',
       })
     } else {
+      setImageUrl(null)
       reset({ name: '', sku: '', price: '', stockQuantity: '0', description: '', categoryId: '', status: 'ACTIVE', tags: '' })
     }
   }, [product, reset])
@@ -78,6 +82,7 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
         categoryId: data.categoryId || undefined,
         status: data.status as any,
         tags: data.tags || undefined,
+        imageUrl: imageUrl || undefined,
       }
       if (isEdit && product) {
         await updateMutation.mutateAsync({ id: product.id, dto })
@@ -93,28 +98,33 @@ export function ProductFormModal({ open, product, onClose }: ProductFormModalPro
   return (
     <Modal open={open} onClose={onClose} title={isEdit ? 'Editar producto' : 'Nuevo producto'} size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <Input label="Nombre del producto" placeholder="Nombre" leftIcon={<Tag size={16} />}
-          error={errors.name?.message} {...register('name')} />
-        <div className="grid grid-cols-3 gap-4">
-          <Input label="SKU" placeholder="SKU-001" leftIcon={<Hash size={16} />}
-            error={errors.sku?.message} {...register('sku')} />
-          <Input label="Precio" type="number" step="0.01" placeholder="0.00" leftIcon={<DollarSign size={16} />}
-            error={errors.price?.message} {...register('price')} />
-          <Input label="Stock" type="number" placeholder="0" leftIcon={<Package size={16} />}
-            error={errors.stockQuantity?.message} {...register('stockQuantity')} />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Categoría</label>
-            <select {...register('categoryId')}
-              className="h-9 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
-              <option value="">Sin categoría</option>
-              {(categoryOptions ?? []).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+        <div className="flex items-start gap-6">
+          <ImageUploader value={imageUrl} onChange={setImageUrl} label="Imagen del producto" />
+          <div className="flex-1 space-y-4">
+            <Input label="Nombre del producto" placeholder="Nombre" leftIcon={<Tag size={16} />}
+              error={errors.name?.message} {...register('name')} />
+            <div className="grid grid-cols-3 gap-4">
+              <Input label="SKU" placeholder="SKU-001" leftIcon={<Hash size={16} />}
+                error={errors.sku?.message} {...register('sku')} />
+              <Input label="Precio" type="number" step="0.01" placeholder="0.00" leftIcon={<DollarSign size={16} />}
+                error={errors.price?.message} {...register('price')} />
+              <Input label="Stock" type="number" placeholder="0" leftIcon={<Package size={16} />}
+                error={errors.stockQuantity?.message} {...register('stockQuantity')} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Categoría</label>
+                <select {...register('categoryId')}
+                  className="h-9 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100">
+                  <option value="">Sin categoría</option>
+                  {(categoryOptions ?? []).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+              <Select label="Estado" options={statusOptions} error={errors.status?.message} {...register('status')} />
+            </div>
+            <Input label="Etiquetas" placeholder="nuevo, oferta, etc." {...register('tags')} />
           </div>
-          <Select label="Estado" options={statusOptions} error={errors.status?.message} {...register('status')} />
         </div>
-        <Input label="Etiquetas" placeholder="nuevo, oferta, etc." {...register('tags')} />
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
           <textarea {...register('description')} rows={3}

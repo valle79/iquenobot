@@ -76,9 +76,25 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
             throw new BusinessException("Failed to send message via Evolution API");
 
         } catch (Exception e) {
-            log.error("Error sending message via Evolution API: {}", e.getMessage(), e);
-            throw new BusinessException("Error al enviar mensaje por WhatsApp: " + e.getMessage());
+            String detail = e.getMessage();
+            log.error("Error sending message via Evolution API: {}", detail, e);
+            throw new BusinessException(buildSendErrorMessage(detail, message.getTo()));
         }
+    }
+
+    /**
+     * Traduce un error de Evolution API a un mensaje claro y accionable.
+     * Caso común: el destinatario no existe o no tiene WhatsApp activo
+     * (Evolution responde "exists": false).
+     */
+    private String buildSendErrorMessage(String detail, String recipient) {
+        if (detail != null && detail.contains("exists")) {
+            return "El número " + recipient + " no existe o no tiene WhatsApp activo. Verifica el número del contacto.";
+        }
+        if (detail != null && detail.contains("400")) {
+            return "No se pudo enviar el mensaje por WhatsApp (400). Verifica que el número sea válido.";
+        }
+        return "Error al enviar mensaje por WhatsApp: " + detail;
     }
 
 
@@ -244,8 +260,9 @@ public String getGroupName(String instanceId, String groupJid) {
             throw new BusinessException("Failed to send media message via Evolution API");
 
         } catch (Exception e) {
-            log.error("Error sending media message via Evolution API: {}", e.getMessage(), e);
-            throw new BusinessException("Error al enviar mensaje multimedia: " + e.getMessage());
+            String detail = e.getMessage();
+            log.error("Error sending media message via Evolution API: {}", detail, e);
+            throw new BusinessException(buildSendErrorMessage(detail, message.getTo()));
         }
     }
 

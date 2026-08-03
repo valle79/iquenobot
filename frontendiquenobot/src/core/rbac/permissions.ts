@@ -1,4 +1,5 @@
 import type { RoleType } from '@/types/enums'
+import { useAuthStore } from '@/core/auth/auth.store'
 
 type PermissionAction = 'view' | 'create' | 'edit' | 'delete' | 'assign' | 'resolve' | 'close'
 
@@ -64,7 +65,7 @@ export const permissionsMap: Record<PermissionResource, Record<PermissionAction,
     view: ['TENANT_ADMIN', 'SUPERVISOR', 'AGENT'],
     create: ['TENANT_ADMIN', 'SUPERVISOR'],
     edit: ['TENANT_ADMIN', 'SUPERVISOR'],
-    delete: ['TENANT_ADMIN'],
+    delete: ['TENANT_ADMIN', 'SUPERVISOR'],
   },
   roles: {
     view: ['TENANT_ADMIN'],
@@ -117,7 +118,7 @@ export function can(userRole: RoleType, action: PermissionAction, resource: Perm
 }
 
 export function useAbility() {
-  const { user } = require('@/core/auth/auth.store').useAuthStore()
+  const { user } = useAuthStore()
 
   return {
     can: (action: PermissionAction, resource: PermissionResource): boolean => {

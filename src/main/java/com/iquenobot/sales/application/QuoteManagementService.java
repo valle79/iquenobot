@@ -149,7 +149,7 @@ public class QuoteManagementService {
     @Transactional
     public QuoteResendResultDto resend(UUID quoteId) {
         Quote quote = loadQuote(quoteId);
-        String phone = quote.getContact() != null ? quote.getContact().getPhone() : null;
+        String phone = quote.getContact() != null ? quote.getContact().resolveWhatsAppNumber() : null;
         if (phone == null || phone.isBlank()) {
             throw new BusinessException("El contacto de la cotización no tiene número de WhatsApp");
         }

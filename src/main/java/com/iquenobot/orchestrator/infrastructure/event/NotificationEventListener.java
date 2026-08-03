@@ -5,10 +5,14 @@ import com.iquenobot.conversation.domain.entity.ConversationMessage;
 import com.iquenobot.conversation.domain.entity.MessageAttachment;
 import com.iquenobot.conversation.domain.repository.ConversationMessageRepository;
 import com.iquenobot.conversation.domain.repository.ConversationRepository;
+import com.iquenobot.conversation.domain.repository.MessageAttachmentRepository;
+import com.iquenobot.contact.domain.repository.ContactRepository;
 import com.iquenobot.notification.application.NotificationService;
 import com.iquenobot.notification.domain.dto.CreateNotificationRequestDto;
 import com.iquenobot.orchestrator.interfaces.event.*;
 import com.iquenobot.shared.domain.util.TenantContext;
+import com.iquenobot.shared.enums.AttachmentType;
+import com.iquenobot.shared.enums.ChannelType;
 import com.iquenobot.shared.enums.NotificationChannel;
 import com.iquenobot.shared.enums.NotificationPriority;
 import com.iquenobot.shared.enums.NotificationType;
@@ -16,6 +20,7 @@ import com.iquenobot.shared.websocket.NotificationWebSocketHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +43,8 @@ public class NotificationEventListener {
     private final NotificationWebSocketHandler webSocketHandler;
     private final ConversationMessageRepository messageRepository;
     private final ConversationRepository conversationRepository;
+    private final ContactRepository contactRepository;
+    private final MessageAttachmentRepository attachmentRepository;
 
     @Async
     @EventListener
@@ -144,16 +151,68 @@ public class NotificationEventListener {
 
                 TenantContext.setTenantId(event.getTenantId());
 
+                // Enriquecer la notificación con datos del contacto y el último mensaje del cliente
+                String contactName = null;
+                String avatarUrl = null;
+                ChannelType channel = null;
+
+                if (event.getContactId() != null) {
+                    var contactOpt = contactRepository.findByIdAndTenantIdAndDeletedFalse(
+                            UUID.fromString(event.getContactId()), tenantId);
+                    if (contactOpt.isPresent()) {
+                        contactName = contactOpt.get().getFullName();
+                        avatarUrl = contactOpt.get().getAvatarUrl();
+                    }
+                }
+
+                var conversationOpt = conversationRepository.findByIdAndTenantIdAndDeletedFalse(conversationId, tenantId);
+                if (conversationOpt.isPresent()) {
+                    channel = conversationOpt.get().getChannel();
+                }
+
+                String lastCustomerMessage = null;
+                String attachmentSummary = null;
+                try {
+                    var latest = messageRepository.findLatestCustomerMessages(
+                                    conversationId, tenantId, PageRequest.of(0, 1))
+                            .stream()
+                            .findFirst()
+                            .orElse(null);
+                    if (latest != null) {
+                        lastCustomerMessage = truncate(latest.getContent(), 140);
+                        attachmentSummary = summarizeAttachments(latest.getId());
+                    }
+                } catch (Exception ex) {
+                    log.warn("Error cargando el último mensaje del cliente para la notificación: {}", ex.getMessage());
+                }
+
+                String title = contactName != null && !contactName.isBlank()
+                        ? "Nueva conversación de " + contactName
+                        : "Conversación Asignada";
+
+                StringBuilder message = new StringBuilder();
+                if (lastCustomerMessage != null && !lastCustomerMessage.isBlank()) {
+                    message.append("«").append(lastCustomerMessage).append("»");
+                } else if (attachmentSummary != null) {
+                    message.append(attachmentSummary);
+                } else {
+                    message.append("Se te ha asignado una nueva conversación");
+                }
+                if (channel != null) {
+                    message.append(" · vía ").append(channelLabel(channel));
+                }
+
                 CreateNotificationRequestDto notification = CreateNotificationRequestDto.builder()
                         .userId(agentId)
                         .type(NotificationType.CONVERSATION_ASSIGNED)
                         .channel(NotificationChannel.IN_APP)
                         .priority(NotificationPriority.HIGH)
-                        .title("Conversación Asignada")
-                        .message("Se te ha asignado una nueva conversación")
+                        .title(title)
+                        .message(message.toString())
                         .actionUrl("/conversations/" + event.getConversationId())
                         .actionLabel("Atender Ahora")
                         .icon("assignment")
+                        .imageUrl(avatarUrl)
                         .relatedEntityType("Conversation")
                         .relatedEntityId(event.getConversationId())
                         .build();
@@ -308,8 +367,7 @@ public class NotificationEventListener {
         }
     }
 
-    private List<Map<String, Object>> buildAttachmentsPayload(Set<MessageAttachment> attachments) {
-        List<Map<String, Object>> result = new ArrayList<>();
+    private List<Map<String, Object>> buildAttachmentsPayload(Set<MessageAttachment> attachments) {        List<Map<String, Object>> result = new ArrayList<>();
         if (attachments == null) {
             return result;
         }
@@ -330,5 +388,40 @@ public class NotificationEventListener {
             result.add(map);
         }
         return result;
+    }
+
+    private String truncate(String text, int maxLength) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        return text.length() <= maxLength ? text : text.substring(0, maxLength - 3) + "...";
+    }
+
+    private String summarizeAttachments(UUID messageId) {
+        List<MessageAttachment> attachments = attachmentRepository.findByMessageId(messageId);
+        if (attachments.isEmpty()) {
+            return null;
+        }
+        long imageCount = attachments.stream()
+                .filter(a -> a.getType() == AttachmentType.IMAGE)
+                .count();
+        if (imageCount > 0) {
+            return imageCount == 1 ? "Envió una imagen" : "Envió " + imageCount + " imágenes";
+        }
+        return "Envió un archivo adjunto";
+    }
+
+    private String channelLabel(ChannelType channel) {
+        return switch (channel) {
+            case WHATSAPP -> "WhatsApp";
+            case TELEGRAM -> "Telegram";
+            case MESSENGER -> "Messenger";
+            case INSTAGRAM -> "Instagram";
+            case EMAIL -> "Email";
+            case WEBCHAT -> "Web";
+            case SMS -> "SMS";
+            case TWITTER -> "Twitter";
+            case API -> "API";
+        };
     }
 }

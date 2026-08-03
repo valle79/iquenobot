@@ -8,11 +8,12 @@ import org.springframework.stereotype.Component;
 public class StorageProperties {
 
     /**
-     * Storage provider: local | s3
+     * Storage provider: local | s3 | cloudinary
      */
     private String provider = "local";
 
     private final S3 s3 = new S3();
+    private final Cloudinary cloudinary = new Cloudinary();
 
     public String getProvider() {
         return provider;
@@ -24,6 +25,10 @@ public class StorageProperties {
 
     public S3 getS3() {
         return s3;
+    }
+
+    public Cloudinary getCloudinary() {
+        return cloudinary;
     }
 
     public static class S3 {
@@ -49,5 +54,18 @@ public class StorageProperties {
         public void setPublicBaseUrl(String publicBaseUrl) { this.publicBaseUrl = publicBaseUrl; }
         public long getPresignExpiryMinutes() { return presignExpiryMinutes; }
         public void setPresignExpiryMinutes(long presignExpiryMinutes) { this.presignExpiryMinutes = presignExpiryMinutes; }
+    }
+
+    public static class Cloudinary {
+        private String cloudName = "";
+        private String apiKey = "";
+        private String apiSecret = "";
+
+        public String getCloudName() { return cloudName; }
+        public void setCloudName(String cloudName) { this.cloudName = cloudName; }
+        public String getApiKey() { return apiKey; }
+        public void setApiKey(String apiKey) { this.apiKey = apiKey; }
+        public String getApiSecret() { return apiSecret; }
+        public void setApiSecret(String apiSecret) { this.apiSecret = apiSecret; }
     }
 }

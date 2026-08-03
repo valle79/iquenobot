@@ -15,6 +15,7 @@ import com.iquenobot.shared.enums.MessageDirection;
 import com.iquenobot.shared.enums.MessageStatus;
 import com.iquenobot.shared.enums.MessageType;
 import com.iquenobot.shared.enums.SenderType;
+import com.iquenobot.shared.enums.ChannelType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -37,11 +38,16 @@ public class SendTextExecutor implements ActionExecutor {
     private final MessageTemplateResolver templateResolver;
 
     @Override
-    public ActionType supportedActionType() { return ActionType.SEND_TEXT; }
+    public ActionType supportedActionType() {
+        return ActionType.SEND_TEXT;
+    }
 
     @Override
     @Transactional
     public void execute(Decision decision, ProcessingContext context) {
+        log.error("=== SENDTEXTEXECUTOR EJECUTANDO ===");
+        log.error("Conversation key: {}", context.getConversation().getChannelConversationId());
+        log.error("Is group: {}", context.getConversation().isGroup());
         String responseText = decision.getParameters() != null
                 ? (String) decision.getParameters().get("response")
                 : null;
@@ -70,7 +76,8 @@ public class SendTextExecutor implements ActionExecutor {
                 String instanceId = context.getIncomingMessage().getInstanceId();
                 String recipient = resolveRecipient(context);
                 channelMessageId = sender.sendTextMessage(instanceId, recipient, responseText);
-                log.info("Text message sent via {}: conversation={} recipient={}", channel, context.getConversation().getId(), recipient);
+                log.info("Text message sent via {}: conversation={} recipient={}", channel,
+                        context.getConversation().getId(), recipient);
             } else {
                 log.warn("No channel sender available for channel={}, message persisted but not delivered", channel);
             }
@@ -104,18 +111,37 @@ public class SendTextExecutor implements ActionExecutor {
                 conv.getId().toString(),
                 intentDetected,
                 responseText.length() > 100 ? responseText.substring(0, 100) : responseText,
-                false
-        ));
+                false));
 
         log.info("Bot text response processed: conversation={} intent={} delivered={}",
                 conv.getId(), intentDetected, channelMessageId != null);
     }
 
     private String resolveRecipient(ProcessingContext context) {
-        var channel = context.getIncomingMessage().getChannel();
-        return switch (channel) {
-            case WHATSAPP, SMS -> context.getContact().getPhone();
-            default -> context.getIncomingMessage().getSourceIdentifier();
-        };
+
+        var conversation = context.getConversation();
+
+        // ===== WHATSAPP GRUPOS =====
+        if (conversation != null && conversation.isGroup()) {
+
+            String groupJid = conversation.getChannelConversationId();
+
+            // Quitar prefijo si existe
+            if (groupJid != null && groupJid.startsWith("WHATSAPP:")) {
+                groupJid = groupJid.substring("WHATSAPP:".length());
+            }
+
+            log.warn("USANDO GRUPO WHATSAPP: {}", groupJid);
+
+            return groupJid;
+        }
+
+        // ===== WHATSAPP DIRECTO =====
+        if (context.getIncomingMessage().getChannel() == ChannelType.WHATSAPP) {
+            String number = context.getContact().resolveWhatsAppNumber();
+            return number != null ? number.replace("+", "") : null;
+        }
+
+        return context.getIncomingMessage().getSourceIdentifier();
     }
 }

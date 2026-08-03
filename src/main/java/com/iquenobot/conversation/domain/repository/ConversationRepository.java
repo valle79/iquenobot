@@ -41,6 +41,13 @@ public interface ConversationRepository extends JpaRepository<Conversation, UUID
     Page<Conversation> findByTenantIdAndContactIdAndDeletedFalse(
             UUID tenantId, UUID contactId, Pageable pageable);
 
+    @Query("SELECT c FROM Conversation c WHERE c.tenantId = :tenantId AND c.contact.id = :contactId " +
+           "AND c.channel = :channel AND c.status <> 'CLOSED' AND c.deleted = false " +
+           "ORDER BY c.lastMessageAt DESC")
+    List<Conversation> findActiveByContactAndChannel(@Param("tenantId") UUID tenantId,
+                                                     @Param("contactId") UUID contactId,
+                                                     @Param("channel") ChannelType channel);
+
     @Query("SELECT c FROM Conversation c WHERE c.tenantId = :tenantId AND c.assignedUser IS NULL " +
            "AND c.status IN ('OPEN', 'PENDING') AND c.deleted = false")
     Page<Conversation> findUnassignedConversations(@Param("tenantId") UUID tenantId, Pageable pageable);

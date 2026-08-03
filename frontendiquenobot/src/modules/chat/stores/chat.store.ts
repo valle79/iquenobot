@@ -109,6 +109,9 @@ interface ChatState {
   // UI
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
+
+  // Reset multitenant
+  clear: () => void
 }
 
 // =====================================================
@@ -333,4 +336,19 @@ replaceMessage: (tempId, conversationId, message) =>
 
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
+
+  // =====================================================
+  // RESET MULTITENANT
+  // =====================================================
+
+  clear: () =>
+    set({
+      conversations: [],
+      activeConversationId: null,
+      messages: {},
+      onlineUsers: new Set(),
+      typingUsers: {},
+      loading: false,
+      error: null,
+    }),
 }))

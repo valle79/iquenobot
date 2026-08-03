@@ -114,8 +114,12 @@ public class SendMediaExecutor implements ActionExecutor {
     }
 
     private String resolveRecipient(ProcessingContext context, ChannelType channel) {
+        var conversation = context.getConversation();
+        if (conversation != null && conversation.isGroup() && channel == ChannelType.WHATSAPP) {
+            return conversation.resolveChannelRecipient();
+        }
         return switch (channel) {
-            case WHATSAPP, SMS -> context.getContact().getPhone();
+            case WHATSAPP, SMS -> context.getContact().resolveWhatsAppNumber();
             default -> context.getIncomingMessage().getSourceIdentifier();
         };
     }

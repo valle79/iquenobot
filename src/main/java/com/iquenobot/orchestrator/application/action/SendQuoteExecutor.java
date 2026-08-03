@@ -123,10 +123,15 @@ public class SendQuoteExecutor implements ActionExecutor {
                 return;
             }
 
-            String recipient = switch (channel) {
-                case WHATSAPP, SMS -> context.getContact().getPhone();
-                default -> context.getIncomingMessage().getSourceIdentifier();
-            };
+            String recipient;
+            if (context.getConversation().isGroup() && channel == ChannelType.WHATSAPP) {
+                recipient = context.getConversation().resolveChannelRecipient();
+            } else {
+                recipient = switch (channel) {
+                    case WHATSAPP, SMS -> context.getContact().resolveWhatsAppNumber();
+                    default -> context.getIncomingMessage().getSourceIdentifier();
+                };
+            }
 
             String messageId = sender.sendMediaMessage(
                     context.getIncomingMessage().getInstanceId(), recipient,

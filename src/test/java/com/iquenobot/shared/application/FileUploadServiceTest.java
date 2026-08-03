@@ -1,6 +1,7 @@
 package com.iquenobot.shared.application;
 
 import com.iquenobot.shared.exception.BusinessException;
+import com.iquenobot.shared.infrastructure.storage.LocalStorageService;
 import com.lowagie.text.Document;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfWriter;
@@ -25,10 +26,11 @@ class FileUploadServiceTest {
 
     @BeforeEach
     void setUp() {
-        fileUploadService = new FileUploadService();
-        ReflectionTestUtils.setField(fileUploadService, "uploadPath", tempDir.toString());
-        ReflectionTestUtils.setField(fileUploadService, "baseUrl", "http://localhost:8085");
-        fileUploadService.init();
+        LocalStorageService storageService = new LocalStorageService();
+        ReflectionTestUtils.setField(storageService, "uploadPath", tempDir.toString());
+        ReflectionTestUtils.setField(storageService, "baseUrl", "http://localhost:8085");
+        ReflectionTestUtils.setField(storageService, "rootDir", tempDir.toAbsolutePath().normalize());
+        fileUploadService = new FileUploadService(storageService);
     }
 
     @Test
@@ -109,11 +111,6 @@ class FileUploadServiceTest {
     void deleteFile_shouldNotThrow_whenUrlIsNull() {
         assertDoesNotThrow(() -> fileUploadService.deleteFile(null));
         assertDoesNotThrow(() -> fileUploadService.deleteFile(""));
-    }
-
-    @Test
-    void init_shouldCreateDirectories() {
-        assertTrue(tempDir.toFile().exists());
     }
 
     private byte[] createValidPdf(String text) throws Exception {

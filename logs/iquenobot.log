@@ -10590,3 +10590,4 @@ org.springframework.web.HttpRequestMethodNotSupportedException: Request method '
 	at java.base/java.lang.VirtualThread.run(VirtualThread.java:329)
 2026-08-03 10:27:14 [tomcat-handler-255] WARN  o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'PUT' is not supported]
 2026-08-03 10:28:54 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.PoolBase - HikariPool-1 - Failed to validate connection org.postgresql.jdbc.PgConnection@3164845e (This connection has been closed.). Possibly consider using a shorter maxLifetime value.
+2026-08-03 10:30:56 [tomcat-handler-256] DEBUG c.i.s.s.JwtAuthenticationFilter - User authenticated: 95e009fb-66e9-437c-9d35-be4df58d425f for tenant: d563b428-b1a9-4bf3-af62-a175e92e8e18

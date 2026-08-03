@@ -25,11 +25,13 @@ class ContactService extends BaseService<ContactDto, CreateContactRequest> {
   }
 
   async block(id: string, reason?: string): Promise<void> {
-    await this.action(`${id}/block`, reason ? { reason } : undefined)
+    await api.post(`${this.endpoint}/${id}/block`, null, {
+      params: reason ? { reason } : undefined,
+    })
   }
 
   async unblock(id: string): Promise<void> {
-    await this.action(`${id}/unblock`)
+    await api.post(`${this.endpoint}/${id}/unblock`)
   }
 
   async importContacts(contacts: Record<string, string>[]): Promise<ImportContactsResult> {

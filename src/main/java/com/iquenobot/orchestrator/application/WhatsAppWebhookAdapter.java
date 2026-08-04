@@ -76,7 +76,7 @@ public class WhatsAppWebhookAdapter {
         // Se genera un ID determinístico a partir del contenido + timestamp
         // para que las redelivery del mismo evento se descarten.
         if (messageId == null || messageId.isBlank()) {
-            messageId = generateSyntheticMessageId(data);
+            messageId = generateSyntheticMessageId(instanceId, data);
         }
 
         if (messageId != null && messageRepository.existsByChannelMessageId(messageId)) {
@@ -87,7 +87,7 @@ public class WhatsAppWebhookAdapter {
         // ---------------------------------------------------------------------
         // VALIDACIÓN DE TELÉFONO
         // ---------------------------------------------------------------------
-        String senderPhone = extractRemoteJid(data);
+        String senderPhone = resolveSenderPhone(instanceId, data);
         if (senderPhone == null || senderPhone.isBlank()) {
             log.warn("WhatsApp message without sender phone, skipping");
             return ProcessingResult.empty();
@@ -103,7 +103,7 @@ public class WhatsAppWebhookAdapter {
 
         log.info("WhatsApp direction: {}", outbound ? "OUTBOUND" : "INBOUND");
 
-        IncomingMessage message = convertToIncomingMessage(instanceId, payload, outbound);
+        IncomingMessage message = convertToIncomingMessage(instanceId, payload, outbound, senderPhone);
 
         log.info("Incoming WhatsApp message processed: from={} direction={} type={} content={}",
                 message.getSourceIdentifier(),
@@ -228,7 +228,8 @@ private String extractGroupName(String instanceId, Map<String, Object> data) {
 private IncomingMessage convertToIncomingMessage(
         String instanceId,
         WhatsAppWebhookDto payload,
-        boolean outbound
+        boolean outbound,
+        String senderPhone
 ) {
 
     Map<String, Object> data = extractData(payload.getData());
@@ -236,12 +237,13 @@ private IncomingMessage convertToIncomingMessage(
     // -------------------------------------------------------------
     // Identificador de la conversación
     // -------------------------------------------------------------
-    String conversationJid = extractConversationId(data);
+    String conversationJid = extractConversationJid(data);
 
     // -------------------------------------------------------------
     // Número real del contacto que participa en la conversación
+    // (resuelto una sola vez en processWebhook)
     // -------------------------------------------------------------
-    String senderJid = extractRemoteJid(data);
+    String senderJid = senderPhone;
 
     if (senderJid == null || senderJid.isBlank()) {
         throw new IllegalArgumentException(
@@ -421,80 +423,109 @@ return IncomingMessage.builder()
     // REMOTE JID
     // -------------------------------------------------------------------------
 
-@SuppressWarnings("unchecked")
-private String extractRemoteJid(Map<String, Object> data) {
+    // -------------------------------------------------------------------------
+    // REMOTE JID / NÚMERO DEL REMITENTE
+    // -------------------------------------------------------------------------
 
-    if (data == null) {
-        return null;
+    /**
+     * Normaliza un JID de WhatsApp a solo dígitos, sin importar el formato
+     * en que llegue (normal, privacidad LID, prefijo interno):
+     * "WHATSAPP:51960947459@s.whatsapp.net" y "66297735954482@lid"
+     * quedan como "51960947459" y "66297735954482".
+     */
+    private String normalizeWhatsAppIdentifier(String jid) {
+        if (jid == null || jid.isBlank()) {
+            return null;
+        }
+        String digits = jid.trim()
+                .replace("WHATSAPP:", "")
+                .replace("@s.whatsapp.net", "")
+                .replace("@c.us", "")
+                .replace("@lid", "")
+                .replaceAll("[^0-9]", "");
+        return digits.isBlank() ? null : digits;
     }
 
-    if (data.get("key") instanceof Map<?, ?> key) {
+    private boolean isGroupJid(String jid) {
+        return jid != null && jid.endsWith("@g.us");
+    }
 
-        Object remoteJidObj = key.get("remoteJid");
-        String remoteJid = remoteJidObj instanceof String ? (String) remoteJidObj : null;
+    /**
+     * Resuelve el número del remitente usando todas las fuentes disponibles:
+     * 1) remoteJid del chat, 2) participant (en grupos). Nunca devuelve null
+     * mientras exista otra fuente posible.
+     *
+     * Los JID "user@lid" (privacidad de WhatsApp) se resuelven contra el
+     * contact store de Evolution, que conserva las dos identidades del mismo
+     * contacto (LID y número real); si no hay coincidencia se usa el LID
+     * como identificador para no perder el mensaje.
+     */
+    @SuppressWarnings("unchecked")
+    private String resolveSenderPhone(String instanceId, Map<String, Object> data) {
+        if (data == null) {
+            return null;
+        }
+
+        String remoteJid = extractConversationJid(data);
+        if (remoteJid == null || remoteJid.isBlank()) {
+            return null;
+        }
+
+        // =============================================================
+        // GRUPO: el remitente real es el participant del mensaje
+        // =============================================================
+        if (isGroupJid(remoteJid)) {
+            String participant = extractParticipantJid(data);
+            if (participant != null && !participant.isBlank()) {
+                return normalizePhone(normalizeWhatsAppIdentifier(participant));
+            }
+            // fallback extremo: se conserva el JID del grupo
+            return remoteJid;
+        }
 
         // =============================================================
         // CHAT INDIVIDUAL
         // =============================================================
-        if (remoteJid != null && remoteJid.endsWith("@s.whatsapp.net")) {
-            return normalizePhone(cleanJid(remoteJid));
-        }
-
-        // =============================================================
-        // GRUPO
-        // =============================================================
-        if (remoteJid != null && remoteJid.endsWith("@g.us")) {
-
-            // usar participant SOLO como contacto que envió el mensaje
-            Object participant = key.get("participant");
-
-            if (participant instanceof String p && !p.isBlank()) {
-                return normalizePhone(cleanJid(p));
+        if (remoteJid.endsWith("@lid")) {
+            String resolved = evolutionApiProvider.resolveLidToPhoneNumber(
+                    instanceId, remoteJid, extractPushName(data));
+            if (resolved != null && !resolved.isBlank()) {
+                log.info("WhatsApp LID {} resuelto a número real {}", remoteJid, resolved);
+                return normalizePhone(resolved);
             }
-
-            // fallback extremo
-            return remoteJid;
+            log.info("WhatsApp LID {} sin resolver; se usa el LID como identificador", remoteJid);
         }
+
+        return normalizePhone(normalizeWhatsAppIdentifier(remoteJid));
     }
 
-    return null;
-}
-
-@SuppressWarnings("unchecked")
-private String extractConversationId(Map<String, Object> data) {
-
-    if (data == null) {
+    /**
+     * Participant del mensaje (grupos): key.participant primero y
+     * contextInfo.participant como alternativa.
+     */
+    @SuppressWarnings("unchecked")
+    private String extractParticipantJid(Map<String, Object> data) {
+        if (data == null) {
+            return null;
+        }
+        if (data.get("key") instanceof Map<?, ?> key) {
+            Object participant = key.get("participant");
+            if (participant instanceof String p && !p.isBlank()) {
+                return p.trim();
+            }
+        }
+        if (data.get("contextInfo") instanceof Map<?, ?> context) {
+            Object participant = context.get("participant");
+            if (participant instanceof String p && !p.isBlank()) {
+                return p.trim();
+            }
+        }
         return null;
     }
 
-    if (data.get("key") instanceof Map<?, ?> key) {
-
-        Object remoteJid = key.get("remoteJid");
-
-        if (remoteJid instanceof String r && !r.isBlank()) {
-            return r.trim(); // NO limpiar @g.us
-        }
+    private String normalizePhone(String value) {
+        return PhoneNormalizer.normalize(value);
     }
-
-    return null;
-}
-
-private String cleanJid(String jid) {
-
-    if (jid == null) {
-        return null;
-    }
-
-    return jid
-            .replace("@s.whatsapp.net", "")
-            .replace("@g.us", "")
-            .replace("@lid", "")
-            .trim();
-}
-
-private String normalizePhone(String value) {
-    return PhoneNormalizer.normalize(value);
-}
 
     // -------------------------------------------------------------------------
     // MESSAGE ID
@@ -518,8 +549,8 @@ private String normalizePhone(String value) {
     // SYNTHETIC MESSAGE ID (para webhooks sin key.id)
     // -------------------------------------------------------------------------
 
-    private String generateSyntheticMessageId(Map<String, Object> data) {
-        String remoteJid = extractRemoteJid(data);
+    private String generateSyntheticMessageId(String instanceId, Map<String, Object> data) {
+        String remoteJid = resolveSenderPhone(instanceId, data);
         String content = extractText(data);
         Long timestamp = extractTimestamp(data);
 

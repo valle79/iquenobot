@@ -1,6 +1,9 @@
 package com.iquenobot.chatbot.interfaces.controller;
 
+import com.iquenobot.chatbot.application.ChatbotPreviewService;
 import com.iquenobot.chatbot.application.ChatbotService;
+import com.iquenobot.chatbot.domain.dto.ChatbotPreviewRequestDto;
+import com.iquenobot.chatbot.domain.dto.ChatbotPreviewResponseDto;
 import com.iquenobot.chatbot.domain.dto.ChatbotRequestDto;
 import com.iquenobot.chatbot.domain.dto.ChatbotResponseDto;
 import com.iquenobot.shared.domain.dto.ApiResponse;
@@ -26,6 +29,7 @@ import java.util.HashMap;
 public class ChatbotController {
 
     private final ChatbotService chatbotService;
+    private final ChatbotPreviewService chatbotPreviewService;
 
     @PostMapping("/message")
     @Operation(summary = "Procesar mensaje del chatbot")
@@ -38,6 +42,16 @@ public class ChatbotController {
                 request.getContext() != null ? request.getContext() : new HashMap<>()
         );
         
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/preview")
+    @Operation(summary = "Probar el chatbot (modo prueba, sin guardar datos)")
+    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'SUPERVISOR')")
+    public ResponseEntity<ApiResponse<ChatbotPreviewResponseDto>> previewMessage(
+            @Valid @RequestBody ChatbotPreviewRequestDto request) {
+
+        ChatbotPreviewResponseDto response = chatbotPreviewService.processPreviewMessage(request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

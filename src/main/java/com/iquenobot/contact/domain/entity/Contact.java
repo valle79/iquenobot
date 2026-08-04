@@ -205,6 +205,16 @@ public class Contact extends SoftDeletableEntity {
      * y al final el número crudo.
      */
     public String resolveWhatsAppNumber() {
+
+        // WhatsApp con privacidad (LID): el número está oculto y el
+        // JID "user@lid" es la única vía para enviarle; se usa tal cual.
+        if (hasText(whatsappPhone)) {
+            String wa = whatsappPhone.trim();
+            if (wa.endsWith("@lid")) {
+                return wa;
+            }
+        }
+
         String candidate;
         if (hasText(normalizedPhone)) {
             candidate = normalizedPhone;

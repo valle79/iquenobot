@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -124,31 +125,31 @@ private String buildChannelConversationId(IncomingMessage message) {
             Contact contact
     ) {
 
-        return conversationRepository
-                .findByChannelConversationIdAndTenantIdAndDeletedFalse(
-                        channelConversationId,
-                        context.getTenantId()
-                )
-                // Si no existe la conversación por su identificador de canal
-                // (p.ej. fue creada desde el panel sin channelConversationId o
-                // con otro formato), reutilizamos la conversación activa del
-                // mismo contacto + canal para evitar duplicados.
-                .orElseGet(() ->
-                        findActiveByContactOrCreate(
-                                context,
-                                channelConversationId,
-                                contact
-                        )
-                );
+        // -------------------------------------------------------------
+        // CHAT INDIVIDUAL
+        // -------------------------------------------------------------
+        // El JID del chat puede variar con el tiempo (número real,
+        // privacidad LID, etc.), por lo que la conversación se vincula
+        // al contacto, no al identificador remoto. Así un mensaje con
+        // "user@lid" se asocia al mismo hilo del número real.
+        if (!context.getIncomingMessage().isGroup()) {
+            return findActiveByContact(context, channelConversationId, contact)
+                    .orElseGet(() ->
+                            findByIdentifierOrCreate(context, channelConversationId, contact));
+        }
+
+        // --------------------------------------------------------------
+        // GRUPO: el identificador del chat es estable
+        // --------------------------------------------------------------
+        return findByIdentifierOrCreate(context, channelConversationId, contact);
     }
 
     @Transactional
-    protected Conversation findActiveByContactOrCreate(
+    protected Optional<Conversation> findActiveByContact(
             ProcessingContext context,
             String channelConversationId,
             Contact contact
     ) {
-
         return conversationRepository
                 .findActiveByContactAndChannel(
                         context.getTenantId(),
@@ -168,14 +169,21 @@ private String buildChannelConversationId(IncomingMessage message) {
                                 existing.getId(), contact.getId(), previousKey, channelConversationId);
                     }
                     return existing;
-                })
-                .orElseGet(() ->
-                        createConversationSafely(
-                                context,
-                                channelConversationId,
-                                contact
-                        )
-                );
+                });
+    }
+
+    @Transactional
+    protected Conversation findByIdentifierOrCreate(
+            ProcessingContext context,
+            String channelConversationId,
+            Contact contact
+    ) {
+        return conversationRepository
+                .findByChannelConversationIdAndTenantIdAndDeletedFalse(
+                        channelConversationId,
+                        context.getTenantId()
+                )
+                .orElseGet(() -> createConversationSafely(context, channelConversationId, contact));
     }
 
     /**

@@ -135,11 +135,18 @@ public class ContactResolutionStep
                 normalizedPhone
         );
 
+        // WhatsApp con privacidad (LID): el número está oculto y el mensaje
+        // llega con un JID "user@lid". Se conserva ese JID en whatsappPhone
+        // para poder responderle por ese chat, aunque no se conozca el número real.
+        boolean lidPrivacy = message.getChannel() == ChannelType.WHATSAPP
+                && message.getChannelConversationId() != null
+                && message.getChannelConversationId().endsWith("@lid");
+
         Contact contact = Contact.builder()
                 .tenantId(tenantId)
                 .fullName(contactName)
                 .phone(normalizedPhone)
-                .whatsappPhone(normalizedPhone)
+                .whatsappPhone(lidPrivacy ? message.getChannelConversationId() : normalizedPhone)
                 .normalizedPhone(normalizedPhone)
                 .status(ContactStatus.ACTIVE)
                 .conversationCount(0)

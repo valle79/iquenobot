@@ -65,3 +65,34 @@ export interface CreateChatbotFlowRequest {
   aiPrompt?: string
   fallbackMessage?: string
 }
+
+export interface SimulatedActionDto {
+  actionType: string
+  label: string
+  description: string
+}
+
+export interface ChatbotPreviewResponse {
+  message: string
+  intentDetected: string | null
+  confidence: number | null
+  requiresHumanAgent: boolean
+  requiresClarification: boolean
+  flowExecuted: string | null
+  simulatedActions: SimulatedActionDto[]
+  botAvailable: boolean
+}
+
+export interface ChatbotHistoryItem {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+export interface ChatbotPreviewRequest {
+  message: string
+  context?: {
+    history?: ChatbotHistoryItem[]
+    isFirstMessage?: boolean
+    fallbackCount?: number
+  }
+}

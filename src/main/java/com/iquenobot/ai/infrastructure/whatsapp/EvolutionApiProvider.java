@@ -16,8 +16,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Evolution API implementation for WhatsApp
@@ -444,6 +449,173 @@ public String getGroupName(String instanceId, String groupJid) {
 
         } catch (Exception e) {
             log.error("Error configurando webhook para instancia {}: {}", instanceId, e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // RESOLUCIÓN DE LID (privacidad de número de WhatsApp)
+    // -------------------------------------------------------------------------
+
+    /**
+     * TTL de la caché de contactos: WhatsApp puede tirar muchos mensajes
+     * seguidos y no conviene llamar a Evolution por cada uno. La resolución
+     * es una optimización de pocos segundos, no requiere frescura total.
+     */
+    private static final Duration CONTACTS_CACHE_TTL = Duration.ofSeconds(30);
+    private final Map<String, CachedContacts> contactsCache = new ConcurrentHashMap<>();
+
+    /**
+     * Resuelve el número real de un JID "user@lid" (privacidad de WhatsApp).
+     *
+     * Evolution conserva en su contact store las dos identidades del mismo
+     * contacto: el JID "@lid" y el JID real "@s.whatsapp.net". Al consultarlo
+     * se puede vincular el mensaje privado al contacto existente (mismo
+     * número, mismo historial) en lugar de crear un duplicado.
+     *
+     * @return JID real "55...@s.whatsapp.net" o null si no hay coincidencia.
+     */
+    public String resolveLidToPhoneNumber(String instanceId, String lidJid, String pushName) {
+        if (instanceId == null || instanceId.isBlank()
+                || lidJid == null || !lidJid.endsWith("@lid")) {
+            return null;
+        }
+
+        try {
+            List<Map<String, Object>> contacts = fetchContacts(instanceId);
+            if (contacts == null || contacts.isEmpty()) {
+                return null;
+            }
+
+            String nameToMatch = findContactName(contacts, lidJid);
+            if (nameToMatch == null) {
+                nameToMatch = pushName;
+            }
+            if (nameToMatch == null || nameToMatch.isBlank()) {
+                return null;
+            }
+
+            for (Map<String, Object> contact : contacts) {
+                String jid = contactJid(contact);
+                if (jid != null && jid.endsWith("@s.whatsapp.net")
+                        && nameToMatch.equalsIgnoreCase(contactName(contact))) {
+                    return jid;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Error resolviendo LID {} a número real: {}", lidJid, e.getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Obtiene la lista de contactos conocidos por la instancia con un caché
+     * corto (TTL 30s). Si la llamada falla, se reutiliza lo que haya en caché.
+     */
+    private List<Map<String, Object>> fetchContacts(String instanceId) {
+        CachedContacts cached = contactsCache.get(instanceId);
+        if (cached != null && !cached.fetchedAt().plus(CONTACTS_CACHE_TTL).isBefore(Instant.now())) {
+            return cached.contacts();
+        }
+
+        try {
+            String url = evolutionApiUrl + "/chat/findContacts/" + instanceId;
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("apikey", apiKey);
+            HttpEntity<String> request = new HttpEntity<>("{}", headers);
+
+            ResponseEntity<Object> response = restTemplate.exchange(
+                    url, HttpMethod.POST, request, Object.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                List<Map<String, Object>> contacts = parseContactList(response.getBody());
+                if (contacts != null) {
+                    contactsCache.put(instanceId, new CachedContacts(Instant.now(), contacts));
+                    return contacts;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Error obteniendo contactos de Evolution: {}", e.getMessage());
+        }
+
+        // fallback suave: se conserva lo que haya en caché aunque esté expirado
+        return cached != null ? cached.contacts() : null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> parseContactList(Object body) {
+        if (body instanceof List<?> list) {
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (Object item : list) {
+                if (item instanceof Map<?, ?> map) {
+                    result.add((Map<String, Object>) map);
+                }
+            }
+            return result.isEmpty() ? null : result;
+        }
+
+        if (body instanceof Map<?, ?> map) {
+            for (String key : new String[]{"contacts", "jids"}) {
+                if (map.get(key) instanceof List<?> list) {
+                    List<Map<String, Object>> result = new ArrayList<>();
+                    for (Object item : list) {
+                        if (item instanceof Map<?, ?> entry) {
+                            result.add((Map<String, Object>) entry);
+                        }
+                    }
+                    if (!result.isEmpty()) {
+                        return result;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private String findContactName(List<Map<String, Object>> contacts, String lidJid) {
+        for (Map<String, Object> contact : contacts) {
+            if (lidJid.equalsIgnoreCase(contactJid(contact))) {
+                return contactName(contact);
+            }
+        }
+        return null;
+    }
+
+    private String contactJid(Map<String, Object> contact) {
+        for (String key : new String[]{"remoteJid", "jid"}) {
+            if (contact.get(key) instanceof String s && !s.isBlank()) {
+                return s.trim();
+            }
+        }
+        return null;
+    }
+
+    private String contactName(Map<String, Object> contact) {
+        for (String key : new String[]{"pushName", "name"}) {
+            if (contact.get(key) instanceof String s && !s.isBlank()) {
+                return s.trim();
+            }
+        }
+        return null;
+    }
+
+    private static final class CachedContacts {
+        private final Instant fetchedAt;
+        private final List<Map<String, Object>> contacts;
+
+        private CachedContacts(Instant fetchedAt, List<Map<String, Object>> contacts) {
+            this.fetchedAt = fetchedAt;
+            this.contacts = contacts;
+        }
+
+        public Instant fetchedAt() {
+            return fetchedAt;
+        }
+
+        public List<Map<String, Object>> contacts() {
+            return contacts;
         }
     }
 

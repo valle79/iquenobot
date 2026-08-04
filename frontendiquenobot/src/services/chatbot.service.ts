@@ -1,8 +1,13 @@
 import { api } from '@/core/api/client'
-import type { ChatbotIntentDto, CreateChatbotIntentRequest, ChatbotFlowDto, CreateChatbotFlowRequest } from '@/types/chatbot'
+import type { ChatbotIntentDto, CreateChatbotIntentRequest, ChatbotFlowDto, CreateChatbotFlowRequest, ChatbotPreviewRequest, ChatbotPreviewResponse } from '@/types/chatbot'
 import type { ApiResponse, PagedResponse, PaginationParams } from '@/types/api'
 
 export const chatbotService = {
+  // Modo prueba (preview)
+  sendPreviewMessage: async (dto: ChatbotPreviewRequest): Promise<ChatbotPreviewResponse> => {
+    const res = await api.post<ApiResponse<ChatbotPreviewResponse>>('/chatbot/preview', dto)
+    return res.data.data
+  },
   // Intents
   getIntents: async (params?: PaginationParams): Promise<PagedResponse<ChatbotIntentDto>> => {
     const res = await api.get<ApiResponse<PagedResponse<ChatbotIntentDto>>>('/chatbot/intents', { params })

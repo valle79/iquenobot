@@ -24,6 +24,7 @@ export const ChannelsPage = lazy(() => import('@/modules/channels/pages/Channels
 export const CategoriesPage = lazy(() => import('@/modules/products/pages/CategoriesPage'))
 export const ChatbotIntentsPage = lazy(() => import('@/modules/ai/pages/ChatbotIntentsPage'))
 export const ChatbotFlowsPage = lazy(() => import('@/modules/ai/pages/ChatbotFlowsPage'))
+export const ChatbotTestPage = lazy(() => import('@/modules/ai/pages/ChatbotTestPage'))
 export const PermissionsPage = lazy(() => import('@/modules/permissions/pages/PermissionsPage'))
 export const TenantSettingsPage = lazy(() => import('@/modules/tenant/pages/TenantSettingsPage'))
 export const AdminDashboardPage = lazy(() => import('@/modules/admin/pages/AdminDashboardPage'))

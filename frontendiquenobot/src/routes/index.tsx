@@ -33,6 +33,7 @@ import {
   CategoriesPage,
   ChatbotIntentsPage,
   ChatbotFlowsPage,
+  ChatbotTestPage,
   PermissionsPage,
   TenantSettingsPage,
 } from './lazy-routes'
@@ -187,6 +188,14 @@ export const routes: RouteObject[] = [
         element: (
           <ProtectedRoute roles={['TENANT_ADMIN', 'SUPERVISOR']}>
             <RouteWrapper><ChatbotFlowsPage /></RouteWrapper>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'chatbot/test',
+        element: (
+          <ProtectedRoute roles={['TENANT_ADMIN', 'SUPERVISOR']}>
+            <RouteWrapper><ChatbotTestPage /></RouteWrapper>
           </ProtectedRoute>
         ),
       },

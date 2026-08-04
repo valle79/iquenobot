@@ -106,23 +106,37 @@ public class ChatbotService {
 
     @Transactional
     public ChatbotResponseDto processMessage(String message, Map<String, Object> context) {
+        return processMessage(message, context, false);
+    }
+
+    /**
+     * Procesa un mensaje del bot. En modo prueba ({@code testMode=true}) el
+     * comportamiento es idéntico al de producción (mismos intents, flujos, KB,
+     * catálogo y llamadas al LLM) pero NO se persiste nada en la base de datos:
+     * no se incrementan contadores de intents/flujos ni se captura información
+     * fiscal en el contacto del cliente.
+     */
+    @Transactional
+    public ChatbotResponseDto processMessage(String message, Map<String, Object> context, boolean testMode) {
         UUID tenantId = getTenantId();
         
         log.info("Processing chatbot message for tenant: {}", tenantId);
 
         // Si el cliente envía sus datos de facturación (DNI/RUC, razón social,
         // dirección), se capturan y guardan en su contacto antes de responder.
-        captureContactDetails(message, context);
+        if (!testMode) {
+            captureContactDetails(message, context);
+        }
 
         // 1. Try to detect intent
-        ChatbotIntent intent = detectIntent(tenantId, message);
+        ChatbotIntent intent = detectIntent(tenantId, message, testMode);
         
         // 2. Try to match a flow
         ChatbotFlow flow = matchFlow(tenantId, message, intent, context);
         
         // 3. Generate response
         if (flow != null) {
-            ChatbotResponseDto response = executeFlow(flow, message, context);
+            ChatbotResponseDto response = executeFlow(flow, message, context, testMode);
             // Un flow no debe descartar la intención comercial ya detectada: se propaga
             // para que el orquestador pueda disparar las acciones correspondientes
             // (cotización en PDF, creación de lead, etc.).
@@ -215,6 +229,11 @@ public class ChatbotService {
 
     @Transactional(readOnly = true)
     public ChatbotIntent detectIntent(UUID tenantId, String message) {
+        return detectIntent(tenantId, message, false);
+    }
+
+    @Transactional(readOnly = true)
+    public ChatbotIntent detectIntent(UUID tenantId, String message, boolean testMode) {
         List<ChatbotIntent> activeIntents = intentRepository.findByTenantIdAndActiveAndDeletedFalseOrderByPriorityDesc(
                 tenantId, true);
         
@@ -223,8 +242,10 @@ public class ChatbotService {
             String[] keywords = extractKeywords(intent.getTrainingPhrases());
             for (String keyword : keywords) {
                 if (message.toLowerCase().contains(keyword.toLowerCase())) {
-                    intent.incrementMatchedCount();
-                    intentRepository.save(intent);
+                    if (!testMode) {
+                        intent.incrementMatchedCount();
+                        intentRepository.save(intent);
+                    }
                     return intent;
                 }
             }
@@ -264,11 +285,18 @@ public class ChatbotService {
 
     @Transactional
     public ChatbotResponseDto executeFlow(ChatbotFlow flow, String message, Map<String, Object> context) {
+        return executeFlow(flow, message, context, false);
+    }
+
+    @Transactional
+    public ChatbotResponseDto executeFlow(ChatbotFlow flow, String message, Map<String, Object> context, boolean testMode) {
         log.info("Executing flow: {}", flow.getName());
         
         try {
-            flow.incrementSuccess();
-            flowRepository.save(flow);
+            if (!testMode) {
+                flow.incrementSuccess();
+                flowRepository.save(flow);
+            }
             
             String botMessage = extractFlowMessage(flow.getFlowConfig());
             if (botMessage == null) {
@@ -283,8 +311,10 @@ public class ChatbotService {
                     .entities(new HashMap<>())
                     .build();
         } catch (Exception e) {
-            flow.incrementFailure();
-            flowRepository.save(flow);
+            if (!testMode) {
+                flow.incrementFailure();
+                flowRepository.save(flow);
+            }
             throw e;
         }
     }

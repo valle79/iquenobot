@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -10,6 +10,7 @@ import {
   Check,
   CheckCircle2,
   Copy,
+  Crown,
   Globe,
   Loader2,
   Lock,
@@ -22,7 +23,25 @@ import { Modal } from '@/shared/atoms/Modal/Modal'
 import { Input } from '@/shared/atoms/Input/Input'
 import { Button } from '@/shared/atoms/Button/Button'
 import { useCreateTenant } from '../hooks/useAdminTenants'
-import { adminService } from '@/services/admin.service'
+import { adminService, type PlanDto } from '@/services/admin.service'
+
+const FEATURE_LABELS: Record<string, string> = {
+  whatsapp: 'WhatsApp',
+  ai_assistant: 'Asistente IA',
+  reports: 'Reportes',
+  api_access: 'API Access',
+  custom_branding: 'Branding Personalizado',
+  multi_agent: 'Multi-Agente',
+}
+
+function parseFeatures(featuresStr: string | null | undefined): Record<string, boolean> {
+  if (!featuresStr) return {}
+  try {
+    return JSON.parse(featuresStr)
+  } catch {
+    return {}
+  }
+}
 
 type UniqueField = 'companyName' | 'subdomain' | 'websiteUrl'
 
@@ -123,7 +142,7 @@ interface CreateTenantModalProps {
   onClose: () => void
 }
 
-const steps = ['Empresa', 'Límites', 'Administrador']
+const steps = ['Empresa', 'Plan', 'Límites', 'Administrador']
 
 export function CreateTenantModal({ open, onClose }: CreateTenantModalProps) {
   const [step, setStep] = useState(0)
@@ -134,12 +153,39 @@ export function CreateTenantModal({ open, onClose }: CreateTenantModalProps) {
   const [checkingField, setCheckingField] = useState<UniqueField | null>(null)
   const [created, setCreated] = useState<CreatedCredentials | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
+  const [plans, setPlans] = useState<PlanDto[]>([])
+  const [selectedPlan, setSelectedPlan] = useState<PlanDto | null>(null)
+  const [loadingPlans, setLoadingPlans] = useState(false)
   const checkSeq = useRef(0)
   const createTenant = useCreateTenant()
 
   const companyForm = useForm<CompanyForm>({ resolver: zodResolver(companySchema) })
   const limitsForm = useForm<LimitsForm>({ resolver: zodResolver(limitsSchema) })
   const adminForm = useForm<AdminForm>({ resolver: zodResolver(adminSchema) })
+
+  useEffect(() => {
+    if (!open) return
+    let cancelled = false
+    setLoadingPlans(true)
+    adminService
+      .getPlans({ size: 50 })
+      .then((res) => {
+        if (cancelled) return
+        const active = res.content.filter((p) => p.active)
+        setPlans(active)
+        setSelectedPlan(
+          (prev) =>
+            prev ?? active.find((p) => p.code === 'professional') ?? active[0] ?? null,
+        )
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoadingPlans(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [open])
 
   const handleClose = () => {
     setStep(0)
@@ -148,6 +194,8 @@ export function CreateTenantModal({ open, onClose }: CreateTenantModalProps) {
     setCheckingField(null)
     setCreated(null)
     setCopied(null)
+    setPlans([])
+    setSelectedPlan(null)
     checkSeq.current++
     companyForm.reset()
     limitsForm.reset()
@@ -199,6 +247,7 @@ export function CreateTenantModal({ open, onClose }: CreateTenantModalProps) {
         ...companyData,
         contactPhone: companyData.contactPhone || undefined,
         websiteUrl: companyData.websiteUrl || undefined,
+        subscriptionPlan: selectedPlan?.code,
         maxAgents: limits.maxAgents,
         maxSupervisors: limits.maxSupervisors,
         ...data,
@@ -405,12 +454,110 @@ export function CreateTenantModal({ open, onClose }: CreateTenantModalProps) {
           )}
 
           {step === 1 && (
-            <form onSubmit={limitsForm.handleSubmit(() => setStep(2))} className="space-y-4">
+            <div className="space-y-4">
               <div className="rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700 dark:bg-brand-900/20 dark:text-brand-400">
                 Creando: <strong>{companyData?.companyName}</strong>
                 <span className="ml-2 rounded-md bg-brand-100 px-2 py-0.5 text-xs dark:bg-brand-900/40">
                   @{companyData?.subdomain}
                 </span>
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-xs leading-relaxed text-gray-600 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-400">
+                Elige el plan que se activará en esta empresa. El administrador podrá gestionar
+                sus límites y funcionalidades según el plan seleccionado.
+              </div>
+              {loadingPlans ? (
+                <div className="flex h-48 items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+                </div>
+              ) : plans.length === 0 ? (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-900 dark:bg-amber-900/20 dark:text-amber-400">
+                  No hay planes activos disponibles. La empresa se creará sin plan asignado.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {plans.map((plan) => {
+                    const selected = selectedPlan?.id === plan.id
+                    const features = parseFeatures(plan.features)
+                    const featured = plan.code === 'professional'
+                    return (
+                      <button
+                        key={plan.id}
+                        type="button"
+                        onClick={() => setSelectedPlan(plan)}
+                        className={`relative rounded-xl border-2 p-4 text-left transition-all ${
+                          selected
+                            ? 'border-brand-600 bg-brand-50/60 shadow-sm dark:bg-brand-900/20'
+                            : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                        }`}
+                      >
+                        {selected && (
+                          <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand-600 text-white shadow">
+                            <Check size={14} />
+                          </span>
+                        )}
+                        <div className="flex items-center gap-1.5">
+                          {featured && <Crown size={14} className="text-brand-600" />}
+                          <p className="font-semibold text-gray-900 dark:text-white">
+                            {plan.name}
+                          </p>
+                        </div>
+                        <p className="mt-1 text-lg font-bold text-gray-900 dark:text-white">
+                          S/ {Number(plan.monthlyPrice ?? 0).toFixed(2)}
+                          <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
+                            /mes
+                          </span>
+                        </p>
+                        <div className="mt-3 space-y-1 border-t border-gray-100 pt-2 dark:border-gray-800">
+                          {Object.entries(FEATURE_LABELS).map(([key, label]) => (
+                            <div key={key} className="flex items-center gap-1.5 text-xs">
+                              {features[key] ? (
+                                <Check size={12} className="shrink-0 text-green-500" />
+                              ) : (
+                                <span className="h-3 w-3 shrink-0 rounded-full border border-gray-300 dark:border-gray-600" />
+                              )}
+                              <span
+                                className={
+                                  features[key]
+                                    ? 'text-gray-700 dark:text-gray-300'
+                                    : 'text-gray-400 dark:text-gray-500'
+                                }
+                              >
+                                {label}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+              <div className="flex justify-between pt-4">
+                <Button type="button" variant="ghost" onClick={() => setStep(0)}>
+                  <ArrowLeft size={18} /> Atrás
+                </Button>
+                <Button
+                  onClick={() => setStep(2)}
+                  disabled={plans.length > 0 && !selectedPlan}
+                >
+                  Siguiente <ArrowRight size={18} />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <form onSubmit={limitsForm.handleSubmit(() => setStep(3))} className="space-y-4">
+              <div className="rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700 dark:bg-brand-900/20 dark:text-brand-400">
+                Creando: <strong>{companyData?.companyName}</strong>
+                <span className="ml-2 rounded-md bg-brand-100 px-2 py-0.5 text-xs dark:bg-brand-900/40">
+                  @{companyData?.subdomain}
+                </span>
+                {selectedPlan && (
+                  <span className="ml-2 rounded-md bg-brand-100 px-2 py-0.5 text-xs dark:bg-brand-900/40">
+                    Plan: {selectedPlan.name}
+                  </span>
+                )}
               </div>
               <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-xs leading-relaxed text-gray-600 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-400">
                 Define cuántos agentes y supervisores podrá crear el administrador de esta empresa.
@@ -439,7 +586,7 @@ export function CreateTenantModal({ open, onClose }: CreateTenantModalProps) {
                 />
               </div>
               <div className="flex justify-between pt-4">
-                <Button type="button" variant="ghost" onClick={() => setStep(0)}>
+                <Button type="button" variant="ghost" onClick={() => setStep(1)}>
                   <ArrowLeft size={18} /> Atrás
                 </Button>
                 <Button type="submit">
@@ -449,7 +596,7 @@ export function CreateTenantModal({ open, onClose }: CreateTenantModalProps) {
             </form>
           )}
 
-          {step === 2 && (
+          {step === 3 && (
             <form onSubmit={adminForm.handleSubmit(onAdminSubmit)} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Input
@@ -489,7 +636,7 @@ export function CreateTenantModal({ open, onClose }: CreateTenantModalProps) {
                 {...adminForm.register('adminPhone')}
               />
               <div className="flex justify-between pt-4">
-                <Button type="button" variant="ghost" onClick={() => setStep(1)}>
+                <Button type="button" variant="ghost" onClick={() => setStep(2)}>
                   <ArrowLeft size={18} /> Atrás
                 </Button>
                 <Button type="submit" loading={createTenant.isPending}>

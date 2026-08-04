@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -26,11 +27,54 @@ public class DataInitializer implements CommandLineRunner {
 
     private static final UUID SYSTEM_TENANT_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     private static final String SUPER_ADMIN_EMAIL = "superadmin@iquenobot.com";
+    private static final String ALL_FEATURES = "{\"whatsapp\":true,\"ai_assistant\":true,\"reports\":true,\"api_access\":true,\"custom_branding\":true,\"multi_agent\":true}";
 
     private final TenantRepository tenantRepository;
     private final UserRepository userRepository;
     private final PlanRepository planRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private record PlanSeed(
+            String name,
+            String code,
+            String description,
+            String monthlyPrice,
+            String yearlyPrice,
+            Integer maxUsers,
+            Integer maxConversations,
+            Integer maxContacts,
+            Integer maxStorageMb,
+            String features,
+            int sortOrder) {
+
+        Plan toEntity() {
+            return Plan.builder()
+                    .id(UUID.randomUUID())
+                    .tenantId(SYSTEM_TENANT_ID)
+                    .name(name)
+                    .code(code)
+                    .description(description)
+                    .monthlyPrice(new BigDecimal(monthlyPrice))
+                    .yearlyPrice(new BigDecimal(yearlyPrice))
+                    .maxUsers(maxUsers)
+                    .maxConversations(maxConversations)
+                    .maxContacts(maxContacts)
+                    .maxStorageMb(maxStorageMb)
+                    .features(features)
+                    .active(true)
+                    .publicPlan(true)
+                    .sortOrder(sortOrder)
+                    .build();
+        }
+    }
+
+    private static final List<PlanSeed> PLAN_SEEDS = List.of(
+            new PlanSeed("Básico", "basic", "Plan básico para pequeñas empresas",
+                    "29.99", "299.99", 15, 500, 2000, null, ALL_FEATURES, 1),
+            new PlanSeed("Profesional", "professional", "Plan profesional para empresas en crecimiento",
+                    "79.99", "799.99", 50, 2500, 10000, null, ALL_FEATURES, 2),
+            new PlanSeed("Enterprise", "enterprise", "Plan enterprise para grandes organizaciones",
+                    "199.99", "1999.99", null, null, null, null, ALL_FEATURES, 3));
 
     @Override
     public void run(String... args) {
@@ -39,87 +83,50 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void seedPlans() {
-        if (planRepository.count() > 0) {
-            log.info("Plans already seeded, skipping");
-            return;
-        }
+        log.info("Syncing default plans...");
 
-        log.info("Seeding default plans...");
+        PLAN_SEEDS.forEach(seed -> {
+            planRepository.findByCode(seed.code())
+                    .ifPresentOrElse(existing -> {
+                        if (existing.isDeleted()) {
+                            log.info("Plan eliminado por el administrador, no se restaura: {}", seed.code());
+                            return;
+                        }
+                        existing.setName(seed.name());
+                        existing.setDescription(seed.description());
+                        existing.setMonthlyPrice(new BigDecimal(seed.monthlyPrice()));
+                        existing.setYearlyPrice(new BigDecimal(seed.yearlyPrice()));
+                        existing.setMaxUsers(seed.maxUsers());
+                        existing.setMaxConversations(seed.maxConversations());
+                        existing.setMaxContacts(seed.maxContacts());
+                        existing.setMaxStorageMb(seed.maxStorageMb());
+                        existing.setFeatures(seed.features());
+                        existing.setSortOrder(seed.sortOrder());
+                        existing.setActive(true);
+                        existing.setPublicPlan(true);
 
-        UUID systemId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-        planRepository.save(Plan.builder()
-                .id(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-                .tenantId(systemId)
-                .name("Free")
-                .code("free")
-                .description("Plan gratuito para probar la plataforma")
-                .monthlyPrice(BigDecimal.ZERO)
-                .yearlyPrice(BigDecimal.ZERO)
-                .maxUsers(1)
-                .maxConversations(50)
-                .maxContacts(100)
-                .maxStorageMb(50)
-                .features("{\"whatsapp\":false,\"ai_assistant\":false,\"reports\":false,\"api_access\":false,\"custom_branding\":false,\"multi_agent\":false}")
-                .active(true)
-                .publicPlan(true)
-                .sortOrder(1)
-                .build());
+                        planRepository.save(existing);
 
-        planRepository.save(Plan.builder()
-                .id(UUID.fromString("00000000-0000-0000-0000-000000000002"))
-                .tenantId(systemId)
-                .name("Basic")
-                .code("basic")
-                .description("Plan básico para pequeñas empresas")
-                .monthlyPrice(new BigDecimal("29.99"))
-                .yearlyPrice(new BigDecimal("299.99"))
-                .maxUsers(3)
-                .maxConversations(500)
-                .maxContacts(1000)
-                .maxStorageMb(500)
-                .features("{\"whatsapp\":true,\"ai_assistant\":false,\"reports\":true,\"api_access\":false,\"custom_branding\":false,\"multi_agent\":false}")
-                .active(true)
-                .publicPlan(true)
-                .sortOrder(2)
-                .build());
+                        log.info("Plan sincronizado: {}", seed.code());
+                    }, () -> {
+                        planRepository.save(seed.toEntity());
 
-        planRepository.save(Plan.builder()
-                .id(UUID.fromString("00000000-0000-0000-0000-000000000003"))
-                .tenantId(systemId)
-                .name("Professional")
-                .code("professional")
-                .description("Plan profesional para empresas en crecimiento")
-                .monthlyPrice(new BigDecimal("79.99"))
-                .yearlyPrice(new BigDecimal("799.99"))
-                .maxUsers(10)
-                .maxConversations(5000)
-                .maxContacts(10000)
-                .maxStorageMb(2000)
-                .features("{\"whatsapp\":true,\"ai_assistant\":true,\"reports\":true,\"api_access\":true,\"custom_branding\":false,\"multi_agent\":false}")
-                .active(true)
-                .publicPlan(true)
-                .sortOrder(3)
-                .build());
+                        log.info("Plan creado: {}", seed.code());
+                    });
+        });
 
-        planRepository.save(Plan.builder()
-                .id(UUID.fromString("00000000-0000-0000-0000-000000000004"))
-                .tenantId(systemId)
-                .name("Enterprise")
-                .code("enterprise")
-                .description("Plan enterprise para grandes organizaciones")
-                .monthlyPrice(new BigDecimal("199.99"))
-                .yearlyPrice(new BigDecimal("1999.99"))
-                .maxUsers(999999)
-                .maxConversations(999999)
-                .maxContacts(999999)
-                .maxStorageMb(10000)
-                .features("{\"whatsapp\":true,\"ai_assistant\":true,\"reports\":true,\"api_access\":true,\"custom_branding\":true,\"multi_agent\":true}")
-                .active(true)
-                .publicPlan(true)
-                .sortOrder(4)
-                .build());
+        deactivateLegacyFreePlan();
+    }
 
-        log.info("Default plans seeded successfully");
+    private void deactivateLegacyFreePlan() {
+        planRepository.findByCode("free").ifPresent(free -> {
+            if (free.isActive()) {
+                free.setActive(false);
+                free.setPublicPlan(false);
+                planRepository.save(free);
+                log.info("Free plan deactivated (no longer offered)");
+            }
+        });
     }
 
     private void seedSystemTenantAndSuperAdmin() {
@@ -130,7 +137,7 @@ public class DataInitializer implements CommandLineRunner {
 
         log.info("Creating system tenant and SUPER_ADMIN user...");
 
-        Plan enterprisePlan = planRepository.findByCodeAndDeletedFalse("enterprise").orElse(null);
+        Plan enterprisePlan = planRepository.findByCode("enterprise").orElse(null);
 
         Tenant systemTenant = Tenant.builder()
                 .id(SYSTEM_TENANT_ID)

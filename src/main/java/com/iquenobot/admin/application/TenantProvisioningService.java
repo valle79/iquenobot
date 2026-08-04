@@ -64,7 +64,7 @@ public class TenantProvisioningService {
             plan = planRepository.findByCodeAndDeletedFalse(request.getSubscriptionPlan()).orElse(null);
         }
         if (plan == null) {
-            plan = planRepository.findByCodeAndDeletedFalse("free").orElse(null);
+            plan = planRepository.findByCodeAndDeletedFalse("basic").orElse(null);
         }
 
         // 3. Create Tenant
@@ -83,7 +83,7 @@ public class TenantProvisioningService {
 
         // Apply regional defaults
         if (request.getTimezone() == null) tenant.setTimezone("UTC");
-        if (request.getCurrency() == null) tenant.setCurrency("USD");
+        if (request.getCurrency() == null) tenant.setCurrency("PEN");
         if (request.getLanguage() == null) tenant.setLanguage("es");
         if (request.getLocale() == null) tenant.setLocale("es-PE");
         if (request.getPrimaryColor() == null) tenant.setPrimaryColor("#6366f1");

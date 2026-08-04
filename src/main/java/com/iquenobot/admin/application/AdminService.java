@@ -233,7 +233,7 @@ public class AdminService {
 
     @Transactional
     public com.iquenobot.plan.domain.dto.PlanDto createPlan(com.iquenobot.plan.domain.dto.CreatePlanRequestDto request) {
-        if (planRepository.existsByCodeAndDeletedFalse(request.getCode())) {
+        if (planRepository.existsByCode(request.getCode())) {
             throw new BusinessException("El código del plan ya existe");
         }
 
@@ -266,14 +266,19 @@ public class AdminService {
                 .orElseThrow(() -> new ResourceNotFoundException("Plan no encontrado"));
 
         if (request.getName() != null) plan.setName(request.getName());
-        if (request.getCode() != null) plan.setCode(request.getCode());
+        if (request.getCode() != null) {
+            if (!request.getCode().equals(plan.getCode()) && planRepository.existsByCode(request.getCode())) {
+                throw new BusinessException("El código del plan ya existe");
+            }
+            plan.setCode(request.getCode());
+        }
         if (request.getDescription() != null) plan.setDescription(request.getDescription());
         if (request.getMonthlyPrice() != null) plan.setMonthlyPrice(request.getMonthlyPrice());
         if (request.getYearlyPrice() != null) plan.setYearlyPrice(request.getYearlyPrice());
-        if (request.getMaxUsers() != null) plan.setMaxUsers(request.getMaxUsers());
-        if (request.getMaxConversations() != null) plan.setMaxConversations(request.getMaxConversations());
-        if (request.getMaxContacts() != null) plan.setMaxContacts(request.getMaxContacts());
-        if (request.getMaxStorageMb() != null) plan.setMaxStorageMb(request.getMaxStorageMb());
+        if (request.getMaxUsers() != null) plan.setMaxUsers(toNullableLimit(request.getMaxUsers()));
+        if (request.getMaxConversations() != null) plan.setMaxConversations(toNullableLimit(request.getMaxConversations()));
+        if (request.getMaxContacts() != null) plan.setMaxContacts(toNullableLimit(request.getMaxContacts()));
+        if (request.getMaxStorageMb() != null) plan.setMaxStorageMb(toNullableLimit(request.getMaxStorageMb()));
         if (request.getFeatures() != null) plan.setFeatures(request.getFeatures());
         if (request.getActive() != null) plan.setActive(request.getActive());
         if (request.getPublicPlan() != null) plan.setPublicPlan(request.getPublicPlan());
@@ -288,9 +293,21 @@ public class AdminService {
     public void deletePlan(UUID id) {
         Plan plan = planRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Plan no encontrado"));
+
+        long tenantsInUse = tenantRepository.countByPlanIdAndDeletedFalse(id);
+        if (tenantsInUse > 0) {
+            throw new BusinessException(
+                    "No se puede eliminar el plan \"" + plan.getName() + "\": hay " + tenantsInUse
+                            + " empresa(s) con este plan asignado");
+        }
+
         plan.softDelete(null);
         planRepository.save(plan);
         log.info("Plan soft-deleted: {}", plan.getName());
+    }
+
+    private Integer toNullableLimit(Integer value) {
+        return value != null && value == -1 ? null : value;
     }
 
     // ========== SYSTEM STATS ==========

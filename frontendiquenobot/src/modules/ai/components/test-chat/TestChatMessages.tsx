@@ -85,7 +85,7 @@ export function TestChatMessages({
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />
           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-500" />
         </span>
-        Simulación de {botName.split('—')[0].trim()} · nada se guarda en tu CRM
+        Simulación de {botName.replace(/—.*/, '').trim()} · nada se guarda en tu CRM
       </div>
 
       {messages.length === 0 && (

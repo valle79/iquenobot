@@ -26,7 +26,7 @@ export function Modal({ open, onClose, title, description, children, size = 'md'
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div
         className={cn(
-          'relative w-full animate-fade-in rounded-xl bg-white p-6 shadow-modal dark:bg-gray-950',
+          'relative w-full max-h-[calc(100vh-2rem)] animate-fade-in overflow-y-auto rounded-xl bg-white p-6 shadow-modal dark:bg-gray-950',
           sizeClasses[size],
         )}
       >

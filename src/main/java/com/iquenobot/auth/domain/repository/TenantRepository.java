@@ -58,4 +58,6 @@ public interface TenantRepository extends JpaRepository<Tenant, UUID> {
 
     @Query("SELECT COUNT(t) FROM Tenant t WHERE t.status = 'ACTIVE' AND t.subscriptionExpiresAt < CURRENT_DATE AND t.deleted = false")
     long countExpiredTenants();
+
+    long countByPlanIdAndDeletedFalse(UUID planId);
 }

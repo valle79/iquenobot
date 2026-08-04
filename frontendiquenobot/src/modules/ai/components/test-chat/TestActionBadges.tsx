@@ -8,12 +8,21 @@ const ACTION_META: Record<string, { icon: LucideIcon; className: string }> = {
   TRANSFER_CONVERSATION: { icon: PhoneCall, className: 'bg-rose-50 text-rose-600 dark:bg-rose-950 dark:text-rose-400' },
 }
 
-function metaFor(actionType: string) {
-  return ACTION_META[actionType] ?? ACTION_META.SEND_TEXT
+function metaFor(actionType: string): { icon: LucideIcon; className: string } {
+  switch (actionType) {
+    case 'CREATE_LEAD':
+      return ACTION_META.CREATE_LEAD
+    case 'SEND_QUOTE':
+      return ACTION_META.SEND_QUOTE
+    case 'TRANSFER_CONVERSATION':
+      return ACTION_META.TRANSFER_CONVERSATION
+    default:
+      return ACTION_META.SEND_TEXT
+  }
 }
 
-export function TestActionBadges({ actions }: { actions: SimulatedActionDto[] }) {
-  if (actions.length === 0) return null
+export function TestActionBadges({ actions }: { actions?: SimulatedActionDto[] }) {
+  if (!actions || actions.length === 0) return null
 
   return (
     <div className="mt-2 max-w-full rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2 dark:border-amber-900/60 dark:bg-amber-950/40">

@@ -18,5 +18,7 @@ public interface PlanRepository extends JpaRepository<Plan, UUID> {
 
     Optional<Plan> findByCodeAndDeletedFalse(String code);
 
-    boolean existsByCodeAndDeletedFalse(String code);
+    Optional<Plan> findByCode(String code);
+
+    boolean existsByCode(String code);
 }

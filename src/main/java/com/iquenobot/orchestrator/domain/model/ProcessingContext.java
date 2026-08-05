@@ -27,6 +27,13 @@ public class ProcessingContext {
      *  (respuesta automática sobre mensajes agregados), no el webhook síncrono. */
     private boolean scheduledProcessing;
 
+    /** true cuando el mensaje debe descartarse sin persistir ni responder
+     *  (p.ej. contacto bloqueado). Detiene el pipeline de forma limpia. */
+    private boolean skipped;
+
+    /** Razón del descarte (para logs y trazabilidad). */
+    private String skipReason;
+
     public IncomingMessage getIncomingMessage() { return incomingMessage; }
     public void setIncomingMessage(IncomingMessage incomingMessage) { this.incomingMessage = incomingMessage; }
 
@@ -62,4 +69,10 @@ public class ProcessingContext {
 
     public boolean isScheduledProcessing() { return scheduledProcessing; }
     public void setScheduledProcessing(boolean scheduledProcessing) { this.scheduledProcessing = scheduledProcessing; }
+
+    public boolean isSkipped() { return skipped; }
+    public void setSkipped(boolean skipped) { this.skipped = skipped; }
+
+    public String getSkipReason() { return skipReason; }
+    public void setSkipReason(String skipReason) { this.skipReason = skipReason; }
 }

@@ -107,6 +107,7 @@ public class SendTextExecutor implements ActionExecutor {
                 conv.getId(), context.getTenantId(), LocalDateTime.now(ZoneOffset.UTC));
 
         eventPublisher.publish(new BotAnsweredEvent(
+                botMessage.getId(),
                 context.getTenantId().toString(),
                 conv.getId().toString(),
                 intentDetected,

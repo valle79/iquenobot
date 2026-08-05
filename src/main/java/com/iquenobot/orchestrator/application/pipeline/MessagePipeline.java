@@ -35,6 +35,16 @@ public class MessagePipeline {
 
             try {
                 context = step.execute(context);
+
+                // Un step puede descartar el mensaje (contacto bloqueado,
+                // desuscrito, etc.): detener el pipeline sin persistir ni
+                // ejecutar el resto de la cadena.
+                if (context.isSkipped()) {
+                    log.info("Pipeline stopped at {}: {}", stepName,
+                            context.getSkipReason() != null ? context.getSkipReason() : "skipped");
+                    return context;
+                }
+
                 long elapsed = System.currentTimeMillis() - stepStart;
                 log.debug("Pipeline step {} completed in {}ms", stepName, elapsed);
             } catch (Exception e) {

@@ -28,8 +28,9 @@ import java.util.stream.Collectors;
  *
  * Configuración multitenant (settings, categoría "bot"):
  * - bot.bot_resume_enabled        (default true)  : activa la recuperación automática
- * - bot.bot_resume_delay_minutes  (default 3)     : ventana de pausa tras cada mensaje del agente
- * - bot.max_human_idle_minutes    (default 15)    : techo de inactividad total que fuerza la reactivación
+ * - bot.bot_resume_delay_minutes  (default 2)     : ventana de pausa tras cada mensaje del agente
+ * - bot.max_human_idle_minutes    (default 15)    : techo de inactividad del agente (medido desde su
+ *                                                    última respuesta) que fuerza la reactivación
  */
 @Service
 @RequiredArgsConstructor
@@ -103,10 +104,16 @@ public class ConversationHandoffService {
         boolean windowExpired = conversation.getBotResumeAfter() == null
                 || !now.isBefore(conversation.getBotResumeAfter());
 
-        boolean idleLimitExceeded = conversation.getHumanTakenOverAt() != null
+        // Techo de inactividad del agente, medido desde su ÚLTIMA respuesta
+        // (no desde el primer takeover del día, que provocaba reanudaciones
+        // prematuras aunque el agente acabara de escribir).
+        LocalDateTime referenceIdle = conversation.getLastAgentReplyAt() != null
+                ? conversation.getLastAgentReplyAt()
+                : conversation.getHumanTakenOverAt();
+
+        boolean idleLimitExceeded = referenceIdle != null
                 && config.getMaxHumanIdleMinutes() > 0
-                && now.isAfter(conversation.getHumanTakenOverAt()
-                        .plusMinutes(config.getMaxHumanIdleMinutes()));
+                && now.isAfter(referenceIdle.plusMinutes(config.getMaxHumanIdleMinutes()));
 
         if (!windowExpired && !idleLimitExceeded) {
             logPaused(conversation);

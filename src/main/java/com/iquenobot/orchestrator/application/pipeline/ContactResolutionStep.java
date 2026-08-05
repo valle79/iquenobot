@@ -59,15 +59,20 @@ public class ContactResolutionStep
 
         updateContactNameIfNeeded(contact, message.getSourceName());
 
-        if (!contact.canReceiveMessages()) {
-            log.warn(
-                    "Contact cannot receive messages: id={} status={}",
-                    contact.getId(),
-                    contact.getStatus()
-            );
-        }
-
         context.setContact(contact);
+
+        // -----------------------------------------------------------------
+        // CONTACTO BLOQUEADO: descartar el mensaje entrante de forma limpia.
+        // El pipeline se detiene aquí: no se persiste el mensaje, no se
+        // crea conversación y no se responde automáticamente.
+        // -----------------------------------------------------------------
+        if (!message.isOutbound() && contact.isBlocked()) {
+            log.warn("Discarding message from blocked contact: id={} name={} phone={}",
+                    contact.getId(), contact.getDisplayName(), contact.getNormalizedPhone());
+            context.setSkipped(true);
+            context.setSkipReason("CONTACT_BLOCKED");
+            return context;
+        }
 
         TenantContext.setUserId(contact.getId().toString());
 

@@ -133,6 +133,26 @@ public class ConversationOrchestrator {
 
             context = pipeline.execute(context);
 
+            // -----------------------------------------------------------------
+            // MENSAJE DESCARTADO (p.ej. contacto bloqueado): no se publican
+            // eventos, no se decide ni se ejecuta ninguna acción. Se responde
+            // success para que el proveedor no reintente el envío del webhook.
+            // -----------------------------------------------------------------
+            if (context.isSkipped()) {
+                log.info("Message discarded: {}",
+                        context.getSkipReason() != null ? context.getSkipReason() : "skipped");
+                return ProcessingResult.success(
+                        Decision.builder()
+                                .actionType(ActionType.NO_ACTION)
+                                .reason(context.getSkipReason() != null
+                                        ? context.getSkipReason()
+                                        : "SKIPPED")
+                                .build(),
+                        "Message discarded",
+                        System.currentTimeMillis() - startTime
+                );
+            }
+
             if (context.getTenantId() != null) MDC.put(TENANT_ID, context.getTenantId().toString());
             if (context.getConversation() != null) MDC.put(CONVERSATION_ID, context.getConversation().getId().toString());
             if (context.getContact() != null) MDC.put(CONTACT_ID, context.getContact().getId().toString());

@@ -23,6 +23,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -226,31 +228,36 @@ public class NotificationEventListener {
     }
 
     @Async
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void handleBotAnswered(BotAnsweredEvent event) {
         try {
             UUID tenantId = UUID.fromString(event.getTenantId());
             UUID conversationId = UUID.fromString(event.getConversationId());
 
-            Optional<ConversationMessage> latestBotMsg = messageRepository
-                    .findByConversationIdOrderBySentAtAsc(conversationId)
-                    .stream()
-                    .filter(m -> m.isFromBot())
-                    .reduce((a, b) -> b);
-
             Map<String, Object> payload = new LinkedHashMap<>();
-            if (latestBotMsg.isPresent()) {
-                ConversationMessage msg = latestBotMsg.get();
-                payload.put("id", msg.getId().toString());
-                payload.put("conversationId", msg.getConversation().getId().toString());
-                payload.put("content", msg.getContent());
-                payload.put("sentAt", msg.getSentAt() != null ? msg.getSentAt().toString() : null);
-                payload.put("direction", "OUTBOUND");
-                payload.put("type", msg.getType() != null ? msg.getType().name() : "TEXT");
-                payload.put("status", msg.getStatus() != null ? msg.getStatus().name() : "SENT");
-                payload.put("fromBot", true);
-                payload.put("botIntent", msg.getBotIntent());
-            } else {
+            if (event.getMessageId() != null) {
+                // Después del commit el mensaje ya es visible en la BD. Fetch por id exacto
+                // (con attachments vía JOIN FETCH) para evitar leer un mensaje del bot anterior
+                // o disparar LazyInitializationException fuera de transacción.
+                Optional<ConversationMessage> persisted = messageRepository
+                        .findByIdAndTenantIdWithAttachments(event.getMessageId(), tenantId);
+                if (persisted.isPresent()) {
+                    ConversationMessage msg = persisted.get();
+                    payload.put("id", msg.getId().toString());
+                    payload.put("conversationId", event.getConversationId());
+                    payload.put("content", msg.getContent());
+                    payload.put("sentAt", msg.getSentAt() != null ? msg.getSentAt().toString() : null);
+                    payload.put("direction", "OUTBOUND");
+                    payload.put("type", msg.getType() != null ? msg.getType().name() : "TEXT");
+                    payload.put("status", msg.getStatus() != null ? msg.getStatus().name() : "SENT");
+                    payload.put("fromBot", true);
+                    payload.put("botIntent", msg.getBotIntent());
+                    payload.put("attachments", buildAttachmentsPayload(msg.getAttachments()));
+                    payload.put("senderName", msg.getSenderName());
+                }
+            }
+
+            if (payload.isEmpty()) {
                 payload.put("id", UUID.randomUUID().toString());
                 payload.put("conversationId", event.getConversationId());
                 payload.put("content", event.getResponsePreview());
@@ -259,6 +266,7 @@ public class NotificationEventListener {
                 payload.put("type", "TEXT");
                 payload.put("status", "SENT");
                 payload.put("fromBot", true);
+                payload.put("attachments", List.of());
             }
 
             webSocketHandler.sendToTenant(tenantId, Map.of("type", "message:new", "payload", payload));

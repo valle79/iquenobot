@@ -67,7 +67,7 @@ public class BotConfiguration {
         builder.fallbackMessage(getStringSetting(settingsByKey, "bot", "fallback_message",
                 "Lo siento, voy a conectarte con un agente humano."));
         builder.botResumeEnabled(getBooleanSetting(settingsByKey, "bot", "bot_resume_enabled", true));
-        builder.botResumeDelayMinutes(getIntSetting(settingsByKey, "bot", "bot_resume_delay_minutes", 3));
+        builder.botResumeDelayMinutes(getIntSetting(settingsByKey, "bot", "bot_resume_delay_minutes", 2));
         builder.maxHumanIdleMinutes(getIntSetting(settingsByKey, "bot", "max_human_idle_minutes", 15));
 
         return builder.build();
@@ -124,7 +124,7 @@ public class BotConfiguration {
         private boolean humanHandoffEnabled = true;
         private String fallbackMessage = "Lo siento, voy a conectarte con un agente humano.";
         private boolean botResumeEnabled = true;
-        private int botResumeDelayMinutes = 3;
+        private int botResumeDelayMinutes = 2;
         private int maxHumanIdleMinutes = 15;
         private Map<String, Object> extraSettings = Map.of();
 

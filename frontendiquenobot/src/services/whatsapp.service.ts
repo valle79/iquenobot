@@ -22,9 +22,25 @@ export interface WhatsAppQRCodeResult {
   error: string | null
 }
 
+export interface WhatsAppSetupPayload {
+  provider: string
+  phoneNumber?: string
+}
+
+export interface WhatsAppSetupResult {
+  instanceId: string
+  configured: boolean
+  message: string
+}
+
 export const whatsappService = {
   getStatus: async (): Promise<WhatsAppConnectionStatus> => {
     const response = await api.get<ApiResponse<WhatsAppConnectionStatus>>('/whatsapp/status')
+    return response.data.data
+  },
+
+  setup: async (payload: WhatsAppSetupPayload): Promise<WhatsAppSetupResult> => {
+    const response = await api.post<ApiResponse<WhatsAppSetupResult>>('/whatsapp/setup', payload)
     return response.data.data
   },
 

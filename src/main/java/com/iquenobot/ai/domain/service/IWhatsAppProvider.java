@@ -21,6 +21,13 @@ public interface IWhatsAppProvider {
     void setWebhook(String instanceId, String webhookUrl);
 
     /**
+     * Create a new WhatsApp instance on the provider automatically.
+     * @param instanceName Suggested instance name/identifier
+     * @return The actual instance name created (or the same one if it already existed)
+     */
+    String createInstance(String instanceName);
+
+    /**
      * Send a text message
      * @param instanceId WhatsApp instance/phone identifier
      * @param message Message details

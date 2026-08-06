@@ -1,14 +1,17 @@
 package com.iquenobot.ai.interfaces.controller;
 
 import com.iquenobot.ai.application.WhatsAppConnectionService;
+import com.iquenobot.ai.domain.dto.WhatsAppSetupRequestDto;
 import com.iquenobot.shared.domain.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,6 +28,14 @@ public class WhatsAppConnectionController {
     @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'SUPERVISOR')")
     public ResponseEntity<ApiResponse<WhatsAppConnectionService.ConnectionStatusResponse>> getStatus() {
         return ResponseEntity.ok(ApiResponse.success(connectionService.getStatus()));
+    }
+
+    @PostMapping("/setup")
+    @Operation(summary = "Configurar WhatsApp automáticamente", description = "Crea la instancia, el webhook y las credenciales de forma automática. El usuario solo indica el proveedor y escanea el QR.")
+    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'SUPERVISOR')")
+    public ResponseEntity<ApiResponse<WhatsAppConnectionService.SetupResponse>> setup(
+            @Valid @RequestBody WhatsAppSetupRequestDto request) {
+        return ResponseEntity.ok(ApiResponse.success(connectionService.setup(request.getProvider(), request.getPhoneNumber())));
     }
 
     @PostMapping("/test-connection")

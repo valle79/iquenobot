@@ -1,19 +1,58 @@
+databases:
+  - name: iquenobot-db
+    plan: free
+    databaseName: iquenobot
+    user: postgres
+
 services:
+  # Sistema IquenoBot
   - type: web
     name: iquenobot
-    env: docker
-    dockerfilePath: Dockerfile.prod
-    healthCheckPath: /api/v1/ping
+    runtime: image
+    image:
+      url: docker.io/luisvalle1/iquenobot:latest
+    healthCheckPath: /actuator/health
+
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: docker
+
       - key: DATASOURCE_URL
-        sync: false
+        fromDatabase:
+          name: iquenobot-db
+          property: connectionString
+
       - key: DATASOURCE_USERNAME
-        sync: false
+        fromDatabase:
+          name: iquenobot-db
+          property: user
+
       - key: DATASOURCE_PASSWORD
-        sync: false
+        fromDatabase:
+          name: iquenobot-db
+          property: password
+
       - key: JWT_SECRET
         generateValue: true
+
       - key: CRYPTO_SECRET
         generateValue: true
+
+      - key: CORS_ORIGINS
+        value: "*"
+
+      - key: BASE_URL
+        sync: false
+
+    disk:
+      name: uploads
+      mountPath: /app/uploads
+      sizeGB: 1
+
+  # Landing
+  - type: web
+    name: iquenobot-landing
+    runtime: image
+    image:
+      url: docker.io/luisvalle1/iquenobot-landing:latest
+    healthCheckPath: /

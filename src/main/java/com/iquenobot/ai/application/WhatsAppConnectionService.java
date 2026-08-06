@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,14 @@ public class WhatsAppConnectionService {
     private String evolutionWebhookBaseUrl;
 
     private static final String CATEGORY = "whatsapp";
+
+    @Data
+    @Builder
+    public static class SetupResponse {
+        private String instanceId;
+        private boolean configured;
+        private String message;
+    }
 
     @Data
     @Builder
@@ -67,10 +76,8 @@ public class WhatsAppConnectionService {
         String instanceId = getSettingValue(settings, "instance_id");
         String provider = getSettingValue(settings, "provider");
         String phoneNumber = getSettingValue(settings, "phone_number");
-        String apiKey = getSettingValue(settings, "api_key");
 
-        boolean configured = instanceId != null && !instanceId.isBlank()
-                && apiKey != null && !apiKey.isBlank();
+        boolean configured = instanceId != null && !instanceId.isBlank();
 
         boolean connected = false;
         String error = null;
@@ -95,26 +102,55 @@ public class WhatsAppConnectionService {
     }
 
     @Transactional
+    public SetupResponse setup(String provider, String phoneNumber) {
+        UUID tenantId = getTenantId();
+        List<Setting> settings = settingRepository.findByTenantIdAndCategoryAndDeletedFalse(tenantId, CATEGORY);
+
+        String existingInstance = getSettingValue(settings, "instance_id");
+        if (existingInstance != null && !existingInstance.isBlank()) {
+            return SetupResponse.builder()
+                    .instanceId(existingInstance)
+                    .configured(true)
+                    .message("WhatsApp ya estaba configurado. Escanea el código QR para conectar tu teléfono.")
+                    .build();
+        }
+
+        String instanceName = generateInstanceName(tenantId);
+
+        whatsAppProvider.createInstance(instanceName);
+        String webhookUrl = getWebhookUrl(instanceName);
+
+        saveSetting(tenantId, "provider", provider != null ? provider : "EVOLUTION_API", "select", "Proveedor de WhatsApp");
+        saveSetting(tenantId, "instance_id", instanceName, "string", "ID de instancia de WhatsApp");
+        saveSetting(tenantId, "api_key", "", "string", "API Key de WhatsApp (auto-gestionada)");
+        saveSetting(tenantId, "phone_number", phoneNumber != null ? phoneNumber : "", "string", "Número de teléfono de WhatsApp");
+        saveSetting(tenantId, "webhook_url", webhookUrl, "string", "URL del webhook de WhatsApp");
+        saveSetting(tenantId, "connected", "false", "boolean", "Estado de conexión de WhatsApp");
+        saveSetting(tenantId, "auto_setup", "true", "boolean", "Instancia creada automáticamente");
+
+        whatsAppProvider.setWebhook(instanceName, webhookUrl);
+
+        log.info("WhatsApp auto-provisioned for tenant {}: instance={} webhook={}", tenantId, instanceName, webhookUrl);
+
+        return SetupResponse.builder()
+                .instanceId(instanceName)
+                .configured(true)
+                .message("WhatsApp configurado correctamente. Escanea el código QR para conectar tu teléfono.")
+                .build();
+    }
+
+    @Transactional
     public TestConnectionResponse testConnection() {
         UUID tenantId = getTenantId();
         List<Setting> settings = settingRepository.findByTenantIdAndCategoryAndDeletedFalse(tenantId, CATEGORY);
 
         String instanceId = getSettingValue(settings, "instance_id");
-        String apiKey = getSettingValue(settings, "api_key");
 
         if (instanceId == null || instanceId.isBlank()) {
             return TestConnectionResponse.builder()
                     .success(false)
                     .connected(false)
                     .message("No se ha configurado el ID de instancia de WhatsApp")
-                    .build();
-        }
-
-        if (apiKey == null || apiKey.isBlank()) {
-            return TestConnectionResponse.builder()
-                    .success(false)
-                    .connected(false)
-                    .message("No se ha configurado la API Key de WhatsApp")
                     .build();
         }
 
@@ -234,6 +270,35 @@ public class WhatsAppConnectionService {
                 .map(Setting::getValue)
                 .findFirst()
                 .orElse(null);
+    }
+
+    private void saveSetting(UUID tenantId, String key, String value, String type, String description) {
+        var existing = settingRepository.findByTenantIdAndCategoryAndKeyAndDeletedFalse(tenantId, CATEGORY, key);
+        if (existing.isPresent()) {
+            Setting setting = existing.get();
+            setting.setValue(value);
+            setting.setType(type);
+            setting.setDescription(description);
+            settingRepository.save(setting);
+        } else {
+            Setting setting = Setting.builder()
+                    .id(UUID.randomUUID())
+                    .tenantId(tenantId)
+                    .category(CATEGORY)
+                    .key(key)
+                    .value(value)
+                    .type(type)
+                    .description(description)
+                    .build();
+            settingRepository.save(setting);
+        }
+    }
+
+    private String generateInstanceName(UUID tenantId) {
+        String sanitized = tenantId.toString().replace("-", "");
+        String shortId = sanitized.substring(0, Math.min(sanitized.length(), 8));
+        String suffix = String.valueOf(ThreadLocalRandom.current().nextInt(1000, 9999));
+        return "iq_" + shortId + suffix;
     }
 
     private UUID getTenantId() {

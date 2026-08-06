@@ -47,6 +47,48 @@ public class EvolutionApiProvider implements IWhatsAppProvider {
     private String backendBaseUrl;
 
     @Override
+    public String createInstance(String instanceName) {
+        log.info("Creating WhatsApp instance via Evolution API: {}", instanceName);
+
+        try {
+            String url = evolutionApiUrl + "/instance/create";
+
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("instanceName", instanceName);
+            requestBody.put("integration", "WHATSAPP-BAILEYS");
+            requestBody.put("qrcode", true);
+
+            HttpHeaders headers = createHeaders();
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url, HttpMethod.POST, request, Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Object rawInstance = response.getBody().get("instance");
+                if (rawInstance instanceof Map<?, ?> instance) {
+                    Object name = instance.get("instanceName");
+                    if (name instanceof String s && !s.isBlank()) {
+                        log.info("WhatsApp instance created successfully: {}", s);
+                        return s;
+                    }
+                }
+            }
+
+            throw new BusinessException("No se pudo crear la instancia de WhatsApp");
+
+        } catch (Exception e) {
+            String detail = e.getMessage() == null ? "" : e.getMessage().toLowerCase();
+            if (detail.contains("exists") || detail.contains("already") || detail.contains("ya existe")) {
+                log.warn("WhatsApp instance already exists, reusing: {}", instanceName);
+                return instanceName;
+            }
+            log.error("Error creating WhatsApp instance {}: {}", instanceName, e.getMessage());
+            throw new BusinessException("Error al crear la instancia de WhatsApp: " + e.getMessage());
+        }
+    }
+
+    @Override
     public String sendMessage(String instanceId, WhatsAppMessageDto message) {
         log.info("Sending text message via Evolution API to: {}", message.getTo());
 

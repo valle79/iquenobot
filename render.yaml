@@ -2,7 +2,6 @@ databases:
   - name: iquenobot-db
     plan: free
     databaseName: iquenobot
-    user: postgres
 
 services:
   # Sistema IquenoBot (backend + frontend CRM integrado)

@@ -32,6 +32,7 @@ COPY --from=frontend-build /app/dist /usr/share/nginx/html
 
 # Copy nginx config
 COPY nginx/nginx.conf /etc/nginx/http.d/default.conf
+COPY nginx/nginx-main.conf /etc/nginx/nginx.conf
 
 # Copy entrypoint
 COPY docker/docker-entrypoint.sh /docker-entrypoint.sh

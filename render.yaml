@@ -5,12 +5,12 @@ databases:
     user: postgres
 
 services:
-  # Sistema IquenoBot
+  # Sistema IquenoBot (backend + frontend CRM integrado)
   - type: web
     name: iquenobot
-    runtime: image
-    image:
-      url: docker.io/luisvalle1/iquenobot:latest
+    runtime: docker
+    plan: free
+    dockerfilePath: Dockerfile.prod
     healthCheckPath: /actuator/health
 
     envVars:
@@ -52,7 +52,8 @@ services:
   # Landing
   - type: web
     name: iquenobot-landing
-    runtime: image
-    image:
-      url: docker.io/luisvalle1/iquenobot-landing:latest
+    runtime: docker
+    plan: free
+    dockerfilePath: iquenobot-landing/Dockerfile
+    buildContext: iquenobot-landing
     healthCheckPath: /

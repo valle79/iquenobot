@@ -47,5 +47,5 @@ services:
     runtime: docker
     plan: free
     dockerfilePath: iquenobot-landing/Dockerfile
-    buildContext: iquenobot-landing
+    dockerContext: iquenobot-landing
     healthCheckPath: /

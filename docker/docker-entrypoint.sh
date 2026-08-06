@@ -1,9 +1,30 @@
 #!/bin/sh
 set -e
 
-# Convertir DATASOURCE_URL de Render (postgres://...) al formato JDBC
+# Convertir DATASOURCE_URL de Render (postgres://...) al formato JDBC.
+# El driver JDBC de PostgreSQL no acepta credenciales embebidas en la URL,
+# asi que se extraen user/password y se pasan como variables separadas.
 if [ -n "$DATASOURCE_URL" ] && [ "${DATASOURCE_URL#jdbc:}" = "$DATASOURCE_URL" ]; then
-    DATASOURCE_URL=$(echo "$DATASOURCE_URL" | sed 's|^postgres://|jdbc:postgresql://|; s|^postgresql://|jdbc:postgresql://|')
+    REST=$(echo "$DATASOURCE_URL" | sed 's|^postgresql*://||')
+
+    case "$REST" in
+        *@*)
+            CREDS=$(echo "$REST" | sed 's|@.*||')
+            HOSTPORT=$(echo "$REST" | sed 's|^[^@]*@||')
+            if [ -z "$DATASOURCE_USERNAME" ]; then
+                DATASOURCE_USERNAME=$(echo "$CREDS" | sed 's|:.*||')
+            fi
+            if [ -z "$DATASOURCE_PASSWORD" ]; then
+                DATASOURCE_PASSWORD=$(echo "$CREDS" | sed 's|^[^:]*:||')
+            fi
+            export DATASOURCE_USERNAME DATASOURCE_PASSWORD
+            ;;
+        *)
+            HOSTPORT=$REST
+            ;;
+    esac
+
+    DATASOURCE_URL="jdbc:postgresql://$HOSTPORT"
     export DATASOURCE_URL
 fi
 

@@ -39,3 +39,8 @@ app:
     secret: ${CRYPTO_SECRET}
   cors:
     allowed-origins: ${CORS_ORIGINS:*}
+
+management:
+  health:
+    mail:
+      enabled: false

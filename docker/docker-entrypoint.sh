@@ -28,7 +28,8 @@ if [ -n "$DATASOURCE_URL" ] && [ "${DATASOURCE_URL#jdbc:}" = "$DATASOURCE_URL" ]
     export DATASOURCE_URL
 fi
 
-# Start nginx in background
+# Start nginx in background (crear /tmp/nginx: los temp paths de la config apuntan ahi)
+mkdir -p /tmp/nginx
 nginx -g "daemon off;" &
 
 # Run the Spring Boot application (puerto fijo 8085: nginx usa el 80/PORT)

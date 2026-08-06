@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -28,15 +29,15 @@ public class SystemSettingsService {
 
     private final SettingRepository settingRepository;
 
-    private final Map<String, Map<String, Setting>> cache = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, Optional<Setting>>> cache = new ConcurrentHashMap<>();
 
     @Transactional(readOnly = true)
     public String getString(String category, String key, String defaultValue) {
-        Setting setting = findSetting(category, key);
-        if (setting == null || setting.getValue() == null || setting.getValue().isBlank()) {
+        Optional<Setting> setting = findSetting(category, key);
+        if (setting.isEmpty() || setting.get().getValue() == null || setting.get().getValue().isBlank()) {
             return defaultValue;
         }
-        return setting.getValue();
+        return setting.get().getValue();
     }
 
     @Transactional(readOnly = true)
@@ -66,15 +67,14 @@ public class SystemSettingsService {
         log.debug("System settings cache evicted for category: {}", category);
     }
 
-    private Setting findSetting(String category, String key) {
-        Map<String, Setting> categoryCache = cache.get(category);
+    private Optional<Setting> findSetting(String category, String key) {
+        Map<String, Optional<Setting>> categoryCache = cache.get(category);
         if (categoryCache != null && categoryCache.containsKey(key)) {
             return categoryCache.get(key);
         }
 
-        Setting setting = settingRepository
-                .findByTenantIdAndCategoryAndKeyAndDeletedFalse(SYSTEM_TENANT_ID, category, key)
-                .orElse(null);
+        Optional<Setting> setting = settingRepository
+                .findByTenantIdAndCategoryAndKeyAndDeletedFalse(SYSTEM_TENANT_ID, category, key);
 
         cache.computeIfAbsent(category, k -> new ConcurrentHashMap<>()).put(key, setting);
         return setting;

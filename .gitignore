@@ -36,3 +36,27 @@ build/
 .env
 .env.local
 .env.production
+
+### Logs
+logs/
+*.log
+*.gz
+
+### TypeScript
+*.tsbuildinfo
+
+### Uploads
+uploads/
+
+### Node
+node_modules/
+
+### OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+*.gz
+

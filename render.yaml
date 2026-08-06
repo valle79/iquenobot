@@ -41,9 +41,6 @@ services:
       - key: CORS_ORIGINS
         value: "*"
 
-      - key: BASE_URL
-        sync: false
-
   # Landing
   - type: web
     name: iquenobot-landing

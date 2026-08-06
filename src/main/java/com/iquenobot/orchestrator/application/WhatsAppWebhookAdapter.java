@@ -13,13 +13,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @RequiredArgsConstructor
@@ -27,11 +27,15 @@ import java.util.Map;
 public class WhatsAppWebhookAdapter {
 
     /**
-     * Referencia global de arranque: cualquier webhook (redelivery de Evolution)
-     * con messageTimestamp anterior a este instante corresponde a mensajes
-     * históricos y se descarta para evitar reprocesar y responder mensajes viejos.
+     * Caché LID -> JID real ("9981755699410@lid" -> "51922843355@s.whatsapp.net").
+     *
+     * WhatsApp con privacidad oculta el número: los mensajes entrantes llegan
+     * con un JID "user@lid" y sin remoteJidAlt, pero los eventos de estado
+     * (DELETED, etc.) sí incluyen remoteJidAlt con el JID real. Se aprenden
+     * esos mapeos para que los mensajes entrantes con "@lid" se asocien al
+     * MISMO contacto/conversación del número real (evita duplicados).
      */
-    private final Instant applicationStartedAt = Instant.now();
+    private final Map<String, String> lidToRealJidCache = new ConcurrentHashMap<>();
 
     private final ConversationOrchestrator orchestrator;
     private final ConversationMessageRepository messageRepository;
@@ -57,18 +61,16 @@ public class WhatsAppWebhookAdapter {
         log.debug("Evolution webhook data={}", data);
 
         // ---------------------------------------------------------------------
-        // MENSAJES ANTERIORES AL ARRANQUE: descartar redeliveries históricas
+        // LID -> NÚMERO REAL: aprender el mapeo desde eventos que incluyen
+        // remoteJidAlt (ej: status=DELETED), antes de descartarlos.
         // ---------------------------------------------------------------------
-        Long messageTimestamp = extractTimestamp(data);
-        if (messageTimestamp != null
-                && Instant.ofEpochSecond(messageTimestamp).isBefore(applicationStartedAt)) {
-            log.info("Skipping webhook with old messageTimestamp={} (before application startup)",
-                    messageTimestamp);
-            return ProcessingResult.empty();
-        }
+        learnLidMappings(data);
 
         // ---------------------------------------------------------------------
-        // DEDUP: evitar procesar mensajes ya recibidos
+        // DEDUP: evitar procesar mensajes ya recibidos. Los mensajes entregados
+        // con demora (redelivery de Evolution) NO se descartan: se persisten para
+        // no perder historial, y el MessagePersistenceStep decide que el bot no
+        // responda automáticamente a los que son viejos.
         // ---------------------------------------------------------------------
         String messageId = extractMessageId(data);
 
@@ -477,6 +479,14 @@ return IncomingMessage.builder()
         if (isGroupJid(remoteJid)) {
             String participant = extractParticipantJid(data);
             if (participant != null && !participant.isBlank()) {
+                if (participant.endsWith("@lid")) {
+                    String cachedReal = lidToRealJidCache.get(participant);
+                    if (cachedReal != null) {
+                        log.info("WhatsApp LID {} (grupo) resuelto desde caché a {}",
+                                participant, cachedReal);
+                        return normalizePhone(normalizeWhatsAppIdentifier(cachedReal));
+                    }
+                }
                 return normalizePhone(normalizeWhatsAppIdentifier(participant));
             }
             // fallback extremo: se conserva el JID del grupo
@@ -487,16 +497,88 @@ return IncomingMessage.builder()
         // CHAT INDIVIDUAL
         // =============================================================
         if (remoteJid.endsWith("@lid")) {
+            String cachedReal = lidToRealJidCache.get(remoteJid);
+            if (cachedReal != null) {
+                log.info("WhatsApp LID {} resuelto desde caché a {}", remoteJid, cachedReal);
+                return normalizePhone(normalizeWhatsAppIdentifier(cachedReal));
+            }
             String resolved = evolutionApiProvider.resolveLidToPhoneNumber(
                     instanceId, remoteJid, extractPushName(data));
             if (resolved != null && !resolved.isBlank()) {
                 log.info("WhatsApp LID {} resuelto a número real {}", remoteJid, resolved);
+                lidToRealJidCache.put(remoteJid, resolved);
                 return normalizePhone(resolved);
             }
             log.info("WhatsApp LID {} sin resolver; se usa el LID como identificador", remoteJid);
         }
 
         return normalizePhone(normalizeWhatsAppIdentifier(remoteJid));
+    }
+
+    /**
+     * Aprende el mapeo LID -> JID real a partir de webhooks que incluyen
+     * remoteJidAlt o participantAlt (p.ej. eventos status=DELETED), de forma
+     * que mensajes futuros con "user@lid" (chat individual o participante de
+     * grupo) se resuelvan al mismo contacto del número real (evita
+     * conversaciones duplicadas).
+     */
+    @SuppressWarnings("unchecked")
+    private void learnLidMappings(Map<String, Object> data) {
+        if (data == null) {
+            return;
+        }
+
+        String remoteJid = null;
+        String remoteJidAlt = null;
+        String participant = null;
+        String participantAlt = null;
+
+        if (data.get("key") instanceof Map<?, ?> key) {
+            Object rj = key.get("remoteJid");
+            if (rj instanceof String s) {
+                remoteJid = s;
+            }
+            Object alt = key.get("remoteJidAlt");
+            if (alt instanceof String s) {
+                remoteJidAlt = s;
+            }
+            Object p = key.get("participant");
+            if (p instanceof String s) {
+                participant = s;
+            }
+            Object pAlt = key.get("participantAlt");
+            if (pAlt instanceof String s) {
+                participantAlt = s;
+            }
+        }
+
+        if (remoteJid == null && data.get("remoteJid") instanceof String rj) {
+            remoteJid = rj;
+        }
+        if (remoteJidAlt == null && data.get("remoteJidAlt") instanceof String alt) {
+            remoteJidAlt = alt;
+        }
+        if (participant == null && data.get("participant") instanceof String p) {
+            participant = p;
+        }
+        if (participantAlt == null && data.get("participantAlt") instanceof String pAlt) {
+            participantAlt = pAlt;
+        }
+
+        rememberLidMapping(remoteJid, remoteJidAlt);
+        rememberLidMapping(participant, participantAlt);
+    }
+
+    private void rememberLidMapping(String lidJid, String realJid) {
+        if (lidJid == null || realJid == null
+                || !lidJid.endsWith("@lid")
+                || realJid.isBlank()
+                || realJid.endsWith("@lid")) {
+            return;
+        }
+        String key = lidJid.trim();
+        lidToRealJidCache.put(key, realJid.trim());
+        log.info("LID mapping learned: {} -> {}", key, realJid.trim());
     }
 
     /**

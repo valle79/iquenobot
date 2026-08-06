@@ -1,8 +1,14 @@
 package com.iquenobot.orchestrator.application.decision;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.iquenobot.ai.domain.dto.AIMessageDto;
 import com.iquenobot.chatbot.application.ChatbotService;
 import com.iquenobot.chatbot.domain.dto.ChatbotResponseDto;
+import com.iquenobot.contact.domain.entity.Contact;
+import com.iquenobot.contact.domain.repository.ContactRepository;
 import com.iquenobot.conversation.application.ConversationHandoffService;
 import com.iquenobot.conversation.domain.entity.Conversation;
 import com.iquenobot.conversation.domain.entity.ConversationMessage;
@@ -22,6 +28,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,6 +46,8 @@ public class BotDecisionStrategy implements DecisionStrategy {
         private final ConversationMessageRepository messageRepository;
         private final KnowledgeBaseService knowledgeBaseService;
         private final ConversationHandoffService handoffService;
+        private final ContactRepository contactRepository;
+        private final ObjectMapper objectMapper = new ObjectMapper();
 
         private record LeadRule(String title, int baseScore) {
         }
@@ -201,9 +210,73 @@ public class BotDecisionStrategy implements DecisionStrategy {
                                                 .build();
                         }
 
+                        // -----------------------------------------------------------------
+                        // COTIZACIÓN PENDIENTE: el cliente ya pidió una cotización y el bot
+                        // le solicitó sus datos. Si la respuesta completa su perfil, se genera
+                        // la cotización que quedó en espera; si aún faltan datos, se le vuelve
+                        // a pedir con cortesía. Una cotización pendiente caduca pasada la
+                        // vigencia (TTL) para no seguir pidiendo datos por una solicitud vieja
+                        // o detectada por error.
+                        // -----------------------------------------------------------------
+                        if (isPendingQuote(conversation)) {
+                                if (isPendingQuoteExpired(conversation)) {
+                                        clearPendingQuote(conversation);
+                                        log.info("Pending quote expired for conversation {}; clearing stale request",
+                                                        conversation.getId());
+                                } else {
+                                        Contact pendingContact = reloadContact(context);
+                                        if (hasQuoteEligibilityData(pendingContact)) {
+                                                List<UUID> pendingProductIds = pendingQuoteProductIds(conversation);
+                                                clearPendingQuote(conversation);
+                                                if (!pendingProductIds.isEmpty()) {
+                                                        log.info("Pending quote ready for conversation {}: contact {} now has billing data; generating quote",
+                                                                        conversation.getId(), pendingContact.getId());
+                                                        return Decision.builder()
+                                                                        .actionType(ActionType.SEND_QUOTE)
+                                                                        .reason("Pending quote completed with customer data")
+                                                                        .parameters(Map.of(
+                                                                                        "productIds", pendingProductIds.stream()
+                                                                                                        .map(UUID::toString)
+                                                                                                        .collect(Collectors.joining(",")),
+                                                                                        "messageContent",
+                                                                                        msg.getContent() != null
+                                                                                                        ? msg.getContent()
+                                                                                                        : ""))
+                                                                        .build();
+                                                }
+                                        } else {
+                                                return Decision.builder()
+                                                                .actionType(ActionType.SEND_TEXT)
+                                                                .reason("Customer still missing billing data for pending quote")
+                                                                .parameters(Map.of(
+                                                                                "response", buildDataRequestMessage(pendingContact),
+                                                                                "intent", intent))
+                                                                .build();
+                                        }
+                                }
+                        }
+
                         if ("solicitar_precio".equals(intent)) {
                                 List<UUID> productIds = findMatchingProductIds(context, msg);
                                 if (!productIds.isEmpty()) {
+                                        // Guardia: jamás se cotiza a un desconocido. Antes de generar
+                                        // el PDF se verifica que el cliente haya compartido sus datos
+                                        // (nombre + DNI/RUC o razón social). Si faltan, se le piden con
+                                        // cortesía y la cotización queda pendiente hasta recibirlos.
+                                        Contact quoteContact = reloadContact(context);
+                                        if (!hasQuoteEligibilityData(quoteContact)) {
+                                                markPendingQuote(conversation, productIds);
+                                                log.info("Quote requested for conversation {} but contact {} lacks billing data; asking for it",
+                                                                conversation.getId(), quoteContact.getId());
+                                                return Decision.builder()
+                                                                .actionType(ActionType.SEND_TEXT)
+                                                                .reason("Customer requested a quote; billing data required")
+                                                                .parameters(Map.of(
+                                                                                "response", buildDataRequestMessage(quoteContact),
+                                                                                "intent", intent))
+                                                                .build();
+                                        }
+                                        clearPendingQuote(conversation);
                                         log.info("Quote requested for conversation {} with {} product(s); generating quote PDF",
                                                         conversation.getId(), productIds.size());
                                         return Decision.builder()
@@ -335,6 +408,188 @@ public class BotDecisionStrategy implements DecisionStrategy {
                 }
                 return knowledgeBaseService.findMatchingProducts(context.getTenantId(), content)
                                 .stream().map(p -> p.getId()).toList();
+        }
+
+        /**
+         * Clave usada en la metadata de la conversación para recordar que hay una
+         * cotización en espera mientras el cliente envía sus datos.
+         */
+        private static final String PENDING_QUOTE_KEY = "pending_quote_product_ids";
+        private static final String PENDING_QUOTE_CREATED_AT_KEY = "pending_quote_created_at";
+
+        /**
+         * Vigencia máxima de una cotización pendiente: si el cliente no envía sus
+         * datos dentro de este lapso, la solicitud pendiente se descarta para que
+         * el bot no siga pidiendo datos de facturación por una cotización vieja
+         * o detectada por error.
+         */
+        private static final Duration PENDING_QUOTE_TTL = Duration.ofHours(1);
+
+        /**
+         * Re-carga el contacto desde la BD para reflejar los datos que el cliente
+         * pudo haber enviado en el mensaje actual (DNI/RUC, razón social, dirección).
+         */
+        private Contact reloadContact(ProcessingContext context) {
+                if (context.getContact() == null || context.getContact().getId() == null) {
+                        return context.getContact();
+                }
+                return contactRepository.findByIdAndTenantIdAndDeletedFalse(
+                                context.getContact().getId(), context.getTenantId())
+                                .orElse(context.getContact());
+        }
+
+        /**
+         * El bot jamás cotiza a un desconocido: exige que el cliente haya compartido
+         * su nombre completo (o de su empresa) y un documento de identidad (DNI/RUC)
+         * o la razón social. La dirección es deseable pero no bloqueante.
+         */
+        private boolean hasQuoteEligibilityData(Contact contact) {
+                if (contact == null) {
+                        return false;
+                }
+                boolean hasName = hasText(contact.getFullName())
+                                || hasText(contact.getFirstName())
+                                || hasText(contact.getLastName());
+                boolean hasCompany = hasText(contact.getCompany());
+                boolean hasTaxDocument = hasText(contact.getDocumentNumber());
+                return hasName && (hasCompany || hasTaxDocument);
+        }
+
+        /**
+         * Mensaje cortés con el que el bot solicita los datos del cliente o empresa
+         * antes de elaborar la cotización. Solo lista los datos que faltan.
+         */
+        private String buildDataRequestMessage(Contact contact) {
+                String greeting = contact != null && hasText(contact.getFirstName())
+                                ? contact.getFirstName() + ", con mucho gusto"
+                                : "con mucho gusto";
+                StringBuilder sb = new StringBuilder("Hola, ")
+                                .append(greeting)
+                                .append(" te prepararé tu cotización. Para enviártela formalmente "
+                                                + "necesito que me compartas estos datos, por favor:\n\n");
+                List<String> missing = new ArrayList<>();
+                boolean hasName = contact != null && (hasText(contact.getFullName())
+                                || hasText(contact.getFirstName())
+                                || hasText(contact.getLastName()));
+                if (!hasName) {
+                        missing.add("- Tu nombre completo (o razón social)");
+                }
+                boolean hasCompany = contact != null && hasText(contact.getCompany());
+                boolean hasTaxDocument = contact != null && hasText(contact.getDocumentNumber());
+                if (!hasTaxDocument && !hasCompany) {
+                        missing.add("- Tu DNI o RUC (o el de tu empresa)");
+                }
+                if (contact == null || !hasText(contact.getAddress())) {
+                        missing.add("- Tu dirección fiscal (opcional)");
+                }
+                sb.append(String.join("\n", missing));
+                sb.append("\n\nCon esos datos tu cotización quedará lista al instante. "
+                                + "¡Gracias por tu confianza!");
+                return sb.toString();
+        }
+
+        private boolean isPendingQuote(Conversation conversation) {
+                return !pendingQuoteProductIds(conversation).isEmpty();
+        }
+
+        /**
+         * Una cotización pendiente caduca pasada la vigencia (TTL): si el cliente
+         * no envió sus datos a tiempo, se descarta para que el bot no siga pidiendo
+         * datos de facturación por una solicitud vieja o detectada por error.
+         * La metadata sin marca de tiempo (datos previos a esta protección) nunca
+         * se considera caducada, para no cambiar el comportamiento existente.
+         */
+        private boolean isPendingQuoteExpired(Conversation conversation) {
+                if (conversation == null || conversation.getMetadata() == null
+                                || conversation.getMetadata().isBlank()) {
+                        return false;
+                }
+                try {
+                        JsonNode node = objectMapper.readTree(conversation.getMetadata());
+                        JsonNode createdAt = node.get(PENDING_QUOTE_CREATED_AT_KEY);
+                        if (createdAt == null || !createdAt.isNumber()) {
+                                return false;
+                        }
+                        long ageMillis = System.currentTimeMillis() - createdAt.asLong();
+                        return ageMillis > PENDING_QUOTE_TTL.toMillis();
+                } catch (Exception e) {
+                        log.debug("Could not read pending quote age from conversation metadata: {}",
+                                        e.getMessage());
+                        return false;
+                }
+        }
+
+        private List<UUID> pendingQuoteProductIds(Conversation conversation) {
+                if (conversation == null || conversation.getMetadata() == null
+                                || conversation.getMetadata().isBlank()) {
+                        return List.of();
+                }
+                try {
+                        JsonNode node = objectMapper.readTree(conversation.getMetadata());
+                        JsonNode ids = node.get(PENDING_QUOTE_KEY);
+                        if (ids == null || !ids.isArray()) {
+                                return List.of();
+                        }
+                        List<UUID> result = new ArrayList<>();
+                        for (JsonNode id : ids) {
+                                try {
+                                        result.add(UUID.fromString(id.asText()));
+                                } catch (IllegalArgumentException ignored) {
+                                        // id malformado en metadata; se omite
+                                }
+                        }
+                        return result;
+                } catch (Exception e) {
+                        log.debug("Could not read pending quote from conversation metadata: {}", e.getMessage());
+                        return List.of();
+                }
+        }
+
+        private void markPendingQuote(Conversation conversation, List<UUID> productIds) {
+                try {
+                        ObjectNode node;
+                        if (conversation.getMetadata() == null || conversation.getMetadata().isBlank()) {
+                                node = objectMapper.createObjectNode();
+                        } else {
+                                node = (ObjectNode) objectMapper.readTree(conversation.getMetadata());
+                        }
+                        if (node.has(PENDING_QUOTE_KEY)) {
+                                node.remove(PENDING_QUOTE_KEY);
+                        }
+                        node.put(PENDING_QUOTE_CREATED_AT_KEY, System.currentTimeMillis());
+                        ArrayNode arr = node.putArray(PENDING_QUOTE_KEY);
+                        productIds.forEach(id -> arr.add(id.toString()));
+                        conversation.setMetadata(objectMapper.writeValueAsString(node));
+                        conversationRepository.save(conversation);
+                } catch (Exception e) {
+                        log.warn("Could not mark pending quote for conversation {}: {}",
+                                        conversation.getId(), e.getMessage());
+                }
+        }
+
+        private void clearPendingQuote(Conversation conversation) {
+                if (conversation == null || conversation.getMetadata() == null
+                                || conversation.getMetadata().isBlank()) {
+                        return;
+                }
+                try {
+                        JsonNode node = objectMapper.readTree(conversation.getMetadata());
+                        if (node instanceof ObjectNode objectNode
+                                        && (objectNode.has(PENDING_QUOTE_KEY)
+                                                        || objectNode.has(PENDING_QUOTE_CREATED_AT_KEY))) {
+                                objectNode.remove(PENDING_QUOTE_KEY);
+                                objectNode.remove(PENDING_QUOTE_CREATED_AT_KEY);
+                                conversation.setMetadata(objectMapper.writeValueAsString(objectNode));
+                                conversationRepository.save(conversation);
+                        }
+                } catch (Exception e) {
+                        log.warn("Could not clear pending quote for conversation {}: {}",
+                                        conversation.getId(), e.getMessage());
+                }
+        }
+
+        private boolean hasText(String value) {
+                return value != null && !value.isBlank();
         }
 
         private void resetFallbackCount(ProcessingContext context) {

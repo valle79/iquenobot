@@ -81,12 +81,25 @@ export const useSocketStore = create<SocketState>((set, get) => ({
     const token = useAuthStore.getState().accessToken
     if (!token) return
 
+    // Ya hay una conexión activa o en curso: no recrearla.
+    // (Crear otra vez el WebSocket reiniciaría el mapa de listeners y
+    // los hooks registrados con useSocketEvent dejarían de recibir eventos.)
+    if (
+      currentWs &&
+      (currentWs.readyState === WebSocket.OPEN ||
+        currentWs.readyState === WebSocket.CONNECTING)
+    ) {
+      return
+    }
+
     if (currentWs) {
       currentWs.close(1000)
     }
 
     const ws = createConnection(token)
-    set({ socket: ws, listeners: new Map() })
+    // NO reiniciar listeners: los eventos siguen llegando a los hooks
+    // registrados (message:new, conversation:updated, etc.).
+    set({ socket: ws })
   },
 
   disconnect: () => {

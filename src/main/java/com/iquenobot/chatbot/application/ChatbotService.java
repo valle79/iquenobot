@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 
@@ -63,13 +64,19 @@ public class ChatbotService {
      * orquestador genere el PDF y lo envíe por WhatsApp.
      */
     public static final java.util.regex.Pattern QUOTE_REQUEST_PATTERN = java.util.regex.Pattern.compile(
-            "\\bcotiz\\w*\\b|\\bpresupuest\\w*\\b"
-                    + "|(deseo|quiero|necesito|requiero)\\s+\\d+\\s*(unidades?|unds?|unid\\.?|und\\.?)"
+            "\\b(?:cotiz|cori[zo]|coti[sz]|koti[s?]|presupuest)\\w*\\b"
+                    + "|(?:deseo|quiero|necesito|requiero)\\s+\\d+\\s*(?:unidades?|unds?|unid\\.?|und\\.?)"
+                    + "|(?:hasme|hazme|hágame|hagame|hágame|habla?)\\s+(?:una|la|un)\\s+"
+                    + "(?:cotizaci\\w*|cori[sz]aci\\w*|coti[sz]aci\\w*|koti[sz]aci\\w*|presupuest\\w*)"
                     + "|(?:me\\s+|nos\\s+)?(?:puedes|puede|podrías|podrias|quieres|deseas)?\\s*"
-                    + "(?:mandar|enviar|pasar|hacer|elaborar|dar)\\w*\\s+(?:una\\s+|la\\s+|un\\s+)?"
-                    + "(?:cotizaci\\w+|presupuest\\w+)"
+                    + "(?:me\\s+)?(?:mandar|enviar|pasar|hacer|elaborar|dar)\\w*\\s+(?:una\\s+|la\\s+|un\\s+)?"
+                    + "(?:cotizaci\\w+|cori[sz]aci\\w+|coti[sz]aci\\w+|koti[sz]aci\\w+|presupuest\\w+)"
                     + "|pago\\s+(?:al\\s+|de\\s+)?(?:contado|cash|crédito|credito|letras|plazos"
                     + "|transferencia|yape|plin|efectivo|contra\\s+entrega)");
+
+    public static boolean isQuoteRequest(String message) {
+        return message != null && QUOTE_REQUEST_PATTERN.matcher(message.toLowerCase()).find();
+    }
 
     /**
      * Términos que indican una consulta comercial genérica ("¿qué venden?",
@@ -102,6 +109,42 @@ public class ChatbotService {
             }
         }
         return false;
+    }
+
+    /**
+     * Palabras que conforman un saludo simple ("hola", "buenos días", "hello",
+     * "qué tal"...). Un mensaje compuesto SOLO por estos términos se responde
+     * con una bienvenida cordial y nunca con el fallback de aclaración.
+     */
+    private static final Set<String> GREETING_WORDS = Set.of(
+            "hola", "saludos", "buenas", "buenos", "buena", "dias", "días", "tardes", "noches",
+            "hello", "hi", "hey", "que", "q", "tal", "como", "estas", "estás", "esta", "está");
+
+    /** Palabras que indican inequívocamente que el mensaje es un saludo. */
+    private static final Set<String> GREETING_TRIGGERS = Set.of(
+            "hola", "saludos", "buenas", "buenos", "buena", "hello", "hi", "hey", "que", "q", "como");
+
+    private boolean isSimpleGreeting(String message) {
+        if (message == null || message.isBlank()) {
+            return false;
+        }
+        String normalized = message.toLowerCase()
+                .replaceAll("[^a-záéíóúñü\\s]", " ")
+                .replaceAll("\\s+", " ")
+                .trim();
+        if (normalized.isEmpty()) {
+            return false;
+        }
+        boolean hasTrigger = false;
+        for (String token : normalized.split(" ")) {
+            if (GREETING_TRIGGERS.contains(token)) {
+                hasTrigger = true;
+            }
+            if (!GREETING_WORDS.contains(token)) {
+                return false;
+            }
+        }
+        return hasTrigger;
     }
 
     @Transactional
@@ -176,6 +219,20 @@ public class ChatbotService {
                     .build();
         }
 
+        // Un saludo simple ("hola", "buenos días"...) jamás se trata como falta
+        // de claridad: se responde con una bienvenida cordial y se invita al
+        // cliente a hacer su consulta.
+        if (isSimpleGreeting(message)) {
+            log.info("Simple greeting detected; responding cordially");
+            return ChatbotResponseDto.builder()
+                    .message(greetingResponse(context))
+                    .requiresHumanAgent(false)
+                    .requiresClarification(false)
+                    .suggestedActions(new ArrayList<>())
+                    .entities(new HashMap<>())
+                    .build();
+        }
+
         @SuppressWarnings("unchecked")
         List<AIMessageDto> history = (List<AIMessageDto>) context.getOrDefault("history", new ArrayList<>());
         boolean hasConversationContext = history.stream().anyMatch(m -> "assistant".equals(m.getRole()));
@@ -183,8 +240,14 @@ public class ChatbotService {
         // Las consultas comerciales genéricas ("¿qué venden?", "catálogo", "precios"...)
         // SIEMPRE se responden con el LLM (con el contexto de KB/productos del tenant
         // si existe), para no rechazar consultas legítimas de venta con "no entendí".
+        // También se responde con el LLM ante una solicitud explícita de cotización o
+        // una clara intención de compra: el cliente pide algo concreto y merece una
+        // respuesta concreta (el orquestador generará el PDF cuando corresponda).
         String kbContext = knowledgeBaseService.buildContextForQuery(buildContextQuery(message, history));
-        if (hasConversationContext || !kbContext.isEmpty() || isSalesInquiry(message)) {
+        boolean quoteRequest = QUOTE_REQUEST_PATTERN.matcher(message.toLowerCase()).find();
+        boolean purchaseIntent = PURCHASE_INTENT_PATTERN.matcher(message.toLowerCase()).find();
+        if (hasConversationContext || !kbContext.isEmpty() || isSalesInquiry(message)
+                || quoteRequest || purchaseIntent) {
             return generateAIResponse(message, context, kbContext);
         }
 
@@ -206,6 +269,38 @@ public class ChatbotService {
                         + "exactamente lo que deseas? Por ejemplo: el nombre del producto, el modelo o la "
                         + "información que necesitas. Un agente humano está al tanto de tu mensaje y te "
                         + "atenderá muy pronto. ¡Gracias por tu paciencia!";
+    }
+
+    /**
+     * Bienvenida cordial para saludos simples. Si se conoce el nombre del
+     * cliente se personaliza; en caso contrario se saluda de forma genérica.
+     * Siempre es breve y concreta: saluda, ofrece el catálogo y pregunta en
+     * qué se puede ayudar.
+     */
+    private String greetingResponse(Map<String, Object> context) {
+        String name = null;
+        String contactIdStr = (String) context.get("contactId");
+        if (contactIdStr != null) {
+            try {
+                UUID contactId = UUID.fromString(contactIdStr);
+                Contact contact = contactRepository
+                        .findByIdAndTenantIdAndDeletedFalse(contactId, getTenantId())
+                        .orElse(null);
+                if (contact != null && hasText(contact.getFirstName())) {
+                    name = contact.getFirstName();
+                } else if (contact != null && hasText(contact.getFullName())) {
+                    name = contact.getFullName();
+                }
+            } catch (Exception e) {
+                log.debug("Could not resolve customer name for greeting: {}", e.getMessage());
+            }
+        }
+        String body = " Estamos aquí para ayudarte con lo que necesites: información de nuestro "
+                + "catálogo, precios, cotizaciones o cualquier consulta. "
+                + "¿En qué puedo ayudarte el día de hoy?";
+        return name != null
+                ? "¡Hola, " + name + "! Mucho gusto saludarte." + body
+                : "¡Hola! Mucho gusto saludarte." + body;
     }
 
     /**

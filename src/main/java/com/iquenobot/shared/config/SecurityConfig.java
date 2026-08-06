@@ -60,6 +60,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/reset-password").permitAll()
                         .requestMatchers("/api/v1/auth/verify-email").permitAll()
                         .requestMatchers("/api/v1/whatsapp/webhook/**").permitAll()
+                        .requestMatchers("/api/v1/ping").permitAll()
                         
                         // Admin endpoints (SUPER_ADMIN only)
                         .requestMatchers("/api/v1/admin/**").hasRole("SUPER_ADMIN")

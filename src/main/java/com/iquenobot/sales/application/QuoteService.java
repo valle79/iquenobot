@@ -77,6 +77,7 @@ public class QuoteService {
                 .total(total)
                 .currency("PEN")
                 .status(QuoteStatus.SENT)
+                .resendCount(0)
                 .observations(extractPaymentObservation(customerMessage))
                 .build();
 

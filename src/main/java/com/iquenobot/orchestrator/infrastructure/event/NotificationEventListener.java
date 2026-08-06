@@ -77,11 +77,12 @@ public class NotificationEventListener {
                 payload.put("senderName", msg.getSenderName());
                 payload.put("attachments", buildAttachmentsPayload(msg.getAttachments()));
             } else {
+                boolean outbound = event.getMessage() != null && event.getMessage().isOutbound();
                 payload.put("id", UUID.randomUUID().toString());
                 payload.put("conversationId", event.getConversationId());
                 payload.put("content", event.getMessage() != null ? event.getMessage().getContent() : "");
                 payload.put("sentAt", LocalDateTime.now(ZoneOffset.UTC).toString());
-                payload.put("direction", "INBOUND");
+                payload.put("direction", outbound ? "OUTBOUND" : "INBOUND");
                 payload.put("type", "TEXT");
                 payload.put("status", "SENT");
                 payload.put("fromBot", false);
@@ -107,6 +108,12 @@ public class NotificationEventListener {
 
             Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("id", conversationId.toString());
+            payload.put("channel", event.getChannel());
+            payload.put("status", "OPEN");
+            payload.put("messageCount", 0);
+            payload.put("unreadCount", 0);
+            payload.put("lastMessageAt", LocalDateTime.now(ZoneOffset.UTC).toString());
+            payload.put("createdAt", LocalDateTime.now(ZoneOffset.UTC).toString());
 
             // Usar datos del evento en lugar de consultar DB (evita race condition con @Transactional)
             String contactName = event.getContactName();

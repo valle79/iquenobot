@@ -156,6 +156,7 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
             if (session.isOpen()) {
                 try {
                     session.sendMessage(message);
+                    log.debug("WebSocket message sent to user={} sessions={}", userId, sessions.size());
                 } catch (IOException e) {
                     log.warn("Error sending WebSocket message to user={}: {}", userId, e.getMessage());
                 }

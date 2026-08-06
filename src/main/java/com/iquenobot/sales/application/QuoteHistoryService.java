@@ -7,7 +7,6 @@ import com.iquenobot.shared.enums.QuoteHistoryAction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
@@ -22,8 +21,15 @@ public class QuoteHistoryService {
     /**
      * Persists a history entry for the given quote. The actor is the current
      * user when provided; null means the BOT generated/executed the action.
+     *
+     * La transacción es REQUIRED (une la del llamador) a propósito: la entrada
+     * de historial debe persistirse en la MISMA transacción que la cotización,
+     * para que ambas hagan commit/rollback juntas. Con REQUIRES_NEW, Hibernate
+     * podía flushear el insert de quote_history antes de que existiera la fila
+     * en "quotes" (violando fk_quote_history_quote_id) o dejar historiales
+     * huérfanos cuando la transacción externa hacía rollback.
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void record(Quote quote, QuoteHistoryAction action, UUID actorId, String actorName,
                        String channel, String channelMessageId, String details) {
         QuoteHistory entry = QuoteHistory.builder()

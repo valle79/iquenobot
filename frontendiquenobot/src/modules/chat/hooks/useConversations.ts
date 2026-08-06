@@ -76,6 +76,9 @@ export function useConversations(filter?: {
       return lastPage.page + 1
     },
     initialPageParam: 0,
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+    refetchInterval: 30_000,
   })
 
   useEffect(() => {
@@ -164,6 +167,7 @@ export function useMessages(conversationId: string | undefined) {
     retry: false,
     staleTime: 30_000,
     refetchOnWindowFocus: false,
+    refetchInterval: 30_000,
   })
 
   useEffect(() => {

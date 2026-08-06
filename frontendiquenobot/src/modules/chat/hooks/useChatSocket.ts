@@ -2,8 +2,16 @@ import { useRef, useCallback } from 'react'
 import { useSocketEvent, useSocketEmit } from '@/core/websocket/socket.hooks'
 import { useChatStore } from '../stores/chat.store'
 import type { ContactDto } from '@/types/contact'
-import type { ConversationDto, ConversationMessageDto } from '@/types/chat'
-import type { MessageStatus } from '@/types/enums'
+import type {
+  ConversationDto,
+  ConversationMessageDto,
+} from '@/types/chat'
+import type {
+  ChannelType,
+  ConversationPriority,
+  ConversationStatus,
+  MessageStatus,
+} from '@/types/enums'
 
 export function useChatSocket() {
   const emit = useSocketEmit()
@@ -37,9 +45,42 @@ export function useChatSocket() {
       }
 
       // Actualizar conversación en memoria
-      const conversation = store.conversations.find(
+      let conversation = store.conversations.find(
         (c) => c.id === message.conversationId,
       )
+
+      // Conversación aún no en el store (contacto nuevo): crearla a partir
+      // del mensaje para que aparezca al instante en el listado.
+      if (!conversation) {
+        const displayName =
+          message.senderName?.trim() || 'Contacto sin nombre'
+        store.addConversation({
+          id: message.conversationId,
+          contact: {
+            id: '',
+            fullName: message.senderName ?? '',
+            displayName: displayName,
+            phone: message.senderPhone ?? '',
+          } as ContactDto,
+          assignedUser: null,
+          channel: 'WHATSAPP' as ChannelType,
+          status: 'OPEN' as ConversationStatus,
+          priority: 'MEDIUM' as ConversationPriority,
+          subject: '',
+          channelConversationId: '',
+          lastMessageAt:
+            message.sentAt ?? message.createdAt ?? '',
+          firstResponseAt: '',
+          resolvedAt: '',
+          closedAt: '',
+          lastMessage: message,
+          messageCount: 1,
+          unreadCount: 0,
+        } as ConversationDto)
+        conversation = store.conversations.find(
+          (c) => c.id === message.conversationId,
+        )
+      }
 
       if (conversation) {
         const isInbound =

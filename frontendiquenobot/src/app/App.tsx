@@ -4,6 +4,7 @@ import { QueryProvider, ThemeProvider, SocketProvider } from '@/providers'
 import { routes } from '@/routes'
 import { useAuthStore } from '@/core/auth/auth.store'
 import { useAuthHydration } from '@/core/auth/useAuthHydration'
+import { useKeepAlive } from '@/hooks/useKeepAlive'
 import { Toaster } from 'sonner'
 import { ErrorBoundary } from '@/shared/molecules/ErrorBoundary'
 import { Spinner } from '@/shared/atoms/Spinner/Spinner'
@@ -46,6 +47,8 @@ function AuthHydrationGate({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  useKeepAlive()
+
   return (
     <ThemeProvider>
       <QueryProvider>

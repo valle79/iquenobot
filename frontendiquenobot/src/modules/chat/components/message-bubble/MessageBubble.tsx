@@ -141,7 +141,8 @@ export const MessageBubble = memo(function MessageBubble({
         ) : (
           <div
             className={cn(
-              'rounded-2xl px-4 py-2.5',
+              'rounded-2xl',
+              isImage || isVideo ? 'p-1.5' : 'px-4 py-2.5',
               isOwn
                 ? 'bg-brand-600 rounded-br-sm text-white'
                 : 'rounded-bl-sm bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100',
@@ -150,14 +151,14 @@ export const MessageBubble = memo(function MessageBubble({
           >
             {isImage &&
               (firstAttachment ? (
-                <div className="mb-1">
+                <div>
                   <img
                     src={firstAttachment.fileUrl}
                     alt={firstAttachment.caption ?? ''}
-                    className="max-w-full rounded-lg"
+                    className="block max-h-64 max-w-[240px] rounded-xl object-cover"
                   />
                   {firstAttachment.caption && (
-                    <p className="mt-2 text-sm break-words whitespace-pre-wrap">
+                    <p className="px-2 pb-1 pt-1.5 text-sm break-words whitespace-pre-wrap">
                       {firstAttachment.caption}
                     </p>
                   )}
@@ -180,7 +181,7 @@ export const MessageBubble = memo(function MessageBubble({
                 <video
                   src={firstAttachment.fileUrl}
                   controls
-                  className="mb-1 max-h-72 max-w-full rounded-lg"
+                  className="mb-1 block max-h-64 max-w-[280px] rounded-xl"
                 />
               ) : (
                 <MediaPlaceholder />

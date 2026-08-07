@@ -27,6 +27,12 @@ public interface ContactRepository extends JpaRepository<Contact, UUID> {
 
     Optional<Contact> findByEmailAndTenantIdAndDeletedFalse(String email, UUID tenantId);
 
+    @Query("SELECT c FROM Contact c WHERE c.tenantId = :tenantId AND c.deleted = false AND " +
+           "LOWER(c.fullName) = LOWER(:fullName) AND c.normalizedPhone <> :lidPhone")
+    Optional<Contact> findByNameMatchingLid(@Param("tenantId") UUID tenantId,
+                                            @Param("fullName") String fullName,
+                                            @Param("lidPhone") String lidPhone);
+
     Page<Contact> findByTenantIdAndDeletedFalse(UUID tenantId, Pageable pageable);
 
     Page<Contact> findByTenantIdAndStatusAndDeletedFalse(UUID tenantId, ContactStatus status, Pageable pageable);

@@ -147,6 +147,30 @@ public class ContactResolutionStep
                 && message.getChannelConversationId() != null
                 && message.getChannelConversationId().endsWith("@lid");
 
+        // Fallback para LID sin resolver: si ya existe un contacto del tenant
+        // con el mismo nombre (pushName), se reutiliza en lugar de duplicar.
+        // Se le guarda el JID LID en whatsappPhone para poder responderle.
+        if (lidPrivacy && contactName != null
+                && !contactName.equals(normalizedPhone)) {
+            Optional<Contact> byName = contactRepository.findByNameMatchingLid(
+                    tenantId,
+                    contactName,
+                    normalizedPhone
+            );
+            if (byName.isPresent()) {
+                Contact existing = byName.get();
+                existing.setWhatsappPhone(message.getChannelConversationId());
+                contactRepository.save(existing);
+                log.info(
+                        "Reusing contact by name for LID message: id={} name={} (whatsappPhone={})",
+                        existing.getId(),
+                        existing.getFullName(),
+                        message.getChannelConversationId()
+                );
+                return existing;
+            }
+        }
+
         Contact contact = Contact.builder()
                 .tenantId(tenantId)
                 .fullName(contactName)

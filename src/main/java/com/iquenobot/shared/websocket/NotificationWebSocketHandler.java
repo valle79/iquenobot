@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.ConcurrentWebSocketSessionDecorator;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
@@ -45,7 +46,8 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
         }
 
         UUID userUuid = UUID.fromString(userId);
-        userSessions.computeIfAbsent(userUuid, k -> new CopyOnWriteArrayList<>()).add(session);
+        WebSocketSession decorated = new ConcurrentWebSocketSessionDecorator(session, 10_000, 8 * 1024 * 1024);
+        userSessions.computeIfAbsent(userUuid, k -> new CopyOnWriteArrayList<>()).add(decorated);
 
         log.debug("WebSocket connected: user={} tenant={} sessions={}", userId, tenantId, userSessions.get(userUuid).size());
     }
@@ -57,7 +59,7 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
             UUID userUuid = UUID.fromString(userId);
             CopyOnWriteArrayList<WebSocketSession> sessions = userSessions.get(userUuid);
             if (sessions != null) {
-                sessions.remove(session);
+                sessions.removeIf(s -> s.getAttributes() == session.getAttributes());
                 if (sessions.isEmpty()) {
                     userSessions.remove(userUuid);
                 }

@@ -150,6 +150,9 @@ private String buildChannelConversationId(IncomingMessage message) {
             String channelConversationId,
             Contact contact
     ) {
+        if (contact == null) {
+            return Optional.empty();
+        }
         return conversationRepository
                 .findActiveByContactAndChannel(
                         context.getTenantId(),
@@ -301,15 +304,17 @@ if (message.isGroup()
 
         conversation = conversationRepository.save(conversation);
 
-        contact.incrementConversationCount();
-        contactRepository.save(contact);
+        if (contact != null) {
+            contact.incrementConversationCount();
+            contactRepository.save(contact);
+        }
 
         eventPublisher.publish(new ConversationCreatedEvent(
                 context.getTenantId().toString(),
                 conversation.getId().toString(),
-                contact.getId().toString(),
+                contact != null ? contact.getId().toString() : null,
                 message.getChannel().name(),
-                contact.getFullName()
+                contact != null ? contact.getFullName() : null
         ));
 
         log.info(
